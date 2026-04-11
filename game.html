@@ -5641,7 +5641,7 @@ function openRelationshipPanel() {
       const childAge = (2029+G.year) - child.birthYear + (G.month >= child.birthMonth ? 0 : -1);
       const babyFace = childAge <= 2 ? '캐릭터얼굴/아기1.png' : '캐릭터얼굴/아기2.png';
       html += `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,35,25,0.6);border-radius:6px;border:1px solid #3a3020">
-        <img src="${babyFace}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #8b7355" onerror="this.style.display='none'">`;
+        <img src="${babyFace}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #8b7355" onerror="this.style.display='none'">
         <div style="flex:1">
           <div style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${child.name}</div>
           <div style="font-size:0.8rem;color:#ffcc88;margin-top:3px">자녀</div>
