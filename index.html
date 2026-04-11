@@ -6462,7 +6462,8 @@ function showMilestonePopup(ms, callback) {
   }
   document.getElementById('se-speaker').textContent = ms.speaker || '';
   document.getElementById('se-text').innerHTML = `<div style="font-size:1.1rem;font-weight:700;color:#f0c850;margin-bottom:10px;text-align:center">${ms.title}</div><div style="white-space:pre-line;margin-bottom:12px;color:#c0b090;font-size:0.85rem;text-align:center">${ms.desc}</div><div style="color:#e8d5b5">${ms.text}</div>`;
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="document.getElementById('status-event-modal').style.display='none';if(window._milestoneCallback)window._milestoneCallback()"><span class="choice-label">축하합니다!</span></button>`;
+  const btnLabel = ms.btnLabel || '축하합니다!';
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="document.getElementById('status-event-modal').style.display='none';if(window._milestoneCallback)window._milestoneCallback()"><span class="choice-label">${btnLabel}</span></button>`;
   window._milestoneCallback = callback;
 }
 
@@ -7147,11 +7148,15 @@ function finishMonthAfterPregnancy(){
     G.sickMonths++;
     if(wasHealthy) {
       // 새로 병에 걸렸을 때 팝업
-      showMilestonePopup({title:'질병',desc:'과도한 스트레스와 피로로 병에 걸렸습니다.\n병원에서 치료를 받아야 합니다.',bg:'배경/병원.webp',face:'캐릭터얼굴/강민우.webp',speaker:'강민우',text:'환자분, 무리하셨군요. 빨리 치료를 받으셔야 합니다.'}, ()=>{});
+      showMilestonePopup({title:'질병',desc:'과도한 스트레스와 피로로 병에 걸렸습니다.\n병원에서 치료를 받아야 합니다.',bg:'배경/병원.webp',face:'캐릭터얼굴/강민우.webp',speaker:'강민우',text:'환자분, 무리하셨군요. 빨리 치료를 받으셔야 합니다.',btnLabel:'확인'}, ()=>{ finishMonthFinal(); });
       return;
     }
   }
 
+  finishMonthFinal();
+}
+
+function finishMonthFinal(){
   // 월간 리셋
   G.monthMarketingDone = false;
   G.monthPublicDefender = false;
