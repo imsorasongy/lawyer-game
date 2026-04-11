@@ -7438,31 +7438,6 @@ function openMenu() {
   html += `<div class="action-option" onclick="showToast('아직 준비중입니다.');document.getElementById('menu-modal').style.display='none'">
     <div><div class="name">설정</div><div class="effects">게임 설정</div></div></div>`;
 
-  // === 테스트용 메뉴 (추후 삭제) ===
-  html += `<div style="border-top:1px solid #5a4a30;margin-top:12px;padding-top:8px">
-    <div style="font-size:0.7rem;color:#cc6666;margin-bottom:6px;text-align:center">[ 테스트용 - 추후 삭제 ]</div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testSalaryRaise()">
-    <div><div class="name" style="color:#ffcc44">월급인상 테스트</div><div class="effects">월급 상승 이벤트 강제 발생</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testPromotion('partner')">
-    <div><div class="name" style="color:#ffcc44">파트너 승진 테스트</div><div class="effects">파트너 변호사 제안 이벤트 강제 발생</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testPromotion('senior')">
-    <div><div class="name" style="color:#ffcc44">대표 승진 테스트</div><div class="effects">대표 변호사 제안 이벤트 강제 발생</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testMaxStats()">
-    <div><div class="name" style="color:#ffcc44">능력치 MAX</div><div class="effects">스트레스/피로도/업보 제외 모든 능력치 999, 전문능력치 100</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testGradSchool99()">
-    <div><div class="name" style="color:#ffcc44">대학원 +99</div><div class="effects">대학원 횟수 99 증가 (수료 테스트용)</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testWinePrep()">
-    <div><div class="name" style="color:#ffcc44">와인대회 스케줄 배치</div><div class="effects">다음달 두번째 토요일에 와인대회 스케줄 강제 배치</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testMuseumPrep()">
-    <div><div class="name" style="color:#ffcc44">미술관 스케줄 배치</div><div class="effects">다음달 첫번째 일요일에 미술관 스케줄 강제 배치</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testShowRomanceFlags()">
-    <div><div class="name" style="color:#ffcc44">연애플래그 확인</div><div class="effects">현재 연애이벤트 진행상태 표시</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';testMaxAffection()">
-    <div><div class="name" style="color:#ffcc44">호감도 MAX</div><div class="effects">모든 연애대상 호감도 100, 전원 만남 처리</div></div></div>`;
-  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';showEnding()">
-    <div><div class="name" style="color:#ff6644">엔딩으로 가기</div><div class="effects">현재 스탯 기반으로 즉시 엔딩 표시</div></div></div>`;
-  html += `</div>`;
-
   document.getElementById('menu-items').innerHTML = html;
 }
 
@@ -9048,57 +9023,6 @@ function openLoadScreen() {
   document.getElementById('saveload-title').textContent = '불러오기';
   document.getElementById('saveload-modal').style.display = 'flex';
   renderSaveLoadList('load');
-}
-
-// ==================== 테스트용 (추후 삭제) ====================
-function testSalaryRaise() {
-  const amount = (G.status === 'partner' || G.status === 'senior') ? 1000000 : 500000;
-  showSalaryRaiseEvent(amount);
-}
-function testPromotion(target) {
-  showStatusEvent(target);
-}
-function testMaxStats() {
-  for (const k in G.stats) {
-    if (k !== 'stress' && k !== 'fatigue' && k !== 'karma') G.stats[k] = 999;
-  }
-  for (const k in G.proStats) G.proStats[k] = 100;
-  G.funds = 5000000000;
-  updateUI();
-  showToast('능력치 MAX 적용!');
-}
-function testGradSchool99() {
-  G.gradSchoolCount = Math.min(G.gradSchoolCount + 99, 99);
-  updateUI();
-  showToast(`대학원 횟수 → ${G.gradSchoolCount}회! 다음 대학원 진행 시 수료됩니다.`);
-}
-function testWinePrep() {
-  if (!G.pendingSchedules) G.pendingSchedules = [];
-  G.pendingSchedules.push({type:'winePrep', target:'2ndSat'});
-  showToast('다음달 두번째 토요일에 와인대회 스케줄이 배치됩니다.');
-}
-function testMuseumPrep() {
-  if (!G.pendingSchedules) G.pendingSchedules = [];
-  G.pendingSchedules.push({type:'museum', target:'1stSun'});
-  showToast('다음달 첫번째 일요일에 미술관 스케줄이 배치됩니다.');
-}
-function testMaxAffection() {
-  ensureRomance();
-  const targets = getRomanceTargets();
-  targets.forEach(t => {
-    G.romance.met[t.id] = true;
-    G.romance.affection[t.id] = 100;
-  });
-  updateUI();
-  showToast('모든 연애대상 호감도 MAX!');
-}
-function testShowRomanceFlags() {
-  ensureRomance();
-  const flags = Object.entries(G.romanceEvents||{}).filter(([k,v])=>v).map(([k])=>k);
-  const pending = (G.pendingSchedules||[]).map(p=>p.type+'/'+p.target);
-  const dating = G.romance.dating || 'none';
-  const aff = Object.entries(G.romance.affection||{}).filter(([k,v])=>v>0).map(([k,v])=>k+':'+Math.floor(v));
-  alert('연애플래그:\n'+flags.join(', ')+'\n\n호감도:\n'+aff.join(', ')+'\n\n연인: '+dating+'\n\n예약스케줄:\n'+(pending.length?pending.join(', '):'없음'));
 }
 
 // ==================== ENDING ====================
