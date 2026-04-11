@@ -5,3 +5,7 @@
 
 # UI 예시 제외
 UI 예시.png
+node_modules/
+package.json
+package-lock.json
+*.png
