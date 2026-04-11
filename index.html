@@ -6175,6 +6175,8 @@ function buildScene(slot) {
           {speaker:'강민우', face:'캐릭터얼굴/강민우.webp', text:'아프신데 없으신 것 같으니 돌아가세요.'}
         ]};
     }
+    // 병원비 5만원
+    G.funds -= 50000; statChanges.funds -= 50000;
     const healChance = G.stats.stamina >= 500 ? 100 : (G.stats.stamina / 5);
     const healed = Math.random()*100 < healChance;
     if (healed) {
