@@ -1760,6 +1760,7 @@ function startOpening() {
 }
 
 function showOpeningScene(idx) {
+  openingTransitioning = true;
   const scene = OPENING_SCENES[idx];
   const bgEl = document.getElementById('opening-bg');
   const textEl = document.getElementById('opening-text');
@@ -1767,7 +1768,10 @@ function showOpeningScene(idx) {
   // 텍스트 페이드아웃
   textEl.style.opacity = '0';
 
-  // 배경 페이드아웃 (2.5초)
+  // 첫 장면은 페이드아웃할 배경이 없으므로 바로 로드
+  const fadeOutDelay = (idx === 0) ? 0 : 2500;
+
+  // 배경 페이드아웃
   bgEl.style.opacity = '0';
   setTimeout(() => {
     // 페이드아웃 완료 후 새 이미지 로드
@@ -1784,7 +1788,7 @@ function showOpeningScene(idx) {
         setTimeout(() => { openingTransitioning = false; }, 1500);
       }, 2500);
     };
-  }, 2500);
+  }, fadeOutDelay);
 }
 
 let openingTransitioning = false;
