@@ -2674,6 +2674,10 @@ function filterCopiedAction(actionId) {
   if (actionId === 'hoemu' && !(G.status==='partner'||G.status==='senior'||G.status==='solo')) return 'homeRest';
   if (actionId === 'consult' && !(G.status==='senior'||G.status==='solo')) return 'homeRest';
   if (actionId === 'date' && !G.romance.dating) return 'homeRest';
+  if (actionId === 'gradSchool' && G.gradSchoolCompleted) return 'homeRest';
+  if (actionId === 'phdThesis' && G.phdCompleted) return 'homeRest';
+  if (actionId === 'golf' && !(G.status==='partner'||G.status==='senior'||G.status==='solo'||G.status==='suspended')) return 'homeRest';
+  if (actionId === 'drive' && !G.currentCar) return 'homeRest';
   return actionId;
 }
 
@@ -2687,8 +2691,11 @@ function applyAutoFill(type) {
       }
     });
   });
-  const studyPool = ['lawStudy','speech','studyGroup','pt','gradSchool'];
-  const socialPool = ['sportClub','industryMeet','wineMeet','publicService','golf','partTimeJob'];
+  const studyPool = ['lawStudy','speech','studyGroup','pt'];
+  if (!G.gradSchoolCompleted) studyPool.push('gradSchool');
+  if (G.gradSchoolCompleted && !G.phdCompleted) studyPool.push('phdThesis');
+  const socialPool = ['sportClub','industryMeet','wineMeet','publicService','partTimeJob'];
+  if (G.status==='partner'||G.status==='senior'||G.status==='solo'||G.status==='suspended') socialPool.push('golf');
   const restPool = ['homeRest','travel'];
   if (G.currentCar) restPool.push('drive');
   // 업무 풀 (일과시간 빈 슬롯용)
@@ -2766,7 +2773,9 @@ function applyAutoFill(type) {
           if (r < ratio.rest) pool = restPool;
           else if (r < ratio.rest + ratio.study) pool = studyPool;
           else pool = socialPool;
-          const pick = pool[Math.floor(Math.random() * pool.length)];
+          let pick = pool[Math.floor(Math.random() * pool.length)];
+          // 골프: 평일 저녁 불가
+          if (pick === 'golf' && !ds.isWeekend && !ds.isHoliday) pick = 'homeRest';
           assignAction(slot, pick);
         }
       });
@@ -2837,6 +2846,7 @@ function assignAction(slot, actionId) {
   if (actionId === 'consult') { slot.action='consult'; slot.label='상담'; slot.slotClass='slot-work'; return; }
   if (actionId === 'hoemu') { slot.action='hoemu'; slot.label='회무'; slot.slotClass='slot-work'; return; }
   if (actionId === 'councilWork') { slot.action='councilWork'; slot.label='의정활동'; slot.slotClass='slot-work'; return; }
+  if (actionId === 'phdThesis') { slot.action='phdThesis'; slot.label='박사논문'; slot.slotClass='slot-study'; return; }
   // EVENING_ACTIONS에서 검색
   for (const ck in EVENING_ACTIONS) {
     const f = EVENING_ACTIONS[ck].items.find(i => i.id === actionId);
