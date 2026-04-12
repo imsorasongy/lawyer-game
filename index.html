@@ -5344,14 +5344,14 @@ function getFemaleRomanceEvents() {
       ]},
     ]
   });
-  // 대학원인연3 - 다음 대학원시 50%
+  // 상민규인연3 - 상담 시 50%
   events.push({
     id:'mingyu3', charId:'mingyu',
-    triggerAction:'gradSchool', prob:0.50,
+    triggerAction:'consult', prob:0.50,
     condition:()=> G.romance.dating===null && !G.brokenUp.mingyu && G.romanceEvents.mingyu2pass && !G.romanceEvents.mingyu3,
-    bg:'배경/대학원.webp', face:'캐릭터얼굴/상민규.webp',
+    bg:'배경/상담.webp', face:'캐릭터얼굴/상민규.webp',
     dialogues:[
-      {speaker:'상민규', text:'{name}변호사님, 덕분에 문제가 잘 해결됐어요. 정말 감사합니다.'},
+      {speaker:'상민규', text:'{name}변호사님, 자문 건으로 찾아왔는데... 덕분에 문제가 잘 해결됐어요. 정말 감사합니다.'},
       {speaker:'{name}', text:'다행이에요. 도움이 됐다니 기쁘네요.'},
       {speaker:'상민규', text:'감사의 뜻으로 제가 특별한 자리를 마련했어요. 시간 되시면 같이 가실래요?'},
     ],
@@ -5364,14 +5364,14 @@ function getFemaleRomanceEvents() {
       ]},
     ]
   });
-  // 대학원인연4 - 다음 대학원시 25%
+  // 상민규인연4 - 상담 시 25%
   events.push({
     id:'mingyu4', charId:'mingyu',
-    triggerAction:'gradSchool', prob:0.25,
+    triggerAction:'consult', prob:0.25,
     condition:()=> G.romance.dating===null && !G.brokenUp.mingyu && G.romanceEvents.mingyu3pass && !G.romanceEvents.mingyu4,
-    bg:'배경/대학원.webp', face:'캐릭터얼굴/상민규.webp',
+    bg:'배경/상담.webp', face:'캐릭터얼굴/상민규.webp',
     dialogues:[
-      {speaker:'상민규', text:'{name}변호사님, 사실 오늘 하고 싶은 말이 있어서요.'},
+      {speaker:'상민규', text:'{name}변호사님, 오늘 상담 끝나고 잠깐 시간 괜찮으세요? 사실 하고 싶은 말이 있어서요.'},
       {speaker:'{name}', text:'네, 무슨 말씀이에요?'},
       {speaker:'상민규', text:'처음에는 법률 자문이 필요해서 다가갔는데, 알면 알수록 변호사님이라는 사람 자체가 좋아지더라고요.'},
       {speaker:'{name}', text:'상사장님...'},
