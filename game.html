@@ -490,6 +490,7 @@ body {
   <div style="display:flex;gap:16px">
     <button class="title-btn" onclick="startOpening()">게임 시작</button>
     <button class="title-btn" onclick="openLoadScreen()">불러오기</button>
+    <button class="title-btn" onclick="openHelpModal()">도움말</button>
   </div>
 </div>
 
@@ -7529,6 +7530,8 @@ function openMenu() {
     <div><div class="name">BGM ${G.bgmOn?'끄기':'켜기'}</div><div class="effects">현재: ${G.bgmOn?'🔊 재생중':'🔇 꺼짐'}</div></div></div>`;
   html += `<div class="action-option" onclick="showToast('아직 준비중입니다.');document.getElementById('menu-modal').style.display='none'">
     <div><div class="name">설정</div><div class="effects">게임 설정</div></div></div>`;
+  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openHelpModal()">
+    <div><div class="name">도움말</div><div class="effects">게임 플레이 안내</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';gameConfirm('타이틀 화면으로 돌아가시겠습니까?\\n저장하지 않은 진행상황은 사라집니다.',()=>{location.reload();})">
     <div><div class="name">처음으로</div><div class="effects">타이틀 화면으로 돌아갑니다</div></div></div>`;
 
@@ -9715,6 +9718,79 @@ function showEndingCustom(title,desc){
   ].map(s=>`<div style="text-align:center;min-width:80px"><div style="font-size:0.75rem;color:#8899bb">${s.label}</div><div style="font-size:1.1rem;font-weight:700;color:#e0d0a0">${s.value}</div></div>`).join('');
   statsPanel.style.display='block';
   setTimeout(()=>{statsPanel.style.opacity='1';},300);
+}
+
+// ==================== 도움말 ====================
+const HELP_PAGES = [
+  {
+    title: '게임 소개',
+    content: `<b>변호사 생존기</b>는 변호사 시뮬레이션 게임입니다.\n\n신입 변호사로 시작하여 <b>10년(120개월)</b> 동안 다양한 활동을 하며 커리어를 쌓아보세요.\n\n매월 스케줄을 짜고 실행하면 한 달이 지나갑니다.\n결과는 여러분의 선택에 달려 있습니다!`
+  },
+  {
+    title: '기본 진행 방식',
+    content: `매월 <b>스케줄</b>을 짜고 <b>실행</b>하면 한 달이 흘러갑니다.\n\n<span style="color:#c9a84c">▸ 일과 시간</span> (평일 낮)\n  업무 관련 활동 — 상담, 재판, 서면작성 등\n\n<span style="color:#c9a84c">▸ 저녁 시간</span> (평일 저녁)\n  자기계발, 여가 — 공부, 운동, 모임 등\n\n<span style="color:#c9a84c">▸ 주말</span>\n  자유롭게 활동을 선택할 수 있습니다.\n\n스케줄을 다 짰으면 <b>실행</b> 버튼을 누르세요!`
+  },
+  {
+    title: '화면 안내 — 왼쪽 메뉴',
+    content: `<span style="color:#c9a84c">▸ 인적사항</span>\n  내 능력치와 전문분야 확인\n\n<span style="color:#c9a84c">▸ 스케줄</span>\n  이번 달 스케줄을 짜고 실행\n\n<span style="color:#c9a84c">▸ 어쏘/직원</span>\n  고용한 어쏘변호사와 직원 관리\n\n<span style="color:#c9a84c">▸ 인간관계</span>\n  만난 사람들과의 관계 확인\n\n<span style="color:#c9a84c">▸ 메뉴</span>\n  저장, 불러오기, 도움말, 처음으로\n\n<span style="color:#c9a84c">▸ 신상관리</span>\n  이름 변경, 피임, 사직, 이별 등`
+  },
+  {
+    title: '화면 안내 — 오른쪽 메뉴',
+    content: `<span style="color:#c9a84c">▸ 서류가방</span>\n  맡고 있는 사건 확인, 검토, 어쏘에게 토스\n\n<span style="color:#c9a84c">▸ 책장</span>\n  구매한 책 읽기 (능력치 상승)\n\n<span style="color:#c9a84c">▸ 컴퓨터</span>\n  구직, 구인, 영업, 국선신청, 쇼핑, 기부 등\n\n<span style="color:#c9a84c">▸ 옷장</span> — 보유 의상 확인 및 변경\n<span style="color:#c9a84c">▸ 집</span> — 주거 업그레이드\n<span style="color:#c9a84c">▸ 냉장고</span> — 음료 섭취 (능력치 회복)\n<span style="color:#c9a84c">▸ 사무실</span> — 사무실 업그레이드, 개업\n<span style="color:#c9a84c">▸ 재테크</span> — 예적금, 주식, 부동산 등 투자`
+  },
+  {
+    title: '핵심 팁',
+    content: `<span style="color:#cc8888">1. 스트레스와 피로 관리가 중요합니다!</span>\n  스트레스+피로가 체력을 넘으면 병에 걸립니다.\n  심하면 과로사할 수 있으니 휴식을 챙기세요.\n\n<span style="color:#88aadd">2. 사건은 능력치로 승패가 결정됩니다.</span>\n  법률지식, 변론, 관찰력 등을 고루 올리세요.\n  서류가방에서 사건을 검토하면 난이도가 낮아집니다.\n\n<span style="color:#88cc88">3. 신분에 따라 할 수 있는 것이 달라집니다.</span>\n  어쏘 → 파트너 → 대표로 승진하거나 개업할 수 있습니다.\n\n<span style="color:#e0d0a0">4. 돈 관리도 신경 쓰세요.</span>\n  매월 고정지출이 나갑니다. 재테크로 자산을 불려보세요.\n\n<span style="color:#f0c850">5. 여러분의 플레이에 따라 26종, 53가지 엔딩 중\n  하나가 결정됩니다. 전설의 변호사를 목표로 해보세요!</span>`
+  }
+];
+
+let helpPage = 0;
+
+function openHelpModal() {
+  helpPage = 0;
+  let overlay = document.getElementById('help-modal');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'help-modal';
+    overlay.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center';
+    overlay.innerHTML = `<div style="background:linear-gradient(180deg,#1e1a14,#141210);border:2px solid #8b7355;border-radius:12px;padding:24px 28px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto">
+      <div id="help-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div id="help-title" style="font-size:1.1rem;font-weight:700;color:#c9a84c;letter-spacing:2px"></div>
+        <div id="help-page-num" style="font-size:0.75rem;color:#8a7a60"></div>
+      </div>
+      <div id="help-content" style="color:#d0c0a0;font-size:0.88rem;line-height:1.8;white-space:pre-line;margin-bottom:18px;min-height:200px"></div>
+      <div id="help-dots" style="text-align:center;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button id="help-prev" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="changeHelpPage(-1)">◀ 이전</button>
+        <button id="help-close" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="document.getElementById('help-modal').style.display='none'">닫기</button>
+        <button id="help-next" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="changeHelpPage(1)">다음 ▶</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  renderHelpPage();
+}
+
+function changeHelpPage(delta) {
+  helpPage = Math.max(0, Math.min(HELP_PAGES.length - 1, helpPage + delta));
+  renderHelpPage();
+}
+
+function renderHelpPage() {
+  const page = HELP_PAGES[helpPage];
+  document.getElementById('help-title').textContent = page.title;
+  document.getElementById('help-page-num').textContent = (helpPage+1) + ' / ' + HELP_PAGES.length;
+  document.getElementById('help-content').innerHTML = page.content;
+  // 인디케이터
+  document.getElementById('help-dots').innerHTML = HELP_PAGES.map((_, i) =>
+    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i===helpPage?'#c9a84c':'#4a4030'}"></span>`
+  ).join('');
+  // 버튼 활성화
+  document.getElementById('help-prev').style.opacity = helpPage === 0 ? '0.3' : '1';
+  document.getElementById('help-prev').style.pointerEvents = helpPage === 0 ? 'none' : 'auto';
+  document.getElementById('help-next').style.opacity = helpPage === HELP_PAGES.length-1 ? '0.3' : '1';
+  document.getElementById('help-next').style.pointerEvents = helpPage === HELP_PAGES.length-1 ? 'none' : 'auto';
 }
 </script>
 </body>
