@@ -7529,6 +7529,8 @@ function openMenu() {
     <div><div class="name">BGM ${G.bgmOn?'끄기':'켜기'}</div><div class="effects">현재: ${G.bgmOn?'🔊 재생중':'🔇 꺼짐'}</div></div></div>`;
   html += `<div class="action-option" onclick="showToast('아직 준비중입니다.');document.getElementById('menu-modal').style.display='none'">
     <div><div class="name">설정</div><div class="effects">게임 설정</div></div></div>`;
+  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';gameConfirm('타이틀 화면으로 돌아가시겠습니까?\\n저장하지 않은 진행상황은 사라집니다.',()=>{location.reload();})">
+    <div><div class="name">처음으로</div><div class="effects">타이틀 화면으로 돌아갑니다</div></div></div>`;
 
   document.getElementById('menu-items').innerHTML = html;
 }
