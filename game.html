@@ -8892,7 +8892,14 @@ function renderBriefcase() {
   empty.style.display = 'none';
   G.caseCards.sort((a,b)=>a.order-b.order);
 
+  // 한 번에 토스하기 버튼 (어쏘 1명 이상 & 사건 1건 이상)
   let html = '';
+  if (G.hiredAssocs.length > 0 && G.caseCards.length > 0) {
+    const totalCapacity = G.hiredAssocs.reduce((sum, a) => sum + Math.max(0, 20 - a.cases.length), 0);
+    if (totalCapacity > 0) {
+      html += `<div style="text-align:center;margin-bottom:10px"><button class="btn-secondary" style="padding:6px 18px;font-size:0.82rem;border-radius:5px;cursor:pointer;background:#2a3040;color:#88aadd;border:1px solid #3a4060;font-weight:700" onclick="openBulkTossMenu()">한 번에 토스하기</button></div>`;
+    }
+  }
   G.caseCards.forEach((card, idx) => {
     const diffColors = {a:'#cc6666',b:'#ccaa44',c:'#66cc88',d:'#88aadd'};
     const canReview = G.monthReviewCount < 3 && card.difficulty !== 'd';
@@ -8950,6 +8957,121 @@ function tossCase(caseIdx, assocIdx) {
   G.hiredAssocs[assocIdx].cases.push(card);
   showToast(`${card.id} → ${G.hiredAssocs[assocIdx].name} 변호사에게 배정`);
   renderBriefcase();
+}
+
+function openBulkTossMenu() {
+  const totalCapacity = G.hiredAssocs.reduce((sum, a) => sum + Math.max(0, 20 - a.cases.length), 0);
+  const maxToss = Math.min(G.caseCards.length, totalCapacity);
+  if (maxToss <= 0) { showToast('토스할 수 있는 사건이 없거나 어쏘가 모두 가득 찼습니다.'); return; }
+
+  const list = document.getElementById('briefcase-list');
+  let html = `<div style="font-size:0.9rem;color:#c9a84c;margin-bottom:12px;text-align:center;font-weight:700">한 번에 토스하기</div>`;
+  html += `<div style="font-size:0.8rem;color:#a09080;margin-bottom:8px;text-align:center">내 사건: ${G.caseCards.length}건 | 어쏘 수용 가능: ${totalCapacity}건</div>`;
+  html += `<div style="font-size:0.85rem;color:#e8d5b5;margin-bottom:10px;text-align:center">몇 건을 토스하시겠습니까?</div>`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px">`;
+  html += `<button style="width:32px;height:32px;border-radius:4px;border:1px solid #5a4a30;background:#3a3020;color:#c9a84c;font-size:1.1rem;cursor:pointer;font-weight:700" onclick="adjustBulkToss(-10)">◀◀</button>`;
+  html += `<button style="width:32px;height:32px;border-radius:4px;border:1px solid #5a4a30;background:#3a3020;color:#c9a84c;font-size:1.1rem;cursor:pointer;font-weight:700" onclick="adjustBulkToss(-1)">◀</button>`;
+  html += `<span id="bulk-toss-count" style="font-size:1.3rem;font-weight:900;color:#f0c850;min-width:50px;text-align:center">${maxToss}</span>`;
+  html += `<button style="width:32px;height:32px;border-radius:4px;border:1px solid #5a4a30;background:#3a3020;color:#c9a84c;font-size:1.1rem;cursor:pointer;font-weight:700" onclick="adjustBulkToss(1)">▶</button>`;
+  html += `<button style="width:32px;height:32px;border-radius:4px;border:1px solid #5a4a30;background:#3a3020;color:#c9a84c;font-size:1.1rem;cursor:pointer;font-weight:700" onclick="adjustBulkToss(10)">▶▶</button>`;
+  html += `</div>`;
+  // 어쏘별 수용량 표시
+  html += `<div style="font-size:0.75rem;color:#8a7a60;margin-bottom:12px">`;
+  G.hiredAssocs.forEach(a => {
+    const cap = Math.max(0, 20 - a.cases.length);
+    html += `<div style="display:flex;justify-content:space-between;padding:2px 8px"><span>${a.name}</span><span>${a.cases.length}/20 (여유 ${cap}건)</span></div>`;
+  });
+  html += `</div>`;
+  html += `<div style="display:flex;gap:8px;justify-content:center">`;
+  html += `<button class="event-choice" style="padding:8px 24px;font-size:0.85rem" onclick="executeBulkToss()"><span class="choice-label">토스 실행</span></button>`;
+  html += `<button class="event-choice" style="padding:8px 24px;font-size:0.85rem" onclick="renderBriefcase()"><span class="choice-label">취소</span></button>`;
+  html += `</div>`;
+  list.innerHTML = html;
+
+  window._bulkTossMax = maxToss;
+  window._bulkTossCount = maxToss;
+}
+
+function adjustBulkToss(delta) {
+  window._bulkTossCount = Math.max(1, Math.min(window._bulkTossMax, window._bulkTossCount + delta));
+  document.getElementById('bulk-toss-count').textContent = window._bulkTossCount;
+}
+
+function executeBulkToss() {
+  const count = window._bulkTossCount;
+  if (!count || count <= 0) return;
+
+  // 수용량이 있는 어쏘 목록 (인덱스와 남은 수용량)
+  const assocs = G.hiredAssocs.map((a, i) => ({idx: i, name: a.name, capacity: Math.max(0, 20 - a.cases.length), assigned: 0}))
+    .filter(a => a.capacity > 0);
+
+  if (assocs.length === 0) { showToast('수용 가능한 어쏘가 없습니다.'); return; }
+
+  let remaining = count;
+
+  // 1차: 균등 배분
+  const base = Math.floor(remaining / assocs.length);
+  if (base > 0) {
+    assocs.forEach(a => {
+      const give = Math.min(base, a.capacity);
+      a.assigned = give;
+      a.capacity -= give;
+      remaining -= give;
+    });
+  }
+
+  // 2차: 나머지 1건씩 배분 (수용량 여유 있는 어쏘에게)
+  for (let i = 0; i < assocs.length && remaining > 0; i++) {
+    if (assocs[i].capacity > 0) {
+      assocs[i].assigned++;
+      assocs[i].capacity--;
+      remaining--;
+    }
+  }
+
+  // 3차: 아직 남은 건이 있으면 (1차에서 수용량 부족으로 못 채운 경우) 여유 있는 어쏘에게 계속 배분
+  while (remaining > 0) {
+    let distributed = false;
+    for (let i = 0; i < assocs.length && remaining > 0; i++) {
+      if (assocs[i].capacity > 0) {
+        assocs[i].assigned++;
+        assocs[i].capacity--;
+        remaining--;
+        distributed = true;
+      }
+    }
+    if (!distributed) break;
+  }
+
+  // 사건 배분 실행 (서류가방 앞쪽부터)
+  G.caseCards.sort((a, b) => a.order - b.order);
+  const results = [];
+  assocs.forEach(a => {
+    if (a.assigned <= 0) return;
+    const cards = G.caseCards.splice(0, a.assigned);
+    cards.forEach(card => G.hiredAssocs[a.idx].cases.push(card));
+    G.cases -= a.assigned;
+    results.push({name: a.name, count: a.assigned});
+  });
+
+  // 결과 화면 표시
+  showBulkTossResult(results);
+}
+
+function showBulkTossResult(results) {
+  const total = results.reduce((s, r) => s + r.count, 0);
+  const list = document.getElementById('briefcase-list');
+  let html = `<div style="font-size:0.95rem;color:#c9a84c;margin-bottom:14px;text-align:center;font-weight:700">한 번에 토스 완료! (${total}건 배분)</div>`;
+  html += `<div style="margin-bottom:16px">`;
+  results.forEach(r => {
+    html += `<div style="display:flex;justify-content:space-between;padding:5px 12px;margin-bottom:3px;background:#2a2518;border:1px solid #3a3020;border-radius:4px">
+      <span style="color:#e8d5b5;font-size:0.85rem">${r.name}</span>
+      <span style="color:#88cc88;font-size:0.85rem;font-weight:700">${r.count}건 배정</span>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div style="text-align:center"><button class="event-choice" style="padding:8px 24px;font-size:0.85rem" onclick="renderBriefcase()"><span class="choice-label">확인</span></button></div>`;
+  list.innerHTML = html;
 }
 
 // ==================== SAVE / LOAD ====================
