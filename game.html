@@ -1628,6 +1628,18 @@ function getActionEvents(actionId) {
       ];
     case 'homeRest':
       return [
+        { id:'babyNightWake', prob:0.05,
+          condition:()=>G.children && G.children.length>0 && G.children.some(c=>{ const age=(2029+G.year)-c.birthYear+(G.month>=c.birthMonth?0:-1); return age<=1; }),
+          bg: G.gender==='male'?'배경/방.webp':'배경/방2.webp',
+          face: null,
+          dialogues: [
+            {speaker:'{name}', text:'으음... 겨우 잠들었는데...'},
+            {speaker:'{name}', text:'아이가 또 깼네... 결국 한참을 달래느라 잠을 설쳤다.'}
+          ],
+          choices:[
+            {text:'(잠을 설쳤다)', effects:{fatigue:10,stress:5}, noChoice:true}
+          ]
+        },
         { id:'pregnancy', prob:0.01,
           condition:()=>G.isMarried && !G.contraception && !G.isPregnant,
           bg: G.gender==='male'?'배경/방.webp':'배경/방2.webp',
