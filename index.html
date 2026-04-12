@@ -876,6 +876,7 @@ const G = {
   politicsAccepted: false,  // 출마 수락했는지
   politicsSupport: 0,       // 지지율 (최대 100)
   isCityCouncil: false,     // 시의원 여부
+  councilElectedYear: 0,    // 시의원 당선 연도 (실제년도, 임기 4년)
   councilActivityCount: 0,  // 의정활동 횟수
   politicsOfferedYear: 0,   // 권유받은 연도 (2034 또는 2038)
 };
@@ -2355,7 +2356,7 @@ function renderSchedule(daysInMonth, firstDayOfWeek) {
   }
   html += '</div>';
   html += `<div class="schedule-actions">
-    <button class="btn btn-secondary" onclick="autoFillSchedule()">자동 배치</button>
+    <button class="btn btn-secondary" onclick="openAutoFillMenu()">자동 배치</button>
     <button class="btn btn-primary" onclick="startExecution()">스케줄 진행</button>
   </div>`;
   sv.innerHTML = html;
@@ -2579,19 +2580,208 @@ function selectAction(actionId) {
   renderSchedule(new Date(ay,G.month,0).getDate(), new Date(ay,G.month-1,1).getDay());
 }
 
-function autoFillSchedule() {
-  const defs=['lawStudy','speech','studyGroup','homeRest','sportClub','industryMeet'];
-  G.schedule.forEach(ds=>{ds.slots.forEach(slot=>{
-    if(!slot.locked&&!slot.action){
-      if(ds.dow===6&&ds.day<=7){slot.action='specialTraining';slot.label=PRO_NAMES[MONTH_SPECIAL[G.month]]+' 특별연수';slot.slotClass='slot-special';}
-      else{const p=defs[Math.floor(Math.random()*defs.length)];
-        for(const ck in EVENING_ACTIONS){const f=EVENING_ACTIONS[ck].items.find(i=>i.id===p);
-          if(f){slot.action=p;slot.label=f.name;slot.slotClass=ck==='study'?'slot-study':ck==='social'?'slot-social':'slot-rest';break;}}
-      }
+function openAutoFillMenu() {
+  const modal = document.getElementById('action-modal');
+  modal.style.display = 'flex';
+  let html = '<div style="font-size:1rem;font-weight:700;color:#c9a84c;margin-bottom:12px;text-align:center">자동 배치</div>';
+  html += '<div style="font-size:0.78rem;color:#a09080;margin-bottom:10px;text-align:center">빈 슬롯을 자동으로 채웁니다 (이미 배치된 슬롯은 유지)</div>';
+  const hasLast = G._lastSchedulePattern && G._lastSchedulePattern.evening.length > 0;
+  if (hasLast) {
+    const statusChanged = G._lastSchedulePattern.status !== G.status || G._lastSchedulePattern.firmId !== G.firmId;
+    if (statusChanged) {
+      html += `<div class="action-option" style="opacity:0.4;cursor:default"><div><div class="name">지난달 스케줄 복사</div><div class="effects" style="color:#cc6666">신분이 바뀌어서 지난달 스케줄 복사를 할 수 없습니다</div></div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="closeActionModal();applyAutoFill('last')"><div><div class="name">지난달 스케줄 복사</div><div class="effects">전월과 동일한 패턴으로 채웁니다</div></div></div>`;
     }
-  });});
-  const ay=2029+G.year;
-  renderSchedule(new Date(ay,G.month,0).getDate(), new Date(ay,G.month-1,1).getDay());
+  }
+  html += `<div class="action-option" onclick="closeActionModal();applyAutoFill('normal')"><div><div class="name">일반형</div><div class="effects">휴식 40% / 공부 30% / 사회활동 30%</div></div></div>`;
+  html += `<div class="action-option" onclick="closeActionModal();applyAutoFill('study')"><div><div class="name">공부형</div><div class="effects">휴식 40% / 공부 40% / 사회활동 20%</div></div></div>`;
+  html += `<div class="action-option" onclick="closeActionModal();applyAutoFill('business')"><div><div class="name">영업형</div><div class="effects">휴식 30% / 공부 30% / 사회활동 40%</div></div></div>`;
+  html += `<div class="action-option" onclick="closeActionModal();applyAutoFill('rest')"><div><div class="name">휴식형</div><div class="effects">휴식 60% / 공부 20% / 사회활동 20%</div></div></div>`;
+  html += `<div class="action-option" onclick="closeActionModal()"><div><div class="name" style="color:#888">취소</div></div></div>`;
+  document.getElementById('modal-actions').innerHTML = html;
+}
+
+function filterCopiedAction(actionId) {
+  // 현재 상태에서 불가능한 활동을 대체
+  if (actionId === 'councilWork' && !G.isCityCouncil) return 'homeRest';
+  if (actionId === 'hoemu' && !(G.status==='partner'||G.status==='senior'||G.status==='solo')) return 'homeRest';
+  if (actionId === 'consult' && !(G.status==='senior'||G.status==='solo')) return 'homeRest';
+  if (actionId === 'date' && !G.romance.dating) return 'homeRest';
+  return actionId;
+}
+
+function applyAutoFill(type) {
+  ensureRomance();
+  // 기존 유저 배치 슬롯 초기화 (locked/forced 제외)
+  G.schedule.forEach(ds => {
+    ds.slots.forEach(slot => {
+      if (!slot.locked && !slot.forced) {
+        slot.action = null; slot.label = '미정'; slot.slotClass = '';
+      }
+    });
+  });
+  const studyPool = ['lawStudy','speech','studyGroup','pt','gradSchool'];
+  const socialPool = ['sportClub','industryMeet','wineMeet','publicService','golf','partTimeJob'];
+  const restPool = ['homeRest','travel','drive'];
+  // 업무 풀 (일과시간 빈 슬롯용)
+  const workPool = ['document'];
+  if (G.status==='senior'||G.status==='solo') workPool.push('consult');
+  if (G.status==='partner'||G.status==='senior'||G.status==='solo') workPool.push('hoemu');
+  if (G.isCityCouncil && type==='business') workPool.push('councilWork');
+  // 상담 배정 횟수 제한
+  let consultRemaining = G.consultQuota || 0;
+
+  // 비율 설정
+  const ratios = {
+    normal:   {rest:0.4, study:0.3, social:0.3},
+    study:    {rest:0.4, study:0.4, social:0.2},
+    business: {rest:0.3, study:0.3, social:0.4},
+    rest:     {rest:0.6, study:0.2, social:0.2},
+  };
+
+  // 지난달 복사 모드
+  if (type === 'last' && G._lastSchedulePattern) {
+    const pat = G._lastSchedulePattern;
+    let evIdx = 0, wkIdx = 0;
+    G.schedule.forEach(ds => {
+      ds.slots.forEach(slot => {
+        if (slot.locked || slot.forced || slot.action) return;
+        if (slot.isDaytime && !slot.suspendedSlot) {
+          // 일과시간 빈 슬롯 (휴업 제외)
+          let pick = workPool[Math.floor(Math.random() * workPool.length)];
+          if (pick === 'consult' && consultRemaining <= 0) pick = 'document';
+          if (pick === 'consult') consultRemaining--;
+          assignAction(slot, pick);
+        } else if (ds.isWeekend || ds.isHoliday || slot.suspendedSlot) {
+          if (pat.weekend.length > 0) {
+            assignAction(slot, filterCopiedAction(pat.weekend[wkIdx % pat.weekend.length]));
+            wkIdx++;
+          }
+        } else {
+          if (pat.evening.length > 0) {
+            assignAction(slot, filterCopiedAction(pat.evening[evIdx % pat.evening.length]));
+            evIdx++;
+          }
+        }
+      });
+    });
+  } else {
+    // 프리셋 모드
+    const ratio = ratios[type] || ratios.normal;
+    G.schedule.forEach(ds => {
+      ds.slots.forEach(slot => {
+        if (slot.locked || slot.forced || slot.action) return;
+        if (slot.isDaytime && !slot.suspendedSlot) {
+          let pick = workPool[Math.floor(Math.random() * workPool.length)];
+          if (pick === 'consult' && consultRemaining <= 0) pick = 'document';
+          if (pick === 'consult') consultRemaining--;
+          assignAction(slot, pick);
+        } else if (slot.suspendedSlot) {
+          // 휴업변호사 일과시간 → 일반 활동으로 채움
+          const r = Math.random();
+          const ratio = ratios[type] || ratios.normal;
+          let pool;
+          if (r < ratio.rest) pool = restPool;
+          else if (r < ratio.rest + ratio.study) pool = studyPool;
+          else pool = socialPool;
+          assignAction(slot, pool[Math.floor(Math.random() * pool.length)]);
+        } else {
+          // 첫째주 토요일 → 특별연수
+          if (ds.dow === 6 && ds.day <= 7) {
+            slot.action = 'specialTraining';
+            slot.label = PRO_NAMES[MONTH_SPECIAL[G.month]] + ' 특별연수';
+            slot.slotClass = 'slot-special';
+            return;
+          }
+          const r = Math.random();
+          let pool;
+          if (r < ratio.rest) pool = restPool;
+          else if (r < ratio.rest + ratio.study) pool = studyPool;
+          else pool = socialPool;
+          const pick = pool[Math.floor(Math.random() * pool.length)];
+          assignAction(slot, pick);
+        }
+      });
+    });
+  }
+
+  // 데이트 자동 배치 (연인 있을 때, 빈 저녁/주말 슬롯에 월 2회)
+  if (G.romance.dating) {
+    let dateCount = 0;
+    const emptyEvening = [];
+    G.schedule.forEach((ds, di) => {
+      ds.slots.forEach((slot, si) => {
+        if (!slot.locked && !slot.forced && slot.action && slot.action !== 'date' &&
+            (slot.time === 'evening' || ds.isWeekend || ds.isHoliday)) {
+          emptyEvening.push({di, si});
+        }
+      });
+    });
+    // 랜덤하게 2개 선택하여 데이트로 교체
+    for (let i = emptyEvening.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [emptyEvening[i], emptyEvening[j]] = [emptyEvening[j], emptyEvening[i]];
+    }
+    for (let i = 0; i < Math.min(2, emptyEvening.length); i++) {
+      const {di, si} = emptyEvening[i];
+      const slot = G.schedule[di].slots[si];
+      slot.action = 'date'; slot.label = '데이트'; slot.slotClass = 'slot-special';
+    }
+  }
+
+  // 병원 자동 배치 (질병 상태일 때, 빈 저녁/주말 슬롯에 월 2회)
+  if (G.isSick) {
+    let hospCount = 0;
+    const emptyForHosp = [];
+    G.schedule.forEach((ds, di) => {
+      ds.slots.forEach((slot, si) => {
+        if (!slot.locked && !slot.forced && slot.action && slot.action !== 'date' && slot.action !== 'hospital' &&
+            (slot.time === 'evening' || ds.isWeekend || ds.isHoliday)) {
+          emptyForHosp.push({di, si});
+        }
+      });
+    });
+    for (let i = emptyForHosp.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [emptyForHosp[i], emptyForHosp[j]] = [emptyForHosp[j], emptyForHosp[i]];
+    }
+    for (let i = 0; i < Math.min(2, emptyForHosp.length); i++) {
+      const {di, si} = emptyForHosp[i];
+      const slot = G.schedule[di].slots[si];
+      slot.action = 'hospital'; slot.label = '병원'; slot.slotClass = 'slot-special';
+    }
+  }
+
+  const ay = 2029 + G.year;
+  renderSchedule(new Date(ay, G.month, 0).getDate(), new Date(ay, G.month - 1, 1).getDay());
+}
+
+function assignAction(slot, actionId) {
+  // 특별연수 처리
+  if (actionId === 'specialTraining') {
+    slot.action = 'specialTraining';
+    slot.label = PRO_NAMES[MONTH_SPECIAL[G.month]] + ' 특별연수';
+    slot.slotClass = 'slot-special';
+    return;
+  }
+  // 업무 처리
+  if (actionId === 'document') { slot.action='document'; slot.label='서면작성'; slot.slotClass='slot-work'; return; }
+  if (actionId === 'consult') { slot.action='consult'; slot.label='상담'; slot.slotClass='slot-work'; return; }
+  if (actionId === 'hoemu') { slot.action='hoemu'; slot.label='회무'; slot.slotClass='slot-work'; return; }
+  if (actionId === 'councilWork') { slot.action='councilWork'; slot.label='의정활동'; slot.slotClass='slot-work'; return; }
+  // EVENING_ACTIONS에서 검색
+  for (const ck in EVENING_ACTIONS) {
+    const f = EVENING_ACTIONS[ck].items.find(i => i.id === actionId);
+    if (f) {
+      slot.action = actionId;
+      slot.label = f.name;
+      slot.slotClass = ck === 'study' ? 'slot-study' : ck === 'social' ? 'slot-social' : 'slot-rest';
+      return;
+    }
+  }
+  // 못 찾으면 휴식
+  slot.action = 'homeRest'; slot.label = '집에서 휴식'; slot.slotClass = 'slot-rest';
 }
 
 // ==================== JOB SYSTEM ====================
@@ -5739,12 +5929,21 @@ function startExecution() {
   doStartExecution();
 }
 function doStartExecution() {
-
   // 강사 스케줄 적용 (일요일 낮 고정)
   applyLecturerSchedule();
   G.schedule.forEach(ds=>{ds.slots.forEach(slot=>{
     if(!slot.locked&&!slot.action){slot.action='homeRest';slot.label='집에서 휴식';slot.slotClass='slot-rest';}
   });});
+  // 지난달 스케줄 패턴 저장 (자동배치 '지난달 복사'용) — 휴식 채운 후 저장
+  const eveningPattern = [], weekendPattern = [];
+  G.schedule.forEach(ds => {
+    ds.slots.forEach(slot => {
+      if (slot.locked || slot.forced || !slot.action) return;
+      if (ds.isWeekend || ds.isHoliday) weekendPattern.push(slot.action);
+      else if (slot.time === 'evening') eveningPattern.push(slot.action);
+    });
+  });
+  G._lastSchedulePattern = { evening: eveningPattern, weekend: weekendPattern, status: G.status, firmId: G.firmId };
   continueExecution();
 }
 
@@ -7303,6 +7502,20 @@ function finishMonthFinal(){
   for(const k in G.stats)G.stats[k]=Math.max(0,Math.min(999,G.stats[k]));
   G.statusMonths++;
 
+  // 시의원 임기 만료 체크 (4년, 당선년도+4의 6월에 만료)
+  if (G.isCityCouncil && G.councilElectedYear) {
+    const actualYear = 2029 + G.year;
+    if (actualYear >= G.councilElectedYear + 4 && G.month === 6) {
+      G.isCityCouncil = false;
+      G.councilElectedYear = 0;
+      G.councilActivityCount = 0;
+      document.getElementById('vn-screen').style.display='none';
+      updateUI();
+      showMilestonePopup({title:'임기 만료',desc:'시의원 임기 4년이 만료되었습니다.',bg:'배경/의회.webp',face:getPlayerFace(),speaker:G.name,text:'4년간의 의정활동이 끝났다. 많은 것을 배운 시간이었어.',btnLabel:'확인'}, ()=>{showMonthSummary(empReports);});
+      return;
+    }
+  }
+
   // 당선 판정 (출마연도 6월 말)
   if (G.politicsAccepted && G.month === 6) {
     const actualYear = 2029 + G.year;
@@ -7311,6 +7524,7 @@ function finishMonthFinal(){
       updateUI();
       if (G.politicsSupport > 50) {
         G.isCityCouncil = true;
+        G.councilElectedYear = actualYear;
         G.politicsAccepted = false;
         G.politicsSupport = 0;
         showMilestonePopup({title:'당선',desc:`${G.name} 변호사가 시의회 의원으로 당선되었습니다!`,bg:'배경/의회.webp',face:'캐릭터얼굴/국회의원.webp',speaker:'이소연',text:`${G.name} 의원, 축하합니다! 앞으로 함께 잘 해봅시다.`}, ()=>{showMonthSummary(empReports);});
