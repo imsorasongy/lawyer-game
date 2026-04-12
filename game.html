@@ -2625,17 +2625,18 @@ function filterCopiedAction(actionId) {
 
 function applyAutoFill(type) {
   ensureRomance();
-  // 기존 유저 배치 슬롯 초기화 (locked/forced 제외)
+  // 기존 유저 배치 슬롯 초기화 (locked/forced/특별연수 제외)
   G.schedule.forEach(ds => {
     ds.slots.forEach(slot => {
-      if (!slot.locked && !slot.forced) {
+      if (!slot.locked && !slot.forced && slot.action !== 'specialTraining') {
         slot.action = null; slot.label = '미정'; slot.slotClass = '';
       }
     });
   });
   const studyPool = ['lawStudy','speech','studyGroup','pt','gradSchool'];
   const socialPool = ['sportClub','industryMeet','wineMeet','publicService','golf','partTimeJob'];
-  const restPool = ['homeRest','travel','drive'];
+  const restPool = ['homeRest','travel'];
+  if (G.currentCar) restPool.push('drive');
   // 업무 풀 (일과시간 빈 슬롯용)
   const workPool = ['document'];
   if (G.status==='senior'||G.status==='solo') workPool.push('consult');
