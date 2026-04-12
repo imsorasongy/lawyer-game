@@ -1753,6 +1753,17 @@ let openingIdx = 0;
 function startOpening() {
   document.getElementById('title-screen').style.display = 'none';
   const screen = document.getElementById('opening-screen');
+  // 2회차 대비: 이전 캐릭터 생성 UI 제거 및 상태 초기화
+  const oldCreate = document.getElementById('opening-create');
+  if (oldCreate) oldCreate.remove();
+  openingGender = null;
+  const bgEl = document.getElementById('opening-bg');
+  bgEl.src = '';
+  bgEl.style.opacity = '0';
+  bgEl.style.filter = 'none';
+  document.getElementById('opening-text').style.opacity = '0';
+  screen.style.opacity = '1';
+  screen.style.cursor = 'pointer';
   screen.style.display = 'block';
   openingIdx = 0;
   showOpeningScene(0);
