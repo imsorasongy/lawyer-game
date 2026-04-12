@@ -3879,7 +3879,9 @@ function getMaleRomanceEvents() {
       {speaker:'박민영', text:'그 반응은 뭐죠. 긴장감이 없군요. 제가 상대방이라고 해서 대충하려고 하시는 건 아니겠지요?'},
     ],
     choices:[
-      {text:'최선을 다해 이길 생각이다.', pass:true},
+      {text:'최선을 다해 이길 생각이다.', pass:true, passDialogues:[
+        {speaker:'박민영', text:'그 말 믿겠습니다. 저도 최선을 다할 테니까, 각오하세요.'}
+      ]},
       {text:'대충할 생각은 없지만...', pass:false, rejectDialogues:[
         {speaker:'박민영', text:'그렇군요. 변호사님은 절 진지하게 생각하지 않았군요..'}
       ]},
@@ -3900,7 +3902,9 @@ function getMaleRomanceEvents() {
       {speaker:'박민영', text:'그런데 오늘 주장하신 내용은 법리적으로 맞지 않는 내용 아닌가요? 저로서는 좀 이해하기 힘든 내용이던데.'},
     ],
     choices:[
-      {text:'제 논리에 허점은 없습니다. 다시 한 번 찾아보세요.', pass:true},
+      {text:'제 논리에 허점은 없습니다. 다시 한 번 찾아보세요.', pass:true, passDialogues:[
+        {speaker:'박민영', text:'그렇게 자신있게 말씀하시니, 제가 다시 확인해봐야겠네요. 변호사님은 역시 만만한 상대가 아니에요.'}
+      ]},
       {text:'그런가요? 가서 확인해봐야겠네요.', pass:false, rejectDialogues:[
         {speaker:'박민영', text:'변호사님은 이 사건에 최선을 다하시는 것 같지 않네요. 알겠습니다.'}
       ]},
@@ -3927,7 +3931,9 @@ function getMaleRomanceEvents() {
       {text:'평소처럼요.', pass:false, rejectDialogues:[
         {speaker:'박민영', text:'그렇군요. 변호사님은 늘 그렇듯 최선을 다하셨겠지요. 그래서 존경합니다.'}
       ]},
-      {text:'평소보다도 더요. 상대가 박민영 변호사님이라서.', pass:true},
+      {text:'평소보다도 더요. 상대가 박민영 변호사님이라서.', pass:true, passDialogues:[
+        {speaker:'박민영', text:'...저라서요? 그게 무슨 의미인지.. 나중에 꼭 여쭤볼게요.'}
+      ]},
     ]
   });
   // 민영과의대결4
@@ -3976,7 +3982,9 @@ function getMaleRomanceEvents() {
       {speaker:'이은경', text:'이번에 와인협회에서 와인대회를 연다고 하더라고요. 혹시 같이 출전하실 생각 있으신가요?'},
     ],
     choices:[
-      {text:'아 재밌겠어요. 출전할게요', pass:true, scheduleNext:{type:'winePrep',target:'2ndSat'}},
+      {text:'아 재밌겠어요. 출전할게요', pass:true, scheduleNext:{type:'winePrep',target:'2ndSat'}, passDialogues:[
+        {speaker:'이은경', text:'정말요? 감사해요! 그럼 다음 주부터 같이 준비해봐요. 꼭 우승하자!'}
+      ]},
       {text:'저는 다른 사람과 나갈 생각이었는데..', pass:false, rejectDialogues:[
         {speaker:'이은경', text:'아.. 아쉽네요. 어쩔 수 없죠.'}
       ]},
@@ -4626,7 +4634,9 @@ function getFemaleRomanceEvents() {
       {speaker:'김원형', text:'좋아요. 저도 최선을 다할 테니까, 각오하세요.'},
     ],
     choices:[
-      {text:'물론이죠. 최선을 다하겠습니다.', pass:true},
+      {text:'물론이죠. 최선을 다하겠습니다.', pass:true, passDialogues:[
+        {speaker:'김원형', text:'좋아요, 그 각오 마음에 드네요. 그럼 법정에서 뵙겠습니다.'}
+      ]},
       {text:'적당히 하죠 뭐.', pass:false, rejectDialogues:[
         {speaker:'김원형', text:'그렇군요. 조금 실망이네요.'}
       ]},
@@ -4647,7 +4657,9 @@ function getFemaleRomanceEvents() {
       {speaker:'김원형', text:'그런데 오늘 제출하신 준비서면, 판례 적용이 조금 무리가 있지 않았나요?'},
     ],
     choices:[
-      {text:'제 해석이 맞다고 생각합니다. 확인해보세요.', pass:true},
+      {text:'제 해석이 맞다고 생각합니다. 확인해보세요.', pass:true, passDialogues:[
+        {speaker:'김원형', text:'당당하시네요. 그런 자신감, 좋습니다. 제가 다시 살펴볼게요.'}
+      ]},
       {text:'그런가요? 다시 확인해볼게요.', pass:false, rejectDialogues:[
         {speaker:'김원형', text:'좀 더 신중하셨으면 좋겠어요.'}
       ]},
@@ -4671,7 +4683,9 @@ function getFemaleRomanceEvents() {
       {text:'평소처럼요.', pass:false, rejectDialogues:[
         {speaker:'김원형', text:'네, 역시 늘 최선을 다하시는 분이죠. 존경합니다.'}
       ]},
-      {text:'김원형 변호사님이 상대여서 더 긴장했거든요.', pass:true},
+      {text:'김원형 변호사님이 상대여서 더 긴장했거든요.', pass:true, passDialogues:[
+        {speaker:'김원형', text:'저 때문에 긴장하셨다고요? ...그 말, 왠지 기분이 좋네요.'}
+      ]},
     ]
   });
   // 원형과의대결4
@@ -4733,7 +4747,9 @@ function getFemaleRomanceEvents() {
       {speaker:'강민우', text:'제가 추천하는 스트레스 해소법이 있는데요. 다음에 해외 갈 때 같이 와인 투어 가볼래요?'},
     ],
     choices:[
-      {text:'뭐지, 이러려고 검진받아보라고 한 거 아니에요? 좋아요! 가요!', pass:true},
+      {text:'뭐지, 이러려고 검진받아보라고 한 거 아니에요? 좋아요! 가요!', pass:true, passDialogues:[
+        {speaker:'강민우', text:'아하하, 들켰나요? 사실 같이 가고 싶었거든요. 기대해주세요, 제가 코스 짤게요!'}
+      ]},
       {text:'몸이 안 좋은데 와인투어를 하는게 맞나요?', pass:false, rejectDialogues:[
         {speaker:'강민우', text:'아, 그렇죠. 죄송합니다.'}
       ]},
@@ -4803,7 +4819,9 @@ function getFemaleRomanceEvents() {
       {speaker:'김창욱', text:'저도 마찬가지에요. 커피라도 한 잔 할까요? 대신 {name}이 사는거!'},
     ],
     choices:[
-      {text:'좋아요, 잠깐 쉬면서 마셔요.', pass:true},
+      {text:'좋아요, 잠깐 쉬면서 마셔요.', pass:true, passDialogues:[
+        {speaker:'김창욱', text:'역시! 그럼 가죠. 야근하는 날은 이렇게 잠깐 쉬어줘야 효율이 오르거든요.'}
+      ]},
       {text:'아뇨, 빨리 끝내고 가야해서요.', pass:false, rejectDialogues:[
         {speaker:'김창욱', text:'그러세요. 고생하세요.'}
       ]},
@@ -4824,7 +4842,9 @@ function getFemaleRomanceEvents() {
       {speaker:'김창욱', text:'회사 근처에 숨은 맛집이 있거든요. 퇴근하고 같이 가요.'},
     ],
     choices:[
-      {text:'좋아요, 같이 가요!', pass:true},
+      {text:'좋아요, 같이 가요!', pass:true, passDialogues:[
+        {speaker:'김창욱', text:'좋아요! 진짜 맛있는 곳이에요. 변호사님 취향에 딱 맞을 거예요.'}
+      ]},
       {text:'오늘은 좀 바빠서요.', pass:false, rejectDialogues:[
         {speaker:'김창욱', text:'알겠어요. 다음에 가죠.'}
       ]},
@@ -4844,7 +4864,9 @@ function getFemaleRomanceEvents() {
       {speaker:'김창욱', text:'주말에 시간 되면 같이 전시회 보러 갈래요?'},
     ],
     choices:[
-      {text:'네, 가고 싶어요!', pass:true},
+      {text:'네, 가고 싶어요!', pass:true, passDialogues:[
+        {speaker:'김창욱', text:'정말요? 좋은 전시가 있거든요. 그럼 주말에 제가 연락드릴게요!'}
+      ]},
       {text:'직장 동료끼리 그러면 좀 그렇지 않을까요?', pass:false, rejectDialogues:[
         {speaker:'김창욱', text:'그렇죠.. 제가 선 넘었네요.'}
       ]},
@@ -4937,7 +4959,9 @@ function getFemaleRomanceEvents() {
       {speaker:'안자성', text:'연예계에 있다 보면 진심으로 대해주는 사람을 만나기가 힘들어요. 다들 연예인 안자성만 보지, 진짜 저를 보는 사람은 없거든요.변호사님이 다 이야기해달라고 해서, 사실 좀 마음의 짐을 덜 수 있었습니다.'},
     ],
     choices:[
-      {text:'연예인이든 아니든, 자성 씨는 자성 씨잖아요.', pass:true},
+      {text:'연예인이든 아니든, 자성 씨는 자성 씨잖아요.', pass:true, passDialogues:[
+        {speaker:'안자성', text:'...그렇게 말해주는 사람은 처음이에요. 정말 감사합니다, 변호사님.'}
+      ]},
       {text:'연예인이라서 힘든 점이 많겠네요. 저는 변호사니까, 믿고 이야기해주시면 됩니다.', pass:false, rejectDialogues:[
         {speaker:'안자성', text:'네...  감사해요.'}
       ]},
@@ -5028,7 +5052,9 @@ function getFemaleRomanceEvents() {
       {speaker:'상민규', text:'감사의 뜻으로 제가 특별한 자리를 마련했어요. 시간 되시면 같이 가실래요?'},
     ],
     choices:[
-      {text:'네, 좋아요!', pass:true},
+      {text:'네, 좋아요!', pass:true, passDialogues:[
+        {speaker:'상민규', text:'감사해요! 분위기 좋은 곳이에요. 변호사님이 좋아하실 거예요.'}
+      ]},
       {text:'그냥 도움 드린 건데 그러실 것 없어요.', pass:false, rejectDialogues:[
         {speaker:'상민규', text:'그래도 고마운 마음은 전하고 싶었는데. 알겠어요.'}
       ]},
@@ -5074,7 +5100,9 @@ function getFemaleRomanceEvents() {
       {speaker:'성요셉', text:'서면 좀 그만쓰고, 같이 바람이라도 쐬러 좀 갑시다.'},
     ],
     choices:[
-      {text:'아, 갑자기? 무슨 바람을?', pass:true},
+      {text:'아, 갑자기? 무슨 바람을?', pass:true, passDialogues:[
+        {speaker:'성요셉', text:'그냥 바람. 맨날 사무실에만 박혀있으면 답답하잖아. 자, 가자.'}
+      ]},
       {text:'괜찮아요, 바빠서요.', pass:false, rejectDialogues:[
         {speaker:'성요셉', text:'하. 넵. 그러시던가.'}
       ]},
