@@ -7919,8 +7919,11 @@ function doMarketing(type) {
     const bonus1 = G.stats.charm/150 + G.stats.debate/400 - G.stats.karma/50;
     G.stats.sales = Math.min(999, G.stats.sales + bonus1);
     G.stats.reputation = Math.min(999, G.stats.reputation + bonus1);
+    // 유튜브 영업 시 구독자 증가
+    const subGain = Math.floor(G.stats.charm*10 + G.stats.debate*5 + G.stats.reputation*5);
+    G.youtubeSubscribers += subGain;
     G.youtubeStarted = true;
-    showToast('유튜브 영업 완료!');
+    showToast(`유튜브 영업 완료! 구독자 +${subGain.toLocaleString()}명`);
   }
   G.monthMarketingDone = true;
   updateUI(); renderComputer();
