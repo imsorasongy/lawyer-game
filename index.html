@@ -1811,12 +1811,14 @@ function advanceOpening() {
     openingTransitioning = true;
     showOpeningScene(openingIdx);
   } else {
+    openingTransitioning = true;
     finishOpening();
   }
 }
 
 function finishOpening() {
   const screen = document.getElementById('opening-screen');
+  screen.onclick = null; // 즉시 클릭 차단 (중복 호출 방지)
   const bgEl = document.getElementById('opening-bg');
   const textEl = document.getElementById('opening-text');
 
