@@ -1785,8 +1785,7 @@ function showOpeningScene(idx) {
   // 배경 페이드아웃
   bgEl.style.opacity = '0';
   setTimeout(() => {
-    // 페이드아웃 완료 후 새 이미지 로드
-    bgEl.src = scene.bg;
+    // onload를 src보다 먼저 설정 (캐시된 이미지에서 onload 누락 방지)
     bgEl.onload = () => {
       // 페이드인 (2.5초)
       bgEl.style.opacity = '1';
@@ -1799,6 +1798,8 @@ function showOpeningScene(idx) {
         setTimeout(() => { openingTransitioning = false; }, 1500);
       }, 2500);
     };
+    // 페이드아웃 완료 후 새 이미지 로드
+    bgEl.src = scene.bg;
   }, fadeOutDelay);
 }
 
