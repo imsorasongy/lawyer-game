@@ -2666,13 +2666,6 @@ function applyAutoFill(type) {
           if (pick === 'consult') consultRemaining--;
           assignAction(slot, pick);
         } else if (ds.isWeekend || ds.isHoliday || slot.suspendedSlot) {
-          // 첫째주 토요일 → 특별연수
-          if (ds.dow === 6 && ds.day <= 7) {
-            slot.action = 'specialTraining';
-            slot.label = PRO_NAMES[MONTH_SPECIAL[G.month]] + ' 특별연수';
-            slot.slotClass = 'slot-special';
-            return;
-          }
           if (pat.weekend.length > 0) {
             assignAction(slot, filterCopiedAction(pat.weekend[wkIdx % pat.weekend.length]));
             wkIdx++;
