@@ -6580,10 +6580,22 @@ function applyEventChoice(choiceIdx) {
   if (!evtDef) return;
   const choice = evtDef.choices[choiceIdx];
 
+  // 수치 변화 추적용
+  const changeList = [];
+
   // Apply basic stat effects
   for (const k in choice.effects) {
-    if (k === 'funds') { G.funds += choice.effects[k]; statChanges.funds += choice.effects[k]; }
-    else if (STAT_NAMES[k]) applyStat(k, choice.effects[k]);
+    if (k === 'funds') {
+      G.funds += choice.effects[k]; statChanges.funds += choice.effects[k];
+      const v = choice.effects[k];
+      const display = Math.abs(v) >= 10000 ? (v>0?'+':'')+Math.floor(v/10000)+'만원' : (v>0?'+':'')+v+'원';
+      changeList.push({name:'자금', value:display, positive: v>0});
+    }
+    else if (STAT_NAMES[k]) {
+      applyStat(k, choice.effects[k]);
+      const v = choice.effects[k];
+      changeList.push({name:STAT_NAMES[k], value:(v>0?'+':'')+v, positive: (k==='stress'||k==='fatigue'||k==='karma') ? v<0 : v>0});
+    }
   }
 
   // Apply special effects
@@ -6735,6 +6747,35 @@ function applyEventChoice(choiceIdx) {
     }
   }
 
+  // 결과 화면 표시
+  showEventResult(evtDef, choice, changeList);
+}
+
+function showEventResult(evtDef, choice, changeList) {
+  // 주인공 얼굴로 전환
+  document.getElementById('se-face').style.display = 'block';
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-dialog').classList.remove('no-face');
+  document.getElementById('se-speaker').textContent = G.name;
+
+  // 결과 텍스트 구성
+  const resultText = choice.result || choice.text;
+  let changesHtml = '';
+  if (changeList.length > 0) {
+    changesHtml = '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center">' +
+      changeList.map(c => {
+        const color = c.positive ? '#88cc88' : '#cc8888';
+        return `<span style="color:${color};font-size:0.85rem;font-weight:700">${c.name} ${c.value}</span>`;
+      }).join('') + '</div>';
+  }
+
+  document.getElementById('se-text').innerHTML =
+    `<div style="color:#e8d5b5;margin-bottom:4px">${resultText}</div>${changesHtml}`;
+  document.getElementById('se-choices').innerHTML =
+    `<button class="event-choice" onclick="closeEventResult()"><span class="choice-label">확인</span></button>`;
+}
+
+function closeEventResult() {
   document.getElementById('status-event-modal').style.display = 'none';
   currentEventDef = null;
   if (eventCallback) eventCallback();
