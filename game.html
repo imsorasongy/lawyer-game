@@ -3470,8 +3470,8 @@ function checkDateEvent(datingId, datingName, datingFace) {
       ]
     };
   }
-  // 3. 맛있는 와인 (20%)
-  if (Math.random() < 0.20) {
+  // 3. 맛있는 와인 (20%, 임신중 제외)
+  if (!G.isPregnant && Math.random() < 0.20) {
     return {
       id:'dateWine', bg:'배경/식당.webp', face:datingFace,
       dialogues:[
