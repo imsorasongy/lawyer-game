@@ -859,6 +859,7 @@ const G = {
   heesenRelation: 0,
   isSick: false,       // 질병 상태
   sickMonths: 0,       // 질병 지속 개월수
+  debtMonths: 0,       // 자금 마이너스 지속 개월수 (3개월 시 파산)
   overseas_count: 0,   // 해외여행횟수 (히든)
   specialLawyer: [],   // 등록된 전문분야 ID 배열, 최대 3개
   isMarried: false,    // 결혼 상태
@@ -7340,7 +7341,28 @@ function closeSummary(){
   G.totalMonths++;
   if(G.year>10){showEnding();return;}
   if(G.stats.stress>900&&G.stats.fatigue>900){showEndingCustom('번아웃 은퇴','극심한 스트레스와 피로로 인해 더 이상 변호사 생활을 이어갈 수 없게 되었습니다.\n건강을 되찾기 위해 조용히 법조계를 떠났습니다.');return;}
-  if(G.funds<-10000000){showEndingCustom('파산','자금이 바닥나 더 이상 변호사 활동을 유지할 수 없게 되었습니다.\n빚을 갚기 위해 다른 길을 찾아야 했습니다.');return;}
+  // 파산 유예 시스템 (자금 마이너스 3개월 지속 시 파산)
+  if (G.funds < 0) {
+    if (!G.debtMonths) G.debtMonths = 0;
+    G.debtMonths++;
+    if (G.debtMonths >= 3) {
+      showEndingCustom('파산','자금이 3개월 연속 마이너스 상태로, 더 이상 변호사 활동을 유지할 수 없게 되었습니다.\n빚을 갚기 위해 다른 길을 찾아야 했습니다.');
+      return;
+    }
+    const remaining = 3 - G.debtMonths;
+    showMilestonePopup({
+      title:'자금 경고',
+      desc:`자금이 마이너스입니다!\n${remaining}개월 내로 자금을 플러스로 만들지 못하면 파산합니다. (${G.debtMonths}/3개월)`,
+      bg: G.gender==='male'?'배경/방.webp':'배경/방2.webp',
+      face: getPlayerFace(),
+      speaker: G.name,
+      text: G.debtMonths === 1 ? '큰일이다... 빨리 돈을 마련해야 해.' : '이대로는 정말 파산하게 된다... 어떻게든 해야 해!',
+      btnLabel:'확인'
+    }, ()=>{ updateUI(); });
+    return;
+  } else {
+    G.debtMonths = 0;
+  }
   updateUI();
 
   // 사내변호사 승진 체크
