@@ -2118,9 +2118,30 @@ function gamePrompt(msg, onSubmit, bgUrl) {
 function openScheduleOverlay() {
   document.getElementById('stats-panel').style.display = 'none';
   // 이미 이번 달 스케줄이 빌드되어 있으면 재빌드하지 않음 (강제배치 스케줄 보존)
-  if (!G.schedule || G.schedule.length === 0 || G._scheduleBuiltFor !== G.year + '-' + G.month) {
+  const scheduleKey = G.year + '-' + G.month + '-' + G.status + '-' + G.firmId + '-' + (G.isLecturer?'L':'');
+  if (!G.schedule || G.schedule.length === 0 || G._scheduleBuiltFor !== scheduleKey) {
+    // 기존 이벤트 강제배치(forced) 슬롯 보존 (와인대회/미술관/결혼식 등)
+    const forcedSlots = [];
+    if (G.schedule && G.schedule.length > 0) {
+      G.schedule.forEach(ds => {
+        ds.slots.forEach(slot => {
+          if (slot.forced) forcedSlots.push({day:ds.day, time:slot.time, action:slot.action, label:slot.label, slotClass:slot.slotClass});
+        });
+      });
+    }
     buildSchedule();
-    G._scheduleBuiltFor = G.year + '-' + G.month;
+    // 보존된 강제배치 슬롯 복원
+    forcedSlots.forEach(fs => {
+      const ds = G.schedule.find(d => d.day === fs.day);
+      if (ds) {
+        const slot = ds.slots.find(s => s.time === fs.time);
+        if (slot) { slot.action = fs.action; slot.label = fs.label; slot.slotClass = fs.slotClass; slot.locked = true; slot.forced = true; }
+      }
+    });
+    G._scheduleBuiltFor = scheduleKey;
+    // forced 복원 후 다시 렌더링
+    const ay = 2029 + G.year;
+    renderSchedule(new Date(ay, G.month, 0).getDate(), new Date(ay, G.month - 1, 1).getDay());
   } else {
     // 스케줄은 유지하되 렌더링만 다시
     const actualYear = 2029 + G.year;
@@ -2235,7 +2256,7 @@ function buildSchedule() {
     if(candidates.length > 0) {
       const pick = candidates[Math.floor(Math.random()*candidates.length)];
       const slot = G.schedule[pick.di].slots[pick.si];
-      slot.action='broadcast'; slot.label='방송'; slot.slotClass='slot-special'; slot.locked=true;
+      slot.action='broadcast'; slot.label='방송'; slot.slotClass='slot-special'; slot.locked=true; slot.forced=true;
       delete slot.isDaytime;
     }
   }
@@ -2283,12 +2304,13 @@ function buildSchedule() {
           slot.label = label;
           slot.slotClass = slotClass;
           slot.locked = true;
+          slot.forced = true;
         });
       }
     });
   }
 
-  G._scheduleBuiltFor = G.year + '-' + G.month;
+  G._scheduleBuiltFor = G.year + '-' + G.month + '-' + G.status + '-' + G.firmId + '-' + (G.isLecturer?'L':'');
   renderSchedule(daysInMonth, firstDayOfWeek);
 }
 
