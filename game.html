@@ -2666,6 +2666,13 @@ function applyAutoFill(type) {
           if (pick === 'consult') consultRemaining--;
           assignAction(slot, pick);
         } else if (ds.isWeekend || ds.isHoliday || slot.suspendedSlot) {
+          // 첫째주 토요일 → 특별연수
+          if (ds.dow === 6 && ds.day <= 7) {
+            slot.action = 'specialTraining';
+            slot.label = PRO_NAMES[MONTH_SPECIAL[G.month]] + ' 특별연수';
+            slot.slotClass = 'slot-special';
+            return;
+          }
           if (pat.weekend.length > 0) {
             assignAction(slot, filterCopiedAction(pat.weekend[wkIdx % pat.weekend.length]));
             wkIdx++;
@@ -5951,6 +5958,7 @@ function doStartExecution() {
   G.schedule.forEach(ds => {
     ds.slots.forEach(slot => {
       if (slot.locked || slot.forced || !slot.action) return;
+      if (slot.action === 'specialTraining') return;
       if (ds.isWeekend || ds.isHoliday) weekendPattern.push(slot.action);
       else if (slot.time === 'evening') eveningPattern.push(slot.action);
     });
