@@ -7203,7 +7203,7 @@ function finishMonthAfterPregnancy(){
   }
   // 과로사/질병 체크
   const overworked = G.stats.stress + G.stats.fatigue > G.stats.stamina * 2;
-  if(overworked && G.isSick && G.sickMonths >= 2){
+  if(overworked && G.isSick && G.sickMonths >= 2 && Math.random() < 0.15){
     // 과로사 엔딩: 기존 과로사 조건 + 질병 2개월 이상 지속
     document.getElementById('vn-screen').style.display='none';
     const modal = document.getElementById('status-event-modal');
