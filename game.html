@@ -668,7 +668,8 @@ body {
     </div>
   </div>
   <!-- 스탯 요약 패널 -->
-  <div id="ending-stats-panel" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,18,12,0.92);border:2px solid #8b7355;border-radius:12px;padding:28px 36px;max-width:500px;width:90%;opacity:0;transition:opacity 1.5s;display:none">
+  <div id="ending-stats-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('취업.webp');background-size:cover;background-position:center;opacity:0;transition:opacity 2s;display:none"></div>
+  <div id="ending-stats-panel" style="position:absolute;top:50%;left:100px;transform:translateY(-50%);background:rgba(20,18,12,0.92);border:2px solid #8b7355;border-radius:12px;padding:28px 36px;max-width:500px;width:90%;opacity:0;transition:opacity 1.5s;display:none">
     <div id="ending-stats-title" style="text-align:center;font-size:1.3rem;font-weight:700;color:#c9a84c;margin-bottom:16px"></div>
     <div id="ending-stats" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px"></div>
     <div style="display:flex;gap:12px;justify-content:center">
@@ -1715,7 +1716,7 @@ function applyMBTIBonus(mbti) {
 const BGM_NORMAL = ['bgm/bgm1.mp3','bgm/bgm2.mp3','bgm/bgm3.mp3','bgm/bgm4.mp3','bgm/bgm5.mp3','bgm/bgm6.mp3'];
 const BGM_LOVE = ['bgm/lovetheme1.mp3','bgm/lovetheme2.mp3'];
 const BGM_OPENING = 'bgm/opening theme.mp3';
-const BGM_ENDING = 'bgm/trial theme.mp3';
+const BGM_ENDING = 'bgm/ending theme.mp3';
 let bgmAudio = null;
 let bgmStarted = false;
 let bgmCurrentMode = 'normal'; // 'normal','love','opening','ending'
@@ -9787,33 +9788,43 @@ function showEnding(){
 }
 
 function showEndingScreen(ending) {
-  playBGM('ending');
+  // 게임 화면 2초 페이드아웃
+  const gameScreen = document.getElementById('game-screen');
+  gameScreen.style.transition = 'opacity 2s';
+  gameScreen.style.opacity = '0';
 
-  const es = document.getElementById('ending-screen');
-  es.style.display = 'block';
+  setTimeout(() => {
+    gameScreen.style.display = 'none';
+    gameScreen.style.opacity = '1';
+    gameScreen.style.transition = '';
+    playBGM('ending');
 
-  // 1. 마지막 집 배경 블러
-  const bgMap = {oneroom:'원룸.webp', apartment:'아파트.webp', luxury:'최고급아파트.webp'};
-  const homeBg = document.getElementById('ending-home-bg');
-  homeBg.style.backgroundImage = `url('${bgMap[G.housing]||"원룸.webp"}')`;
-  setTimeout(() => { homeBg.style.opacity = '1'; }, 100);
+    const es = document.getElementById('ending-screen');
+    es.style.display = 'block';
 
-  // 1.5. 인트로 팝업
-  const introDiv = document.createElement('div');
-  introDiv.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,18,12,0.9);border:2px solid #8b7355;border-radius:10px;padding:32px 40px;color:#e8d5b5;font-size:1.3rem;line-height:2;text-align:center;z-index:10;opacity:0;transition:opacity 1.5s;white-space:pre-line';
-  introDiv.textContent = '변호사로 벌써 10년을 보냈다.\n앞으로 나는 어떤 길을 걸어가게 될까.';
-  es.appendChild(introDiv);
-  setTimeout(() => { introDiv.style.opacity = '1'; }, 1500);
+    // 1. 마지막 집 배경 블러
+    const bgMap = {oneroom:'원룸.webp', apartment:'아파트.webp', luxury:'최고급아파트.webp'};
+    const homeBg = document.getElementById('ending-home-bg');
+    homeBg.style.backgroundImage = `url('${bgMap[G.housing]||"원룸.webp"}')`;
+    setTimeout(() => { homeBg.style.opacity = '1'; }, 100);
 
-  // 클릭하면 인트로 페이드아웃 → 엔딩 VN으로
-  introDiv.style.cursor = 'pointer';
-  introDiv.onclick = function() {
-    introDiv.style.opacity = '0';
-    setTimeout(() => {
-      introDiv.remove();
-      showEndingVN(ending);
-    }, 1500);
-  };
+    // 1.5. 인트로 팝업
+    const introDiv = document.createElement('div');
+    introDiv.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,18,12,0.9);border:2px solid #8b7355;border-radius:10px;padding:32px 40px;color:#e8d5b5;font-size:1.3rem;line-height:2;text-align:center;z-index:10;opacity:0;transition:opacity 1.5s;white-space:pre-line';
+    introDiv.textContent = '변호사로 벌써 10년을 보냈다.\n앞으로 나는 어떤 길을 걸어가게 될까.';
+    es.appendChild(introDiv);
+    setTimeout(() => { introDiv.style.opacity = '1'; }, 1500);
+
+    // 클릭하면 인트로 페이드아웃 → 엔딩 VN으로
+    introDiv.style.cursor = 'pointer';
+    introDiv.onclick = function() {
+      introDiv.style.opacity = '0';
+      setTimeout(() => {
+        introDiv.remove();
+        showEndingVN(ending);
+      }, 1500);
+    };
+  }, 2000);
 }
 
 function showEndingVN(ending) {
@@ -9843,41 +9854,114 @@ function showEndingVN(ending) {
       }
     }
     if (phase === 2) {
-      // VN 윈도우 페이드아웃
+      // VN 윈도우 페이드아웃 + 집 배경 페이드아웃 → 크레딧 시퀀스
       vnEl.style.opacity = '0';
-      // 스탯 패널 표시
-      const statsPanel = document.getElementById('ending-stats-panel');
-      const wr = (G.wins+G.losses)>0 ? Math.round(G.wins/(G.wins+G.losses)*100)+'%' : '-';
-      document.getElementById('ending-stats-title').textContent = ending.title + gradeLabel;
-      const s = G.stats;
-      document.getElementById('ending-stats').innerHTML = [
-        {label:'법률지식', value:Math.floor(s.lawKnowledge)},
-        {label:'변론능력', value:Math.floor(s.debate)},
-        {label:'영업력', value:Math.floor(s.sales)},
-        {label:'매력', value:Math.floor(s.charm)},
-        {label:'관찰력', value:Math.floor(s.observation)},
-        {label:'체력', value:Math.floor(s.stamina)},
-        {label:'멘탈', value:Math.floor(s.mental)},
-        {label:'도덕성', value:Math.floor(s.morality)},
-        {label:'사교성', value:Math.floor(s.sociability)},
-        {label:'명성', value:Math.floor(s.reputation)},
-        {label:'스트레스', value:Math.floor(s.stress)},
-        {label:'피로도', value:Math.floor(s.fatigue)},
-        {label:'업보', value:Math.floor(s.karma)},
-        {label:'자금', value:G.funds.toLocaleString()+'원'},
-        {label:'승소율', value:wr},
-        {label:'총 승소', value:G.wins+'건'},
-        {label:'총 패소', value:G.losses+'건'},
-        {label:'경력', value:G.totalMonths+'개월'},
-        {label:'결혼', value:G.isMarried?'기혼':'미혼'},
-        {label:'자녀', value:G.children&&G.children.length>0?G.children.map(c=>c.name).join(', '):'없음'},
-      ].map(st=>`<div style="text-align:center;min-width:70px"><div style="font-size:0.68rem;color:#8899bb">${st.label}</div><div style="font-size:0.95rem;font-weight:700;color:#e0d0a0">${st.value}</div></div>`).join('');
-      setTimeout(() => {
-        statsPanel.style.display = 'block';
-        setTimeout(() => { statsPanel.style.opacity = '1'; }, 50);
-      }, 1500);
+      const homeBg = document.getElementById('ending-home-bg');
+      homeBg.style.transition = 'opacity 1.5s';
+      homeBg.style.opacity = '0';
+      window._endingNext = null;
+      setTimeout(() => { showEndingCredits(ending, gradeLabel); }, 2000);
     }
   };
+}
+
+function showEndingCredits(ending, gradeLabel) {
+  const es = document.getElementById('ending-screen');
+  const credits = [
+    {bg:'졸업.webp', title:'Opening', body:'Midnight Bonus Stage'},
+    {bg:'배경/상담.webp', title:'Main BGM', body:'Midnight Bonus Stage(inst.)\nNight Urban Drive\n일과후\n로펌의 오후\nAfter Lawschool'},
+    {bg:'배경/결혼식.webp', title:'Love Theme', body:'사랑이 다가온 날\n우리 계속'},
+    {bg:'배경/유럽.webp', title:'Ending', body:'Gaming Love'},
+    {bg:'배경/의회.webp', title:'기획&제작', body:'박대영'},
+    {bg:'배경/재판.webp', title:'', body:'벼넥시트 - 변호사 생존기 -'},
+  ];
+
+  // 크레딧용 오버레이 생성
+  const creditBg = document.createElement('div');
+  creditBg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;opacity:0;transition:opacity 2s;z-index:20';
+  es.appendChild(creditBg);
+
+  const creditText = document.createElement('div');
+  creditText.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;white-space:pre-line;text-shadow:0 2px 8px rgba(0,0,0,0.8);opacity:0;transition:opacity 2s;z-index:21;cursor:pointer';
+  es.appendChild(creditText);
+
+  let idx = 0;
+  let creditPhase = 0; // 0=페이드인 대기, 1=표시 중(클릭→페이드아웃), 2=페이드아웃 중
+
+  function renderCreditText(c) {
+    let html = '';
+    if (c.title) {
+      html += `<div style="color:#888888;font-size:1.8rem;font-weight:700;margin-bottom:0.8em">${c.title}</div>`;
+    }
+    html += `<div style="color:#ffffff;font-size:2.7rem;font-weight:700;line-height:1.8">${c.body.replace(/\n/g,'<br>')}</div>`;
+    creditText.innerHTML = html;
+  }
+
+  function showCredit() {
+    if (idx >= credits.length) {
+      creditBg.remove();
+      creditText.remove();
+      showEndingStats(ending, gradeLabel);
+      return;
+    }
+    const c = credits[idx];
+    creditBg.style.backgroundImage = `url('${c.bg}')`;
+    renderCreditText(c);
+    creditPhase = 1;
+    setTimeout(() => { creditBg.style.opacity = '1'; creditText.style.opacity = '1'; }, 100);
+  }
+
+  function onCreditClick() {
+    if (creditPhase === 1) {
+      creditPhase = 2;
+      creditBg.style.opacity = '0';
+      creditText.style.opacity = '0';
+      setTimeout(() => { idx++; showCredit(); }, 2000);
+    }
+  }
+  creditText.onclick = onCreditClick;
+  creditBg.onclick = onCreditClick;
+  creditBg.style.cursor = 'pointer';
+
+  showCredit();
+}
+
+function showEndingStats(ending, gradeLabel) {
+  const statsPanel = document.getElementById('ending-stats-panel');
+  const wr = (G.wins+G.losses)>0 ? Math.round(G.wins/(G.wins+G.losses)*100)+'%' : '-';
+  document.getElementById('ending-stats-title').textContent = ending.title + gradeLabel;
+  const s = G.stats;
+  document.getElementById('ending-stats').innerHTML = [
+    {label:'법률지식', value:Math.floor(s.lawKnowledge)},
+    {label:'변론능력', value:Math.floor(s.debate)},
+    {label:'영업력', value:Math.floor(s.sales)},
+    {label:'매력', value:Math.floor(s.charm)},
+    {label:'관찰력', value:Math.floor(s.observation)},
+    {label:'체력', value:Math.floor(s.stamina)},
+    {label:'멘탈', value:Math.floor(s.mental)},
+    {label:'도덕성', value:Math.floor(s.morality)},
+    {label:'사교성', value:Math.floor(s.sociability)},
+    {label:'명성', value:Math.floor(s.reputation)},
+    {label:'스트레스', value:Math.floor(s.stress)},
+    {label:'피로도', value:Math.floor(s.fatigue)},
+    {label:'업보', value:Math.floor(s.karma)},
+    {label:'자금', value:G.funds.toLocaleString()+'원'},
+    {label:'승소율', value:wr},
+    {label:'총 승소', value:G.wins+'건'},
+    {label:'총 패소', value:G.losses+'건'},
+    {label:'경력', value:G.totalMonths+'개월'},
+    {label:'결혼', value:G.isMarried?'기혼':'미혼'},
+    {label:'자녀', value:G.children&&G.children.length>0?G.children.map(c=>c.name).join(', '):'없음'},
+  ].map(st=>`<div style="text-align:center;min-width:70px"><div style="font-size:0.68rem;color:#8899bb">${st.label}</div><div style="font-size:0.95rem;font-weight:700;color:#e0d0a0">${st.value}</div></div>`).join('');
+  // 배경 페이드인
+  const statsBg = document.getElementById('ending-stats-bg');
+  statsBg.style.display = 'block';
+  setTimeout(() => { statsBg.style.opacity = '1'; }, 100);
+  // 스탯 패널 페이드인
+  setTimeout(() => {
+    statsPanel.style.display = 'block';
+    setTimeout(() => { statsPanel.style.opacity = '1'; }, 50);
+  }, 1500);
 }
 
 function showWeddingScene(scene, cb) {
