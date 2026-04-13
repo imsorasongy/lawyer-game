@@ -9105,6 +9105,7 @@ function hireAssoc(idx) {
   if(!a) return;
   G.hiredAssocs.push({...a, cases:[]});
   G.monthHireCount++;
+  window._hireCandidates.assocs.splice(idx, 1);
   showToast(`${a.name} 어쏘변호사를 채용했습니다!`);
   updateUI(); openHireMenu();
 }
@@ -9113,6 +9114,7 @@ function hireStaff(idx) {
   if(!s) return;
   G.hiredStaff.push({...s});
   G.monthHireCount++;
+  window._hireCandidates.staff.splice(idx, 1);
   showToast(`${s.name} 직원을 채용했습니다!`);
   updateUI(); openHireMenu();
 }
