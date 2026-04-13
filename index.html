@@ -2679,6 +2679,7 @@ function filterCopiedAction(actionId) {
   if (actionId === 'phdThesis' && G.phdCompleted) return 'homeRest';
   if (actionId === 'golf' && !(G.status==='partner'||G.status==='senior'||G.status==='solo'||G.status==='suspended')) return 'homeRest';
   if (actionId === 'drive' && !G.currentCar) return 'homeRest';
+  if (actionId === 'hospital' && !G.isSick) return 'homeRest';
   return actionId;
 }
 
@@ -9891,9 +9892,9 @@ function showEndingCredits(ending, gradeLabel) {
   function renderCreditText(c) {
     let html = '';
     if (c.title) {
-      html += `<div style="color:#888888;font-size:1.8rem;font-weight:700;margin-bottom:0.8em">${c.title}</div>`;
+      html += `<div style="color:#e0c878;font-size:1.8rem;font-weight:700;margin-bottom:0.8em">${c.title}</div>`;
     }
-    html += `<div style="color:#ffffff;font-size:2.7rem;font-weight:700;line-height:1.8">${c.body.replace(/\n/g,'<br>')}</div>`;
+    html += `<div style="color:#e8d5b5;font-size:2.7rem;font-weight:700;line-height:1.8">${c.body.replace(/\n/g,'<br>')}</div>`;
     creditText.innerHTML = html;
   }
 
