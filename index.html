@@ -1512,7 +1512,7 @@ function getActionEvents(actionId) {
             {speaker:'{name}', text:'아... 재판 직전인데 옷이... 급하게 세탁소에 맡겨야겠다.'}
           ],
           choices:[
-            {text:'(세탁비 10만원 지출)', effects:{funds:-100000}, noChoice:true}
+            {text:'', effects:{funds:-100000}, noChoice:true}
           ]
         },
         // 법정 모욕
@@ -1730,7 +1730,7 @@ function getActionEvents(actionId) {
             {speaker:'{name}', text:'앗, 차가 미끄러졌다... 접촉사고가 나버렸네.'}
           ],
           choices:[
-            {text:'(수리비 300만원 지출)', effects:{funds:-3000000,stress:10,stamina:-10}, noChoice:true}
+            {text:'', effects:{funds:-3000000,stress:10,stamina:-10}, noChoice:true}
           ]
         }
       ];
@@ -1763,7 +1763,7 @@ function getActionEvents(actionId) {
             {speaker:'{name}', text:'아이가 또 깼네... 결국 한참을 달래느라 잠을 설쳤다.'}
           ],
           choices:[
-            {text:'(잠을 설쳤다)', effects:{fatigue:10,stress:5}, noChoice:true}
+            {text:'', effects:{fatigue:10,stress:5}, noChoice:true}
           ]
         },
         { id:'pregnancy', prob:0.01,
@@ -4229,7 +4229,6 @@ function applyDateEventChoice(idx) {
 function finishDateEvent() {
   document.getElementById('status-event-modal').style.display = 'none';
   currentDateEvent = null;
-  playBGM('normal');
   // 결혼 조건 체크
   if (checkMarriageCondition()) {
     showMarriageEvent(() => { if (dateEventCallback) dateEventCallback(); });
@@ -6413,7 +6412,7 @@ function buildScene(slot) {
     return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,result:'info',resultLabel:'속행',text:t(sd.cont),changes:[]};
   }
 
-  // 메인스토리 조사
+  // 메인스토리 조사 (증거 발견은 지연 실행 — 빌드 시에는 스탯만 적용, 증거는 VN 재생 시 결정)
   if (/^investigate\d$/.test(slot.action)) {
     const caseNum = parseInt(slot.action.replace('investigate',''));
     const mc = getMainCaseObj(caseNum);
@@ -6425,42 +6424,10 @@ function buildScene(slot) {
     const prep = 3 + Math.floor(G.stats.observation / 200);
     mc.preparation = Math.min(100, mc.preparation + prep);
     changes.push(`준비도 +${prep}`);
-    if (caseNum >= 3) {
-      // 사건3+: 조사로 증거 발견 (phase에 따라 풀 결정)
-      if (mc.phase === undefined || mc.phase === null) mc.phase = (mc.month < 5) ? 1 : 2; // 방어코드
-      const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
-      const pool = mc.phase===1 ? evData.phase1 : evData.phase2;
-      const notFound = pool.filter(e => !mc.foundEvidence.includes(e.id));
-      let text = '아직 결정적인 자료를 찾지 못했다. 더 조사해야 한다.';
-      if (notFound.length > 0) {
-        const chance = 30 + G.stats.observation * 0.03;
-        if (Math.random()*100 < chance) {
-          const found = notFound[Math.floor(Math.random()*notFound.length)];
-          mc.foundEvidence.push(found.id);
-          text = found.desc;
-          changes.push(`증거 발견: ${found.name}`);
-        }
-      }
-      const bgMap = {3:'배경/철새도래지.webp', 4:'배경/군청.webp'};
-      return {bg:bgMap[caseNum]||'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'조사',text,changes};
-    }
-    // 사건1~2: 기존 방식
-    const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
-    const notFound = evData.investigate.filter(e => !mc.investigateEvidence.includes(e.id));
-    let text = '아직 결정적인 단서를 찾지 못했다. 더 조사해야 한다.';
-    if (notFound.length > 0) {
-      const chance = 30 + G.stats.observation * 0.03;
-      if (Math.random()*100 < chance) {
-        const found = notFound[Math.floor(Math.random()*notFound.length)];
-        mc.investigateEvidence.push(found.id);
-        text = found.desc;
-        changes.push(`증거 발견: ${found.name}`);
-      }
-    }
-    const bg = caseNum===1 ? '배경/야근.webp' : '배경/범행현장.webp';
-    return {bg,face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'조사',text,changes};
+    const bgMap = {1:'배경/야근.webp', 2:'배경/범행현장.webp', 3:'배경/철새도래지.webp', 4:'배경/군청.webp'};
+    return {type:'lazyInvestigate', caseNum, bg:bgMap[caseNum]||'배경/서면.webp', face:getPlayerFace(), speaker:G.name, date:dateStr, result:'success', resultLabel:'조사', changes};
   }
-  // 메인스토리 검토
+  // 메인스토리 검토 (증거 해석은 지연 실행)
   if (/^review\d$/.test(slot.action)) {
     const caseNum = parseInt(slot.action.replace('review',''));
     const mc = getMainCaseObj(caseNum);
@@ -6471,38 +6438,7 @@ function buildScene(slot) {
     const prep = 4 + Math.floor(G.stats.lawKnowledge / 200);
     mc.preparation = Math.min(100, mc.preparation + prep);
     changes.push(`준비도 +${prep}`);
-    if (caseNum >= 3) {
-      // 사건3+: 검토로 이미 발견한 증거의 의미 해석
-      const unreviewd = mc.foundEvidence.filter(id => !mc.reviewedEvidence.includes(id));
-      let text = mc.foundEvidence.length===0 ? '분석할 자료가 없다. 먼저 조사를 해야 한다.' : '현재까지 찾은 증거는 모두 분석했다. 새로운 증거를 찾아야 한다.';
-      if (unreviewd.length > 0) {
-        const chance = 30 + G.stats.lawKnowledge * 0.03;
-        if (Math.random()*100 < chance) {
-          const targetId = unreviewd[Math.floor(Math.random()*unreviewd.length)];
-          mc.reviewedEvidence.push(targetId);
-          const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
-          const allPool = [...(evData.phase1||[]), ...(evData.phase2||[])];
-          const ev = allPool.find(e=>e.id===targetId);
-          text = ev ? ev.reviewDesc : '증거의 의미를 파악했다.';
-          changes.push(`증거 분석 완료: ${ev?ev.name:targetId}`);
-        }
-      }
-      return {bg:'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'검토',text,changes};
-    }
-    // 사건1~2: 기존 방식
-    const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
-    const notFound = evData.review.filter(e => !mc.reviewEvidence.includes(e.id));
-    let text = '판례와 기록을 더 분석해봐야 한다.';
-    if (notFound.length > 0) {
-      const chance = 30 + G.stats.lawKnowledge * 0.03;
-      if (Math.random()*100 < chance) {
-        const found = notFound[Math.floor(Math.random()*notFound.length)];
-        mc.reviewEvidence.push(found.id);
-        text = found.desc;
-        changes.push(`증거 발견: ${found.name}`);
-      }
-    }
-    return {bg:'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'검토',text,changes};
+    return {type:'lazyReview', caseNum, bg:'배경/서면.webp', face:getPlayerFace(), speaker:G.name, date:dateStr, result:'success', resultLabel:'검토', changes};
   }
   // 메인스토리 재판
   if (/^mainTrial\d$/.test(slot.action)) {
@@ -7002,6 +6938,84 @@ function showVNScene(idx) {
     return;
   }
 
+  // Handle lazy investigate (증거 발견을 VN 재생 시점에 실행)
+  if (scene.type === 'lazyInvestigate') {
+    scene.type = null; // 처리 완료 표시 (일반 VN 씬으로 전환)
+    scene.text = '사건 조사를 진행했다.'; // 기본값
+    const cn = scene.caseNum;
+    const mc = getMainCaseObj(cn);
+    if (mc) {
+      if (cn >= 3) {
+        if (mc.phase === undefined || mc.phase === null) mc.phase = (mc.month < 5) ? 1 : 2;
+        const evData = MAIN_STORY_EVIDENCE['case'+cn];
+        const pool = mc.phase===1 ? evData.phase1 : evData.phase2;
+        const notFound = pool.filter(e => !mc.foundEvidence.includes(e.id));
+        scene.text = '아직 결정적인 자료를 찾지 못했다. 더 조사해야 한다.';
+        if (notFound.length > 0) {
+          const chance = 30 + G.stats.observation * 0.03;
+          if (Math.random()*100 < chance) {
+            const found = notFound[Math.floor(Math.random()*notFound.length)];
+            mc.foundEvidence.push(found.id);
+            scene.text = found.desc;
+            if (scene.changes) scene.changes.push(`증거 발견: ${found.name}`);
+          }
+        }
+      } else {
+        const evData = MAIN_STORY_EVIDENCE[cn===1?'case1':'case2'];
+        const notFound = evData.investigate.filter(e => !mc.investigateEvidence.includes(e.id));
+        scene.text = '아직 결정적인 단서를 찾지 못했다. 더 조사해야 한다.';
+        if (notFound.length > 0) {
+          const chance = 30 + G.stats.observation * 0.03;
+          if (Math.random()*100 < chance) {
+            const found = notFound[Math.floor(Math.random()*notFound.length)];
+            mc.investigateEvidence.push(found.id);
+            scene.text = found.desc;
+            if (scene.changes) scene.changes.push(`증거 발견: ${found.name}`);
+          }
+        }
+      }
+    }
+  }
+
+  // Handle lazy review (증거 의미 해석을 VN 재생 시점에 실행)
+  if (scene.type === 'lazyReview') {
+    scene.type = null; // 처리 완료 표시
+    scene.text = '사건 검토를 진행했다.'; // 기본값
+    const cn = scene.caseNum;
+    const mc = getMainCaseObj(cn);
+    if (mc) {
+      if (cn >= 3) {
+        const unreviewd = mc.foundEvidence.filter(id => !mc.reviewedEvidence.includes(id));
+        scene.text = mc.foundEvidence.length===0 ? '분석할 자료가 없다. 먼저 조사를 해야 한다.' : '현재까지 찾은 증거는 모두 분석했다. 새로운 증거를 찾아야 한다.';
+        if (unreviewd.length > 0) {
+          const chance = 30 + G.stats.lawKnowledge * 0.03;
+          if (Math.random()*100 < chance) {
+            const targetId = unreviewd[Math.floor(Math.random()*unreviewd.length)];
+            mc.reviewedEvidence.push(targetId);
+            const evData = MAIN_STORY_EVIDENCE['case'+cn];
+            const allPool = [...(evData.phase1||[]), ...(evData.phase2||[])];
+            const ev = allPool.find(e=>e.id===targetId);
+            scene.text = ev ? ev.reviewDesc : '증거의 의미를 파악했다.';
+            if (scene.changes) scene.changes.push(`증거 분석 완료: ${ev?ev.name:targetId}`);
+          }
+        }
+      } else {
+        const evData = MAIN_STORY_EVIDENCE[cn===1?'case1':'case2'];
+        const notFound = evData.review.filter(e => !mc.reviewEvidence.includes(e.id));
+        scene.text = '판례와 기록을 더 분석해봐야 한다.';
+        if (notFound.length > 0) {
+          const chance = 30 + G.stats.lawKnowledge * 0.03;
+          if (Math.random()*100 < chance) {
+            const found = notFound[Math.floor(Math.random()*notFound.length)];
+            mc.reviewEvidence.push(found.id);
+            scene.text = found.desc;
+            if (scene.changes) scene.changes.push(`증거 발견: ${found.name}`);
+          }
+        }
+      }
+    }
+  }
+
   // Handle legacy event type (backward compat)
   if (scene.type === 'event') {
     showVNScene(idx + 1);
@@ -7187,6 +7201,11 @@ function showEventDialogue() {
     document.getElementById('se-choices').innerHTML =
       `<button class="event-choice" onclick="showEventDialogue()">▼ 계속</button>`;
   } else {
+    // noChoice면 선택지 화면 없이 바로 적용
+    if (evtDef.choices.length === 1 && evtDef.choices[0].noChoice) {
+      applyEventChoice(0);
+      return;
+    }
     // Show choices (prompt 있으면 표시)
     showEventChoices();
   }
@@ -8019,6 +8038,19 @@ function closeSummary(){
     return;
   } else {
     G.debtMonths = 0;
+  }
+  // 질병 경고 (매월 초)
+  if (G.isSick) {
+    showMilestonePopup({
+      title:'질병 경고',
+      desc:'현재 병에 걸린 상태입니다.\n병원에 가서 치료를 해야 합니다.',
+      bg: '배경/병원.webp',
+      face: getPlayerFace(),
+      speaker: G.name,
+      text: '몸이 좋지 않다... 빨리 병원에 가야겠어.',
+      btnLabel:'확인'
+    }, ()=>{ updateUI(); });
+    return;
   }
   updateUI();
 
@@ -10565,7 +10597,7 @@ const MAIN_TRIAL_2 = [
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'아니, 이 증거에 대해 부동의하신다고 하더라도 본 재판부는 이미 결론을 내렸습니다.'},
       {face:'player', speaker:'{name}', text:'!!'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'선고하겠습니다. 피고인 박정호는 무죄.'},
-      {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'(오열) 여보... 드디어... 당신이 아니라는 걸 다들 알게 됐어...'},
+      {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'여보... 드디어... 당신이 아니라는 걸 다들 알게 됐어...'},
       {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 감사합니다. 정말... 감사합니다.'},
       {face:'player', speaker:'{name}', text:'박정호 씨, 이제 집으로 돌아가세요.'},
       {face:'player', speaker:'{name}', text:'(무죄를 밝혔다. 하지만... CCTV 삭제, 지문 조작... 이건 개인이 할 수 있는 일이 아니다.)'},
@@ -10738,7 +10770,8 @@ const MAIN_TRIAL_3 = [
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'............'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'본 재판부는 충분히 심리하였으므로 결심하겠습니다.\n선고합니다.\n도라군의 개발사업시행승인처분을 취소합니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'환경영향평가의 절차적·실질적 하자가 인정되고, 그 외 중대한 위법사유가 확인되었습니다.\n아울러 오늘 법정에서 제기된 살인 관련 의혹에 대해서는 검찰에 수사를 촉구하겠습니다.'},
-      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'(눈물) 변호사님... 해냈습니다... 정말로 해냈습니다...\n이태준이... 이태준이 목숨 걸고 지키려 한 이 땅을... 드디어 지켜냈습니다.'},
+      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 해냈습니다... 정말로 해냈습니다...'},
+      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'이태준이... 이태준이 목숨 걸고 지키려 한 이 땅을... 드디어 지켜냈습니다.'},
       {face:'player', speaker:'{name}', text:'박정호 씨, 축하합니다. 이 개발사업은 이제 끝났습니다.'},
       {face:'player', speaker:'{name}', text:'(개발사업은 취소되었고, 장현우의 비리와 살인 의혹도 세상에 드러났다.)'},
       {face:'player', speaker:'{name}', text:'(하지만... 장현우 혼자의 힘으로 이 모든 것을 할 수 있었을까?)'},
@@ -11008,7 +11041,7 @@ const MAIN_TRIAL_4 = [
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 장현우 살해 혐의로 긴급체포합니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'당신은 진술하지 아니할 권리가 있고, 변호인은 이미 선임하셨네요?'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'{name} 변호사님.. 수고하셨습니다.'},
-      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'(눈물) 변호사님... 형의 억울함을 풀어주셔서... 감사합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'변호사님... 형의 억울함을 풀어주셔서... 감사합니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'형은 정말 나쁜 사람이었을지 모르지만, 우리 가족에게는 그러지 않았어요.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'모두가 먹고 살기 힘들던 시절 형이 법조인이 되어서 번 돈으로 우리를 부양하지 않았더라면, 우리는 지금 이렇게 살지 못했을 겁니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'누군가에게는 나쁜 사람이, 우리에게는 좋은 사람이기도 했어요.'},
