@@ -4071,6 +4071,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
   if (G.isMarried && (G.romance.affection[datingId]||0) >= 100 && Math.random() < 0.10) {
     const unownedItems = SHOP_ITEMS.filter(i => {
       if (i.gender && i.gender !== G.gender) return false;
+      if (i.category === 'car') return false; // 차량은 선물 제외
       if (getItemCount(i.id) >= (i.max||1)) return false;
       return true;
     });
@@ -11784,9 +11785,10 @@ function showBirthdayEvent(cb) {
   const datingName = datingTarget.name;
   const datingFace = datingTarget.face;
 
-  // 선물 선택: 소유하지 않은 쇼핑 아이템 중 랜덤
+  // 선물 선택: 소유하지 않은 쇼핑 아이템 중 랜덤 (차량 제외)
   const unownedItems = SHOP_ITEMS.filter(i => {
     if (i.gender && i.gender !== G.gender) return false;
+    if (i.category === 'car') return false; // 차량은 선물 제외
     if (getItemCount(i.id) >= (i.max||1)) return false;
     return true;
   });
