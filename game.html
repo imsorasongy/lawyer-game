@@ -9053,7 +9053,7 @@ function openInvestMenu() {
       <div class="effects">투자 ${f(iv.commodity.amount)} → 현재 ${f(iv.commodity.currentValue)} (${pct(iv.commodity.currentValue,iv.commodity.amount)})</div></div>
       <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCommodity()">판매</div></div>`;
   } else {
-    html+=`<div class="action-option" onclick="investInput('commodity')"><div><div class="name">🥇 현물 투자</div><div class="effects">1000만~10억 | 매월 -30%~+60% 변동</div></div></div>`;
+    html+=`<div class="action-option" onclick="investInput('commodity')"><div><div class="name">🥇 현물 투자</div><div class="effects">1000만~10억 | 매월 -40%~+60% 변동</div></div></div>`;
   }
 
   // 벤처
@@ -9174,8 +9174,8 @@ function processInvestmentsMonthly(){
   if(iv.domesticStock){const rate=Math.random()<0.5?-Math.random()*0.3:Math.random()*0.5;iv.domesticStock.currentValue=Math.max(0,Math.floor(iv.domesticStock.currentValue*(1+rate)));}
   // 해외주식 변동 (50% 하락 0~-15%, 50% 상승 0~+30%)
   if(iv.foreignStock){const rate=Math.random()<0.5?-Math.random()*0.15:Math.random()*0.3;iv.foreignStock.currentValue=Math.max(0,Math.floor(iv.foreignStock.currentValue*(1+rate)));}
-  // 현물 변동 (50% 하락 0~-30%, 50% 상승 0~+60%)
-  if(iv.commodity){const rate=Math.random()<0.5?-Math.random()*0.3:Math.random()*0.6;iv.commodity.currentValue=Math.max(0,Math.floor(iv.commodity.currentValue*(1+rate)));}
+  // 현물 변동 (50% 하락 0~-40%, 50% 상승 0~+60%)
+  if(iv.commodity){const rate=Math.random()<0.5?-Math.random()*0.4:Math.random()*0.6;iv.commodity.currentValue=Math.max(0,Math.floor(iv.commodity.currentValue*(1+rate)));}
   // 지식재산권 수익
   if(iv.ip){const income=Math.floor(iv.ip.amount*rr(0.001,0.02));G.funds+=income;}
   // 부동산 보유기간
