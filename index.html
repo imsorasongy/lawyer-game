@@ -9131,7 +9131,7 @@ function confirmInvest(type){
 function matureDeposit(){const d=G.invest.deposit;G.funds+=Math.floor(d.amount*1.035);G.invest.deposit=null;showToast('예금 만기해지!');updateUI();openInvestMenu();}
 function matureSavings(){const s=G.invest.savings;G.funds+=Math.floor(s.totalPaid*1.025);G.invest.savings=null;showToast('적금 만기해지!');updateUI();openInvestMenu();}
 function matureFund(){const d=G.invest.fund;const rate=rr(-0.1,0.2);G.funds+=Math.floor(d.amount*(1+rate));G.invest.fund=null;showToast(`펀드 만기해지! (${(rate*100).toFixed(1)}%)`);updateUI();openInvestMenu();}
-function matureVenture(){const v=G.invest.venture;const rate=rr(-0.9,3.0);G.funds+=Math.max(0,Math.floor(v.amount*(1+rate)));G.invest.venture=null;showToast(`벤처 투자회수! (${(rate*100).toFixed(1)}%)`);updateUI();openInvestMenu();}
+function matureVenture(){const v=G.invest.venture;const rate=Math.random()<0.5?-Math.random()*0.9:Math.random()*3.0;G.funds+=Math.max(0,Math.floor(v.amount*(1+rate)));G.invest.venture=null;showToast(`벤처 투자회수! (${(rate*100).toFixed(1)}%)`);updateUI();openInvestMenu();}
 
 // 즉시 판매
 function sellCoin(i){const c=G.invest.coins.splice(i,1)[0];G.funds+=Math.max(0,Math.floor(c.currentValue));showToast(`코인 판매! ${f(Math.floor(c.currentValue))}`);updateUI();openInvestMenu();}
@@ -9168,13 +9168,14 @@ function processInvestmentsMonthly(){
   if(iv.savings){iv.savings.monthsLeft--;if(iv.savings.monthsLeft>0){G.funds-=iv.savings.monthly;iv.savings.totalPaid+=iv.savings.monthly;}}
   if(iv.fund)iv.fund.monthsLeft--;
   if(iv.venture)iv.venture.monthsLeft--;
-  // 코인 변동
-  iv.coins.forEach(c=>{c.currentValue=Math.max(0,Math.floor(c.currentValue*(1+rr(-0.8,2.0))));});
-  // 주식 변동
-  if(iv.domesticStock)iv.domesticStock.currentValue=Math.max(0,Math.floor(iv.domesticStock.currentValue*(1+rr(-0.3,0.5))));
-  if(iv.foreignStock)iv.foreignStock.currentValue=Math.max(0,Math.floor(iv.foreignStock.currentValue*(1+rr(-0.15,0.3))));
-  // 현물 변동
-  if(iv.commodity)iv.commodity.currentValue=Math.max(0,Math.floor(iv.commodity.currentValue*(1+rr(-0.3,0.6))));
+  // 코인 변동 (50% 하락 0~-80%, 50% 상승 0~+200%)
+  iv.coins.forEach(c=>{const rate=Math.random()<0.5?-Math.random()*0.8:Math.random()*2.0;c.currentValue=Math.max(0,Math.floor(c.currentValue*(1+rate)));});
+  // 국내주식 변동 (50% 하락 0~-30%, 50% 상승 0~+50%)
+  if(iv.domesticStock){const rate=Math.random()<0.5?-Math.random()*0.3:Math.random()*0.5;iv.domesticStock.currentValue=Math.max(0,Math.floor(iv.domesticStock.currentValue*(1+rate)));}
+  // 해외주식 변동 (50% 하락 0~-15%, 50% 상승 0~+30%)
+  if(iv.foreignStock){const rate=Math.random()<0.5?-Math.random()*0.15:Math.random()*0.3;iv.foreignStock.currentValue=Math.max(0,Math.floor(iv.foreignStock.currentValue*(1+rate)));}
+  // 현물 변동 (50% 하락 0~-30%, 50% 상승 0~+60%)
+  if(iv.commodity){const rate=Math.random()<0.5?-Math.random()*0.3:Math.random()*0.6;iv.commodity.currentValue=Math.max(0,Math.floor(iv.commodity.currentValue*(1+rate)));}
   // 지식재산권 수익
   if(iv.ip){const income=Math.floor(iv.ip.amount*rr(0.001,0.02));G.funds+=income;}
   // 부동산 보유기간
