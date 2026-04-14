@@ -607,6 +607,7 @@ body {
     <button class="item-btn" onclick="openFridge()"><span class="item-icon">&#127861;</span>냉장고</button>
     <button class="item-btn" id="office-btn" onclick="handleOfficeClick()"><span class="item-icon">&#127970;</span>사무실</button>
     <button class="item-btn" onclick="openInvestMenu()"><span class="item-icon">&#128176;</span>재테크</button>
+    <button class="item-btn" id="evidence-case-btn" style="display:none" onclick="openEvidenceCase()"><span class="item-icon">&#128270;</span>증거함</button>
   </div>
 
   <!-- Stats Panel (slide from left) -->
@@ -753,6 +754,15 @@ body {
   </div>
 </div>
 
+<!-- Evidence Case Modal -->
+<div id="evidence-case-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:150;align-items:center;justify-content:center" onclick="this.style.display='none'">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:85vh;overflow-y:auto">
+    <button class="modal-close" onclick="document.getElementById('evidence-case-modal').style.display='none'">&times;</button>
+    <div class="modal-title" id="evidence-case-title">증거 서류함</div>
+    <div id="evidence-case-body"></div>
+  </div>
+</div>
+
 <!-- Office Name Input Modal -->
 <div id="office-name-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center">
   <div class="modal-content" style="max-width:380px;text-align:center">
@@ -801,6 +811,7 @@ const G = {
   caseCards: [],             // 진행중 사건카드 배열
   yearCaseSeq: 0,            // 해당 연도 사건 순번
   monthReviewCount: 0,       // 이번달 사건 검토 횟수 (최대 3)
+  monthTossCount: 0,         // 이번달 토스 건수
   // 컴퓨터/영업
   snsStarted: false,
   snsFollowers: 0,
@@ -2179,6 +2190,12 @@ function updateUI() {
     const canUseOffice = G.status==='senior'||G.status==='solo'||G.status==='suspended';
     offBtn.style.opacity = canUseOffice ? '1' : '0.4';
     offBtn.style.pointerEvents = canUseOffice ? 'auto' : 'auto'; // 항상 클릭 가능 (handleOfficeClick에서 분기)
+  }
+  // 증거 서류함 버튼 표시/숨김
+  const evBtn = document.getElementById('evidence-case-btn');
+  if (evBtn) {
+    const mcn = getMainCaseNum();
+    evBtn.style.display = (mcn > 0 || [G.mainCase1,G.mainCase2,G.mainCase3,G.mainCase4].some(mc=>mc&&mc.cleared)) ? 'flex' : 'none';
   }
   // 고정지출 동적 갱신
   G.fixedExpense = calcFixedExpense();
@@ -6424,7 +6441,7 @@ function buildScene(slot) {
           changes.push(`증거 발견: ${found.name}`);
         }
       }
-      const bgMap = {3:'배경/서면.webp', 4:'배경/군청.webp'};
+      const bgMap = {3:'배경/철새도래지.webp', 4:'배경/군청.webp'};
       return {bg:bgMap[caseNum]||'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'조사',text,changes};
     }
     // 사건1~2: 기존 방식
@@ -7932,6 +7949,7 @@ function showMonthSummary(empReports){
 function closeSummary(){
   document.getElementById('month-summary').style.display='none';
   G.monthReviewCount = 0; // 매월 검토 횟수 리셋
+  G.monthTossCount = 0; // 매월 토스 건수 리셋
   G.month++;
   if(G.month>12){
     G.month=1; G.year++;
@@ -9669,21 +9687,33 @@ function openTossMenu(caseIdx) {
 }
 
 function tossCase(caseIdx, assocIdx) {
+  if (getMonthlyTossRemaining() <= 0) { showToast('이번 달 토스 한도를 모두 사용했습니다.'); return; }
   const card = G.caseCards.splice(caseIdx,1)[0];
   G.cases--;
   G.hiredAssocs[assocIdx].cases.push(card);
-  showToast(`${card.id} → ${G.hiredAssocs[assocIdx].name} 변호사에게 배정`);
+  if (!G.monthTossCount) G.monthTossCount = 0;
+  G.monthTossCount++;
+  showToast(`${card.id} → ${G.hiredAssocs[assocIdx].name} 변호사에게 배정 (토스 잔여: ${getMonthlyTossRemaining()}건)`);
   renderBriefcase();
+}
+
+function getMonthlyTossLimit() {
+  return Math.floor(G.caseCards.length * 0.83);
+}
+function getMonthlyTossRemaining() {
+  if (!G.monthTossCount) G.monthTossCount = 0;
+  return Math.max(0, getMonthlyTossLimit() - G.monthTossCount);
 }
 
 function openBulkTossMenu() {
   const totalCapacity = G.hiredAssocs.reduce((sum, a) => sum + Math.max(0, 20 - a.cases.length), 0);
-  const maxToss = Math.min(Math.floor(G.caseCards.length * 0.83), totalCapacity);
-  if (maxToss <= 0) { showToast('토스할 수 있는 사건이 없거나 어쏘가 모두 가득 찼습니다.'); return; }
+  const monthlyRemain = getMonthlyTossRemaining();
+  const maxToss = Math.min(monthlyRemain, totalCapacity);
+  if (maxToss <= 0) { showToast(monthlyRemain<=0 ? '이번 달 토스 한도를 모두 사용했습니다.' : '토스할 수 있는 사건이 없거나 어쏘가 모두 가득 찼습니다.'); return; }
 
   const list = document.getElementById('briefcase-list');
   let html = `<div style="font-size:0.9rem;color:#c9a84c;margin-bottom:12px;text-align:center;font-weight:700">한 번에 토스하기</div>`;
-  html += `<div style="font-size:0.8rem;color:#a09080;margin-bottom:8px;text-align:center">내 사건: ${G.caseCards.length}건 | 어쏘 수용 가능: ${totalCapacity}건</div>`;
+  html += `<div style="font-size:0.8rem;color:#a09080;margin-bottom:8px;text-align:center">내 사건: ${G.caseCards.length}건 | 어쏘 수용 가능: ${totalCapacity}건 | 이번 달 토스 잔여: ${monthlyRemain}건</div>`;
   html += `<div style="font-size:0.85rem;color:#e8d5b5;margin-bottom:10px;text-align:center">몇 건을 토스하시겠습니까?</div>`;
   html += `<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px">`;
   html += `<button style="width:32px;height:32px;border-radius:4px;border:1px solid #5a4a30;background:#3a3020;color:#c9a84c;font-size:1.1rem;cursor:pointer;font-weight:700" onclick="adjustBulkToss(-10)">◀◀</button>`;
@@ -9771,6 +9801,10 @@ function executeBulkToss() {
     results.push({name: a.name, count: a.assigned});
   });
 
+  // 월간 토스 카운트 증가
+  const totalTossed = results.reduce((s, r) => s + r.count, 0);
+  if (!G.monthTossCount) G.monthTossCount = 0;
+  G.monthTossCount += totalTossed;
   // 결과 화면 표시
   showBulkTossResult(results);
 }
@@ -9957,18 +9991,18 @@ const MAIN_STORY_OFFER_DIALOGUES = {
   ],
   case3: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님, 그때 정말 감사했습니다. 덕분에 무죄를 받았습니다.'},
-    {face:'player', speaker:'{name}', text:'박정호 씨, 잘 지내셨어요? 오늘은 무슨 일로...'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'네... 사실 부탁드릴 것이 있어서 왔습니다.'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'제가 그동안 반대해왔던 도라군 개발사업... 아시죠?'},
-    {face:'player', speaker:'{name}', text:'물론이죠. 이태준 국장 사건과도 관련이 있었던.'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'그 개발사업이 아직도 진행 중입니다. 장현우 군수가 밀어붙이고 있어요.'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님이 재판에서 밝혀주셨잖아요. 환경영향평가서 원본이 개발 불가 판정이었다는 것을.'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'그런데도 이 사업이 합법적으로 진행되고 있다니... 말이 됩니까?'},
-    {face:'player', speaker:'{name}', text:'(확실히... 앞 사건에서 드러난 것만으로도 이 개발사업에는 문제가 많다.)'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'개발사업시행승인처분 취소소송을 하고 싶습니다. 이 사업 자체가 위법하다는 걸 법정에서 증명하고 싶어요.'},
-    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님이 맡아주실 수 있습니까?'},
-    {face:'player', speaker:'{name}', text:'(행정소송이라... 상대는 도라군, 사실상 장현우 군수다.)'},
-    {face:'player', speaker:'{name}', text:'(게다가 장현우 뒤에는 법조카르텔이 있다. 만만치 않겠지만...)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'박정호 씨, 잘 지내셨어요? 오늘은 무슨 일로...'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'네... 사실 부탁드릴 것이 있어서 왔습니다.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'제가 그동안 반대해왔던 도라군 개발사업... 아시죠?'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'물론이죠. 이태준 국장 사건과도 관련이 있었던.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'그 개발사업이 아직도 진행 중입니다. 장현우 군수가 밀어붙이고 있어요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님이 재판에서 밝혀주셨잖아요. 환경영향평가서 원본이 개발 불가 판정이었다는 것을.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'그런데도 이 사업이 합법적으로 진행되고 있다니... 말이 됩니까?'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(확실히... 앞 사건에서 드러난 것만으로도 이 개발사업에는 문제가 많다.)'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'개발사업시행승인처분 취소소송을 하고 싶습니다. 이 사업 자체가 위법하다는 걸 법정에서 증명하고 싶어요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님이 맡아주실 수 있습니까?'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(행정소송이라... 상대는 도라군, 사실상 장현우 군수다.)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(게다가 장현우 뒤에는 법조카르텔이 있다. 만만치 않겠지만...)'},
   ],
   case4: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'............'},
@@ -10250,18 +10284,29 @@ const MAIN_TRIAL_1 = [
   // phase 0: 1회 재판 — 증거 채택 공방
   {
     dialogues: [
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'재판 시작하겠습니다. 검사, 공소사실 요지를 진술하세요.'},
-      {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'피고인은 2030. 1. 1. 불상의 장소에서 피해자 회사의 돈 10억원을 횡령하는 등 총 78차례에 걸쳐 피해자 회사의 돈 3500억원을 횡령하였습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'재판시작하겠습니다. 검사, 공소사실 요지를 진술하세요.'},
+      {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'피고인은 2030. 1. 1. 불상의 장소에서 피해자 회사의 돈 10억원을 횡령하는등 총 78차례에 걸쳐 피해자 회사의 돈 3500억원을 횡령하였습니다. 구체적인 일시, 방법, 금액은 공소장 별지에 기재된 바와 같습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'변호인, 의견 진술하세요.'},
       {face:'player', speaker:'{name}', text:'말도 안 되는 소설입니다. 무죄를 주장합니다.'},
-      {face:'player', speaker:'{name}', text:'피고인은 그룹의 회장인 이만석의 비자금 조성사실을 알게 되어 이를 상급자에게 보고했다가 오히려 횡령범으로 고발당했습니다. 당시 피고인이 확보한 비자금 관련자료를 제출하겠습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인도 같은 의견인가요?'},
+      {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'네 그렇습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰측 증거목록 제출하세요. 변호인, 증거의견은 어떻습니까.'},
+      {face:'player', speaker:'{name}', text:'김서연, 이만석의 진술조서 부동의합니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰측 증인신청하시겠습니까?'},
+      {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'넵. 증인신청하겠습니다.'},
+      {face:'player', speaker:'{name}', text:'저희측도 증거신청 할 것이 있습니다. 피고인은 그룹의 회장인 이만석의 비자금 조성사실을 알게 되어 이를 상급자에게 보고했다가 오히려 해고를 당하고 횡령범으로 고발당했습니다.'},
+      {face:'player', speaker:'{name}', text:'그러나 피고인이 횡령했다는 돈은 횡령한 것이 아니라, 이만석의 비자금입니다. 당시 피고인이 확보한 비자금 관련자료를 제출하겠습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰 측, 피고인이 제출한 USB 자료에 대해 의견이 있습니까?'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'재판장님. 해당 자료는 피고인이 이만석회장의 개인정보를 불법으로 반출한 것입니다. 불법 수집 증거로서 증거능력이 없으며, 저희측은 이에 대해 개인정보보호법 위반으로 고발할 생각입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'변호인, 이에 대해 답변하시죠.'},
       {face:'player', speaker:'{name}', text:'(여기서 잘 골라야 한다.)'},
     ],
     evidenceSteps: [{prompt:'(여기서 잘 골라야 한다. 어떤 증거를 제시할까?)', correct:['rev_whistleblower'], count:1}],
     successDialogues: [
-      {face:'player', speaker:'{name}', text:'재판장님, 이 판례를 봐 주십시오.\n\n대법원 2023도27590 판결을 보시면, 재판과정에서 소송상 필요한 주장의 증명이나 범죄혐의에 대한 방어권 행사를 위하여 개인정보가 포함된 증거를 법원에 제출하는 경우, 위법성이 조각된다고 보고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'재판장님, 이 판례를 봐 주십시오.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이게 무슨 의미가 있습니까?'},
+      {face:'player', speaker:'{name}', text:'대법원 2023도27590 판결을 보시면, 재판과정에서 소송상 필요한 주장의 증명이나 범죄혐의에 대한 방어권 행사를 위하여 개인정보가 포함된 소송서류나 증거를 법원에 제출하는 경우, 사회상규에 위배되지 않는 행위에 해당하여 형법 제20조에 따라 위법성이 조각된다고 보면서 그 요건을 설시하고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'본 건에서도 소송상 피고인의 방어권 행사를 위해 그 증거를 법원에 제출한 것인 바, 이는 위법성이 조각됩니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그렇군요. 알겠습니다. 일단 피고인측 주장을 받아들이도록 하겠습니다. 다음 기일에서 본격적인 심리를 진행하겠습니다.'},
       {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님... 감사합니다. 첫 번째 고비를 넘겼네요.'},
       {face:'player', speaker:'{name}', text:'아직 시작입니다. 다음 재판이 더 중요합니다.'},
@@ -10282,6 +10327,8 @@ const MAIN_TRIAL_1 = [
       {face:'player', speaker:'{name}', text:'증인에게 직접 묻겠습니다. 2030년 1월 1일, 증인 이름으로 홍콩 소재 \'SJ 인터내셔널\'로 10억 원을 송금한 사실이 있지 않습니까? 여기 해당 송금 기록이 있습니다.\n\n증인이 그냥 비서에 불과하다면, 이러한 큰 돈은 어디서 난 거죠?'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'재판장님! 지금 변호인 측은 증거로 채택되지 않은 문서를 가지고 증인신문과정에서 제시하고 있습니다.'},
       {face:'player', speaker:'{name}', text:'이 자료는 금융감독원의 공식 외환거래 기록입니다. 지금 증거로 제출하겠습니다.'},
+      {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'저희는 받아들일수 없습니다.'},
+      {face:'캐릭터얼굴/의뢰인4.webp', speaker:'김서연', text:'...'},
       {face:'캐릭터얼굴/의뢰인4.webp', speaker:'김서연', text:'...네. 그 송금은... 제가 처리했습니다.'},
       {face:'캐릭터얼굴/의뢰인4.webp', speaker:'김서연', text:'저도 너무 괴로웠습니다. 더 이상 거짓말은 못 하겠습니다. 이만석 회장의 지시로... 지난 몇 년간 해외 페이퍼컴퍼니를 통해 자금을 빼돌렸습니다.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'증인! 지금 무슨 말을...'},
@@ -10301,7 +10348,10 @@ const MAIN_TRIAL_1 = [
     ],
     evidenceSteps: [{prompt:'한정민의 횡령 혐의를 반박할 증거 2개를 제시하세요.', correct:['inv_account','inv_audit'], count:2}],
     successDialogues: [
-      {face:'player', speaker:'{name}', text:'재판장님, 이 최종 감사 보고서를 증거로 제출하겠습니다.\n\n검사가 제출한 것은 중간보고서입니다. 최종 감사 보고서를 보면, 한정민 씨 명의 계좌로의 이체는 업무상 정당한 경비 처리였다고 나왔습니다.\n\n검찰은 결론이 나지 않은 중간 보고서만을 제출한 후, 본인들에게 불리한 최종 감사보고서는 제출하지 않은 것입니다.'},
+      {face:'player', speaker:'{name}', text:'재판장님, 이 최종 감사 보고서를 증거로 제출하겠습니다. 한 번 봐주시겠습니까?'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이것이 어떻다는 겁니까?'},
+      {face:'player', speaker:'{name}', text:'검사가 제출한 것은 중간보고서입니다. 최종 감사 보고서를 보면, 한정민 씨 명의 계좌로의 이체는 업무상 정당한 경비 처리였다고 나왔습니다.'},
+      {face:'player', speaker:'{name}', text:'검찰은 결론이 나지 않은 중간 보고서만을 제출한 후, 본인들에게 불리한 최종 감사보고서는 제출하지 않은 것입니다.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'그 문서는... 어디서 구한 겁니까?'},
       {face:'player', speaker:'{name}', text:'검찰 측이 감사 보고서를 제출했으니, 저도 같은 감사의 최종 보고서를 제출하는 것이 당연합니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰측, 왜 중간 보고서만 제출했습니까?'},
@@ -10317,7 +10367,7 @@ const MAIN_TRIAL_1 = [
     dialogues: [
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이만석씨, 선서하시고... 검찰측부터 증인신문하세요.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'... 이상입니다.'},
-      {face:'player', speaker:'{name}', text:'(12개월간의 싸움이 마무리되는 순간이다. 여기서 모든 것을 쏟아야 한다.)'},
+      {face:'player', speaker:'{name}', text:'(12개월간의 싸움이 마무리되는 순간이다. 여기서 모든 것을 쏟아야 한다. 그나저나 어디서 많이 본 것 같은 얼굴이군.)'},
       {face:'player', speaker:'{name}', text:'이만석 증인, 사실은 3500억원은 당신이 비자금으로 만들어 사용한 것이 아닙니까?'},
       {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'이만석', text:'전혀 그렇지 않습니다.'},
       {face:'player', speaker:'{name}', text:'그래요? 이 자료들을 한 번 보시죠.'},
@@ -10328,16 +10378,18 @@ const MAIN_TRIAL_1 = [
       {face:'player', speaker:'{name}', text:'그리고 김서연 증인의 진술. 이 모든 것이 하나의 사실을 가리키고 있습니다.\n\n이만석 회장은 10년간 조직적으로 비자금을 조성했습니다. 진실은 아무리 감추려 해도 결국 드러나게 되어 있습니다.'},
       {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'이만석', text:'증언하지 않겠습니다.'},
       {face:'player', speaker:'{name}', text:'상관없습니다. 어차피 이 사건에서 당신의 증언은 필요하지 않아요.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그럼 증인신문을 마치고.. 검찰측 최종의견 진술하세요.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'재판장님. 피고인 측이 제시한 증거들의 증거능력..을 좀 잘 살펴봐주시고.. 피고인에게 징역 30년을 선고해주시기 바랍니다.'},
       {face:'player', speaker:'{name}', text:'(조미현 검사가 처음으로 말문이 막혔다.)'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'글쎄요.. 변호인측 최후진술 하세요.'},
       {face:'player', speaker:'{name}', text:'아까 말씀드린대로입니다. 이 사건의 진실은 명백합니다. 오히려 이런 명백한 사건의 진실이 수사기관에서 드러나지 않았다는 점이 더 의문입니다. 피고인에게 무죄를 선고해주십시오.'},
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'네, 잘 들었습니다.\n\n그럼 선고하겠습니다. 피고인 한정민은 무죄.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'네, 잘 들었습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그럼 선고하겠습니다. 피고인 한정민은 무죄.'},
       {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님! 감사합니다... 정말 감사합니다!'},
       {face:'player', speaker:'{name}', text:'한정민 씨의 용기가 없었다면 불가능했을 겁니다.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'???', text:'아주 인상적이었네. {name} 변호사.'},
       {face:'player', speaker:'{name}', text:'누구시죠?'},
-      {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'???', text:'나도 아주 인상적이었어, {name} 변호사 양반. 이 쪽은 장현우 군수님이고.. 나는 차차 알게 될 걸세. 앞으로 자주 보게 될 것 같은 느낌이구만.'},
+      {face:'캐릭터얼굴/법조수괴.webp', speaker:'???', text:'나도 아주 인상적이었어, {name} 변호사 양반. 이 쪽은 장현우 군수님이고.. 나는 차차 알게 될 걸세. 앞으로 자주 보게 될 것 같은 느낌이구만.'},
       {face:'player', speaker:'{name}', text:'(장현우... 어디선가 들어본 이름이야. 이 사건 아무래도 수상해. 이만석에게 권력이 있다고는 하나, 검찰에서 이렇게 명백한 사건을 재벌 비자금이 아닌 횡령사건으로 처리한다고..?)'},
       {face:'player', speaker:'{name}', text:'(그래.. 생각났어. 장현우. 도라군수. 도라군은 성진이 지금 대규모 개발사업을 진행하고 있는 곳...그리고 장현우는 유명한 법조인 출신 해결사. 과연..)'},
       {face:'player', speaker:'{name}', text:'(좀 더 알아봐야겠어.)'},
@@ -11114,6 +11166,126 @@ function processMainStoryMonthEnd(checkOffer) {
     }
   });
   return false;
+}
+
+// ==================== 증거 서류함 ====================
+function openEvidenceCase() {
+  const modal = document.getElementById('evidence-case-modal');
+  modal.style.display = 'flex';
+  // 표시할 사건 결정: 진행 중 > 클리어된 것 중 최신
+  let caseNum = getMainCaseNum();
+  if (!caseNum) {
+    // 클리어된 사건 중 가장 높은 번호
+    for (let i=4; i>=1; i--) { const mc = getMainCaseObj(i); if (mc && mc.cleared) { caseNum = i; break; } }
+  }
+  if (!caseNum) { document.getElementById('evidence-case-body').innerHTML = '<div style="text-align:center;color:#8a7a60;padding:30px 0">진행 중인 메인사건이 없습니다.</div>'; return; }
+  renderEvidenceCase(caseNum);
+}
+
+function renderEvidenceCase(caseNum) {
+  const mc = getMainCaseObj(caseNum);
+  const caseNames = {1:'재벌 총수의 비자금', 2:'살인 누명과 법조카르텔', 3:'도라군 개발사업 취소소송', 4:'장현우 살인사건'};
+  document.getElementById('evidence-case-title').textContent = `증거 서류함 — 사건${caseNum}`;
+
+  let html = `<div style="text-align:center;font-size:0.85rem;color:#c9a84c;margin-bottom:12px;font-weight:700">${caseNames[caseNum]}</div>`;
+
+  // 사건 선택 탭 (여러 사건이 있을 때)
+  const allCases = [1,2,3,4].filter(n => getMainCaseObj(n));
+  if (allCases.length > 1) {
+    html += `<div style="display:flex;gap:4px;justify-content:center;margin-bottom:12px">`;
+    allCases.forEach(n => {
+      const active = n === caseNum;
+      html += `<button onclick="renderEvidenceCase(${n})" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${active?'#c9a84c':'#3a3020'};background:${active?'rgba(201,168,76,0.2)':'#1a1810'};color:${active?'#f0c850':'#8a7a60'};font-weight:${active?'700':'400'}">사건${n}</button>`;
+    });
+    html += `</div>`;
+  }
+
+  if (caseNum <= 2) {
+    html += renderEvidenceCaseOld(caseNum, mc);
+  } else {
+    html += renderEvidenceCaseNew(caseNum, mc);
+  }
+
+  // 하단 상태
+  const statusLabel = mc.cleared ? '✅ 클리어' : (mc.failed ? '❌ 실패' : '진행 중');
+  const phaseLabel = (caseNum >= 3 && mc.phase) ? ` | Phase ${mc.phase}` : '';
+  html += `<div style="border-top:1px solid #3a3020;margin-top:12px;padding-top:8px;font-size:0.75rem;color:#8a7a60;text-align:center">`;
+  html += `${statusLabel}${phaseLabel} | 준비도: ${mc.preparation||0} | 재판: ${mc.trialPhase||0}/4회 완료`;
+  html += `</div>`;
+
+  document.getElementById('evidence-case-body').innerHTML = html;
+}
+
+// 사건1~2용 (조사/검토 별도 풀)
+function renderEvidenceCaseOld(caseNum, mc) {
+  const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
+  let html = '';
+
+  // 조사 증거
+  html += `<div style="font-size:0.8rem;color:#88aadd;font-weight:700;margin-bottom:6px">🔍 조사 증거 (${mc.investigateEvidence.length}/${evData.investigate.length})</div>`;
+  evData.investigate.forEach(ev => {
+    const found = mc.investigateEvidence.includes(ev.id);
+    html += `<div style="padding:5px 8px;margin-bottom:3px;background:${found?'#2a2818':'#1a1810'};border:1px solid ${found?'#4a4020':'#2a2520'};border-radius:4px;font-size:0.78rem">`;
+    if (found) {
+      html += `<div style="color:#e8d5b5;font-weight:700">✓ ${ev.name}</div>`;
+      html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px">${ev.desc}</div>`;
+    } else {
+      html += `<div style="color:#5a5040">○ ???</div>`;
+    }
+    html += `</div>`;
+  });
+
+  // 검토 증거
+  html += `<div style="font-size:0.8rem;color:#88ddaa;font-weight:700;margin-top:10px;margin-bottom:6px">📋 검토 증거 (${mc.reviewEvidence.length}/${evData.review.length})</div>`;
+  evData.review.forEach(ev => {
+    const found = mc.reviewEvidence.includes(ev.id);
+    html += `<div style="padding:5px 8px;margin-bottom:3px;background:${found?'#1a2818':'#1a1810'};border:1px solid ${found?'#2a4020':'#2a2520'};border-radius:4px;font-size:0.78rem">`;
+    if (found) {
+      html += `<div style="color:#e8d5b5;font-weight:700">✓ ${ev.name}</div>`;
+      html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px">${ev.desc}</div>`;
+    } else {
+      html += `<div style="color:#5a5040">○ ???</div>`;
+    }
+    html += `</div>`;
+  });
+
+  return html;
+}
+
+// 사건3~4용 (조사→발견, 검토→의미 해석)
+function renderEvidenceCaseNew(caseNum, mc) {
+  const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
+  let html = '';
+
+  [
+    {label:'Phase 1 증거', pool:evData.phase1, color:'#88aadd'},
+    {label:'Phase 2 증거', pool:evData.phase2, color:'#dd88aa'}
+  ].forEach(section => {
+    const foundCount = section.pool.filter(e => mc.foundEvidence.includes(e.id)).length;
+    const reviewedCount = section.pool.filter(e => mc.reviewedEvidence.includes(e.id)).length;
+    html += `<div style="font-size:0.8rem;color:${section.color};font-weight:700;margin-top:10px;margin-bottom:6px">🔍 ${section.label} (발견: ${foundCount}/${section.pool.length} | 분석: ${reviewedCount}/${section.pool.length})</div>`;
+
+    section.pool.forEach(ev => {
+      const found = mc.foundEvidence.includes(ev.id);
+      const reviewed = mc.reviewedEvidence.includes(ev.id);
+      html += `<div style="padding:5px 8px;margin-bottom:3px;background:${found?'#2a2818':'#1a1810'};border:1px solid ${found?(reviewed?'#4a6020':'#4a4020'):'#2a2520'};border-radius:4px;font-size:0.78rem">`;
+      if (found) {
+        const icon = reviewed ? '✅' : '⚠️';
+        html += `<div style="color:#e8d5b5;font-weight:700">${icon} ${ev.name}</div>`;
+        html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px">${ev.desc}</div>`;
+        if (reviewed) {
+          html += `<div style="color:#88cc88;font-size:0.72rem;margin-top:2px;font-style:italic">→ ${ev.reviewDesc}</div>`;
+        } else {
+          html += `<div style="color:#cc8844;font-size:0.72rem;margin-top:2px;font-style:italic">→ 분석 필요 (검토를 통해 의미를 파악하세요)</div>`;
+        }
+      } else {
+        html += `<div style="color:#5a5040">○ ???</div>`;
+      }
+      html += `</div>`;
+    });
+  });
+
+  return html;
 }
 
 // ==================== 임시 디버그 (배포 전 삭제) ====================
