@@ -883,8 +883,10 @@ const G = {
   // 메인스토리
   mainCase1: null,  // 사건1 객체 (수임 시 생성)
   mainCase2: null,  // 사건2 객체 (수임 시 생성)
-  mainStoryFlag: { case1_cleared: false, case2_cleared: false },
-  mainStoryOffered: { case1: false, case2: false }, // 수임 제안 했는지
+  mainCase3: null,  // 사건3 객체 (수임 시 생성)
+  mainCase4: null,  // 사건4 객체 (수임 시 생성)
+  mainStoryFlag: { case1_cleared: false, case2_cleared: false, case3_cleared: false, case4_cleared: false },
+  mainStoryOffered: { case1: false, case2: false, case3: false, case4: false }, // 수임 제안 했는지
 };
 
 const STATUS_NAMES = {
@@ -944,14 +946,76 @@ const MAIN_STORY_EVIDENCE = {
       {id:'rev_sunset', name:'사건 당일 일몰시간', desc:'기상청 기록으로 사건 당일 일몰시간을 확인하니... CCTV 영상 속 일몰 시점과 1시간 차이가 난다.'},
       {id:'rev_app', name:'도청앱 정보', desc:'피고인 핸드폰에 설치된 앱을 조사하니... 위치추적 기능이 있는 도청앱이다. 누군가 피고인의 위치를 실시간으로 파악하고 있었다.'},
     ]
+  },
+  // 사건3: 조사로 증거 발견, 검토로 의미 해석 (phase1: 1~5월, phase2: 6~11월)
+  case3: {
+    phase1: [
+      {id:'inv3_casebook', name:'환경영향평가판례집', desc:'환경영향평가 관련 판례집을 발견했다. 상당한 분량인데... 분석이 필요하다.', reviewDesc:'판례를 분석하니... \'공청회 요청이 있었음에도 공청회를 열지 않은 경우, 그 환경영향평가 대상 개발사업에 대한 처분은 위법하다\'는 판례가 있다!'},
+      {id:'inv3_hearing_req', name:'공청회 요청서', desc:'도라군 관련 서류 더미에서 공청회 요청서를 발견했다. 내용을 더 봐야겠다.', reviewDesc:'공청회 요청서를 분석하니... 무려 300명의 주민이 서명해서 공청회 개최를 요청했다! 이 정도면 공청회를 열어야 할 의무가 있었다.'},
+      {id:'inv3_registry', name:'등기내역', desc:'군청의 문서 접수 등기내역을 확보했다. 확인해봐야 한다.', reviewDesc:'등기내역을 분석하니... 공청회 요청서가 군청에 실제로 접수된 기록이 있다! 군 측은 이 요청을 분명히 받았으면서도 무시한 것이다.'},
+      {id:'inv3_eia_report', name:'환경영향평가서', desc:'도라군 개발사업의 환경영향평가서를 입수했다. 상당한 분량이다.', reviewDesc:'환경영향평가서를 분석하니... 이 지역에 철새 및 천연기념물이 \'없다\'고 기재되어 있다. 정말 그럴까? 현장과 대조해 봐야 한다.'},
+      {id:'inv3_bird_photo', name:'철새도래지 사진', desc:'현지 답사에서 서식지 사진을 다수 확보했다. 뭔가 이상한데...', reviewDesc:'사진을 분석하니... 환경영향평가서에는 철새가 없다고 했지만, 실제로는 철새들이 다수 서식하고 있다! 평가서 내용이 거짓이다.'},
+      {id:'inv3_ecology_paper', name:'도라군 생태 논문', desc:'도라군 생태계에 대한 학술 논문을 찾았다. 읽어봐야 한다.', reviewDesc:'논문을 분석하니... 이 지역에 천연기념물들이 다수 서식한다는 학술적 근거가 있다. 환경영향평가서는 명백한 허위 기재다!'},
+    ],
+    phase2: [
+      {id:'inv3_account', name:'장현우 차명계좌', desc:'장현우의 금융거래 내역에서 수상한 차명계좌를 발견했다.', reviewDesc:'차명계좌를 분석하니... \'주식회사 전우\'로부터 거액이 입금되어 있고, \'김철민\'이라는 사람에게 거액이 송금되어 있다. 이 돈의 흐름은 뭐지?'},
+      {id:'inv3_corp_reg', name:'법인등기사항전부증명서', desc:'주식회사 전우의 법인등기를 떼 봤다. 확인이 필요하다.', reviewDesc:'법인등기를 분석하니... 대표이사가 \'임순애\'다.'},
+      {id:'inv3_company_list', name:'개발사업 참여회사 명단', desc:'도라군 개발사업에 참여하는 회사 명단을 확보했다.', reviewDesc:'명단을 분석하니... \'주식회사 전우\'가 개발사업에 참여하고 있다.'},
+      {id:'inv3_interview', name:'장현우 인터뷰 기사', desc:'장현우 군수의 과거 인터뷰 기사를 찾았다. 무슨 내용인지 봐야겠다.', reviewDesc:'인터뷰를 분석하니... 장현우가 부인의 이름을 \'임순애\'라고 밝혔다.'},
+      {id:'inv3_report_record', name:'사건신고서', desc:'이태준 살인사건 신고서 사본을 입수했다.', reviewDesc:'신고서를 분석하니... 신고자 이름이 \'김철민\'이다.'},
+      {id:'inv3_phone_data', name:'박정호 핸드폰 분석자료', desc:'박정호의 핸드폰 상세 분석 자료를 확보했다.', reviewDesc:'분석자료를 보니... 장현우가 보낸 문자메시지의 링크를 열었을 때 도청앱이 설치된 것이다. 장현우가 박정호를 감시하고 있었다!'},
+      {id:'inv3_eia_original', name:'환경영향평가서 원본', desc:'환경영향평가서의 원본 문서를 다시 확보했다. 이태준 살인사건 때 나왔던 그 문서다.', reviewDesc:'원본을 다시 분석하니... 원래 평가 결과는 \'개발 불가\' 판정이었다. 이태준 국장이 이걸 박정호에게 전달하려 했던 거다. 그걸 막으려고...'},
+    ]
+  },
+  case4: {
+    phase1: [
+      {id:'inv4_autopsy', name:'부검서', desc:'장현우의 부검서를 입수했다. 질식사... 자세히 봐야겠다.', reviewDesc:'부검서를 분석하니... 질식사인데, 삭흔 주변에 움직인 흔적이 전혀 없다. 이상하다...'},
+      {id:'inv4_forensic_book', name:'법의학책', desc:'법의학 전문서적을 구했다. 목맴 사망에 대한 부분을 찾아봐야 한다.', reviewDesc:'법의학책을 분석하니... \'자살에 의한 목맴의 경우에도 삭흔에 움직인 반응이 반드시 나타난다\'고 기술되어 있다. 움직인 흔적이 없다면... 이건 자살이 아니다!'},
+      {id:'inv4_cctv', name:'군수실 CCTV', desc:'군수실 복도 CCTV 영상을 확보했다. 20시부터 24시까지 녹화분이다.', reviewDesc:'CCTV를 분석하니... 21시~22시 영상과 22시~23시 영상이 겹치고 있다! 영상이 편집된 것이다.'},
+      {id:'inv4_access_log', name:'군수실 출입기록', desc:'군수실의 전자 출입기록을 확보했다.', reviewDesc:'출입기록을 분석하니... 20시와 22시 30분에 출입이 기록되어 있다.'},
+      {id:'inv4_access_card', name:'출입카드', desc:'군수실 출입카드를 확보했다. 분석이 필요하다.', reviewDesc:'출입카드를 분석하니... 카드에서 군수의 지문이 검출되지 않는다!'},
+      {id:'inv4_scene_photo', name:'현장사진', desc:'범행 현장 사진을 확보했다. 자세히 봐야겠다.', reviewDesc:'현장사진을 분석하니... 장현우는 맨손이다.'},
+    ],
+    phase2: [
+      {id:'inv4_park_phone_loc', name:'박진서 핸드폰 위치', desc:'박진서의 핸드폰 위치 내역을 확보했다.', reviewDesc:'위치 내역을 분석하니... 사무실→식당→주유소→사무실. 비서의 동선과 완전히 동일하다.'},
+      {id:'inv4_secretary_phone_loc', name:'비서 핸드폰 위치', desc:'박진서 비서의 핸드폰 위치 내역을 확보했다.', reviewDesc:'비서의 위치 내역을 분석하니... 박진서와 동일한 경로다.'},
+      {id:'inv4_restaurant_cctv', name:'식당 CCTV', desc:'박진서의 비서가 갔던 식당의 CCTV 영상을 확보했다.', reviewDesc:'식당 CCTV를 분석하니... 비서는 확인되지만 박진서는 영상에 없다!'},
+      {id:'inv4_park_call_log', name:'박진서 통화내역', desc:'박진서의 통화내역을 확보했다.', reviewDesc:'통화내역을 분석하니... 비서가 식당에 있던 시간대에 부재중 통화가 있다. 전화를 받지 못했다?'},
+      {id:'inv4_ledger', name:'박진서의 비리 장부', desc:'박진서가 소지하고 있던 비리 관련 장부를 입수했다.', reviewDesc:'장부를 분석하니... 비리내용을 기록한 장부이다. 장부에 발자국이 찍혀있다.'},
+      {id:'inv4_victim_text', name:'장현우가 보낸 문자', desc:'장현우의 핸드폰에서 박진서에게 보낸 문자메시지를 발견했다.', reviewDesc:'문자를 분석하니... 박진서가 가지고 있는 장부를 장현우가 문자로 보냈다.'},
+      {id:'inv4_autopsy2', name:'부검서 (수면제)', desc:'부검서의 추가 분석 결과를 입수했다. 혈액 정밀검사 결과가 포함되어 있다.', reviewDesc:'추가 부검 결과를 분석하니... 체내에서 수면제 성분이 검출되었다!'},
+      {id:'inv4_prescription', name:'박진서의 처방전', desc:'박진서의 병원 진료기록과 처방전을 확보했다.', reviewDesc:'처방전을 분석하니... 박진서가 수면제를 처방받았다. 부검에서 검출된 것과 동일한 성분이다!'},
+    ]
   }
 };
 
-function getMainCase() { return G.mainCase1 && G.mainCase1.active ? G.mainCase1 : (G.mainCase2 && G.mainCase2.active ? G.mainCase2 : null); }
-function getMainCaseNum() { return G.mainCase1 && G.mainCase1.active ? 1 : (G.mainCase2 && G.mainCase2.active ? 2 : 0); }
+function getMainCase() {
+  if(G.mainCase1&&G.mainCase1.active) return G.mainCase1;
+  if(G.mainCase2&&G.mainCase2.active) return G.mainCase2;
+  if(G.mainCase3&&G.mainCase3.active) return G.mainCase3;
+  if(G.mainCase4&&G.mainCase4.active) return G.mainCase4;
+  return null;
+}
+function getMainCaseNum() {
+  if(G.mainCase1&&G.mainCase1.active) return 1;
+  if(G.mainCase2&&G.mainCase2.active) return 2;
+  if(G.mainCase3&&G.mainCase3.active) return 3;
+  if(G.mainCase4&&G.mainCase4.active) return 4;
+  return 0;
+}
+function getMainCaseObj(caseNum) {
+  return [null, G.mainCase1, G.mainCase2, G.mainCase3, G.mainCase4][caseNum] || null;
+}
 function getAllFoundEvidence(caseNum) {
-  const mc = caseNum===1?G.mainCase1:G.mainCase2;
+  const mc = getMainCaseObj(caseNum);
   if(!mc) return [];
+  // 사건3+: 조사로 발견 + 검토 완료된 증거만 반환 (재판용)
+  if(caseNum >= 3) {
+    const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
+    const allPool = [...(evData.phase1||[]), ...(evData.phase2||[])];
+    return allPool.filter(e => mc.foundEvidence.includes(e.id) && mc.reviewedEvidence.includes(e.id));
+  }
+  // 사건1~2: 기존 방식
   const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
   const found = [];
   mc.investigateEvidence.forEach(id => { const e=evData.investigate.find(x=>x.id===id); if(e) found.push(e); });
@@ -2245,7 +2309,7 @@ function openScheduleOverlay() {
     if (G.schedule && G.schedule.length > 0) {
       G.schedule.forEach(ds => {
         ds.slots.forEach(slot => {
-          if (slot.forced && slot.action !== 'mainTrial1' && slot.action !== 'mainTrial2') forcedSlots.push({day:ds.day, time:slot.time, action:slot.action, label:slot.label, slotClass:slot.slotClass});
+          if (slot.forced && !/^mainTrial\d$/.test(slot.action)) forcedSlots.push({day:ds.day, time:slot.time, action:slot.action, label:slot.label, slotClass:slot.slotClass});
         });
       });
     }
@@ -2398,23 +2462,22 @@ function buildSchedule() {
   }
 
   // 메인스토리 재판 슬롯 강제 배치 (수임 후 3,6,9,12개월차)
-  [G.mainCase1, G.mainCase2].forEach((mc, idx) => {
+  [G.mainCase1, G.mainCase2, G.mainCase3, G.mainCase4].forEach((mc, idx) => {
     if (!mc || !mc.active || mc.trialPhase >= 4) return;
     const caseNum = idx+1;
-    // 수임 시점부터 경과 개월 수 계산 (수임월 = 1개월차)
     const elapsed = (G.year - mc.startYear) * 12 + (G.month - mc.startMonth) + 1;
-    // 재판 달: 3,6,9,12개월차 (elapsed가 정확히 3,6,9,12)
     const trialMonths = [3, 6, 9, 12];
     const phaseForElapsed = trialMonths.indexOf(elapsed);
-    // 현재 달이 재판 달이고, 해당 phase가 아직 안 잡혔으면 배치
     if (phaseForElapsed >= 0 && phaseForElapsed === mc.trialPhase && mc.trialScheduledPhase < phaseForElapsed) {
       mc.trialScheduledPhase = phaseForElapsed;
+      const trialLabels = {1:'비자금 사건 재판', 2:'항소심 재판', 3:'행정재판', 4: phaseForElapsed<2?'경찰 조사':'대질신문'};
+      const trialActions = {1:'mainTrial1', 2:'mainTrial2', 3:'mainTrial3', 4:'mainTrial4'};
       for (const ds of G.schedule) {
         if (ds.isWeekend || ds.isHoliday) continue;
         const daySlot = ds.slots[0];
         if (daySlot && daySlot.time === 'day') {
-          daySlot.action = 'mainTrial' + caseNum;
-          daySlot.label = caseNum===1 ? '비자금 사건 재판' : '항소심 재판';
+          daySlot.action = trialActions[caseNum];
+          daySlot.label = trialLabels[caseNum];
           daySlot.slotClass = 'slot-trial';
           daySlot.locked = true;
           daySlot.forced = true;
@@ -2565,13 +2628,17 @@ function openActionModal(dayIdx) {
         <div><div class="name">의정활동</div><div class="effects">변론능력 +2, 관찰력 +2, 명성 +2, 업보 +1</div></div>
         <div class="cost">-</div></div>`;
     }
-    // 메인스토리 사건 검토 (일과시간)
+    // 메인스토리 사건 검토 (일과시간, 12번째 달 제외)
     const mcNum = getMainCaseNum();
     if (mcNum > 0) {
-      const mc = mcNum===1?G.mainCase1:G.mainCase2;
-      html += `<div class="action-option" onclick="selectAction('review${mcNum}')">
-        <div><div class="name">사건 검토</div><div class="effects">준비도 상승, 증거 발견 가능 (준비도: ${mc.preparation.toFixed(0)})</div></div>
-        <div class="cost">-</div></div>`;
+      const mc = getMainCaseObj(mcNum);
+      const mcElapsed = (G.year - mc.startYear) * 12 + (G.month - mc.startMonth) + 1;
+      if (mcElapsed < 12) {
+        const revLabel = mcNum>=3 ? '준비도 상승, 증거 의미 해석 가능' : '준비도 상승, 증거 발견 가능';
+        html += `<div class="action-option" onclick="selectAction('review${mcNum}')">
+          <div><div class="name">사건 검토</div><div class="effects">${revLabel} (준비도: ${mc.preparation.toFixed(0)})</div></div>
+          <div class="cost">-</div></div>`;
+      }
     }
     html += '</div>';
   }
@@ -2620,14 +2687,17 @@ function openActionModal(dayIdx) {
         <div><div class="name">병원</div><div class="effects">질병 치료</div></div>
         <div class="cost">무료</div></div></div>`;
   }
-  // 메인스토리 사건 조사 (저녁/주말)
+  // 메인스토리 사건 조사 (저녁/주말, 12번째 달 제외)
   if (getMainCaseNum() > 0 && (slot.time==='evening' || ds.isWeekend || ds.isHoliday)) {
     const mcn = getMainCaseNum();
-    const mc = mcn===1?G.mainCase1:G.mainCase2;
-    html += `<div class="action-category"><div class="action-category-title">메인스토리</div>
-      <div class="action-option" onclick="selectAction('investigate${mcn}')">
-        <div><div class="name">사건 조사</div><div class="effects">준비도 상승, 증거 발견 가능 (준비도: ${mc.preparation.toFixed(0)})</div></div>
-        <div class="cost">10만원</div></div></div>`;
+    const mc = getMainCaseObj(mcn);
+    const mcElapsed2 = (G.year - mc.startYear) * 12 + (G.month - mc.startMonth) + 1;
+    if (mcElapsed2 < 12) {
+      html += `<div class="action-category"><div class="action-category-title">메인스토리</div>
+        <div class="action-option" onclick="selectAction('investigate${mcn}')">
+          <div><div class="name">사건 조사</div><div class="effects">준비도 상승, 증거 발견 가능 (준비도: ${mc.preparation.toFixed(0)})</div></div>
+          <div class="cost">10만원</div></div></div>`;
+    }
   }
   // 해외여행 선택지 (휴일 슬롯일 때)
   if (ds.isWeekend || ds.isHoliday) {
@@ -2718,9 +2788,9 @@ function selectAction(actionId) {
     slot.action='partTimeJob'; slot.label='아르바이트'; slot.slotClass='slot-rest';
   } else if (actionId==='drive') {
     slot.action='drive'; slot.label='드라이브'; slot.slotClass='slot-rest';
-  } else if (actionId==='investigate1' || actionId==='investigate2') {
+  } else if (/^investigate\d$/.test(actionId)) {
     slot.action=actionId; slot.label='사건 조사'; slot.slotClass='slot-special';
-  } else if (actionId==='review1' || actionId==='review2') {
+  } else if (/^review\d$/.test(actionId)) {
     slot.action=actionId; slot.label='사건 검토'; slot.slotClass='slot-special';
   } else if (actionId==='japanTrip') {
     for(let i=0;i<3&&(currentEditDay+i)<G.schedule.length;i++){
@@ -2781,7 +2851,7 @@ function filterCopiedAction(actionId) {
   if (actionId === 'golf' && !(G.status==='partner'||G.status==='senior'||G.status==='solo'||G.status==='suspended')) return 'homeRest';
   if (actionId === 'drive' && !G.currentCar) return 'homeRest';
   if (actionId === 'hospital' && !G.isSick) return 'homeRest';
-  if (actionId === 'investigate1' || actionId === 'investigate2' || actionId === 'review1' || actionId === 'review2' || actionId === 'mainTrial1' || actionId === 'mainTrial2') return 'homeRest';
+  if (/^investigate\d$/.test(actionId) || /^review\d$/.test(actionId) || /^mainTrial\d$/.test(actionId) || /^mainInvestigation\d$/.test(actionId) || /^mainConfrontation\d$/.test(actionId)) return 'homeRest';
   return actionId;
 }
 
@@ -4030,7 +4100,6 @@ function showDateEvent(evt, cb) {
   resetModalStyle(true);
   modal.style.display = 'flex';
   document.getElementById('se-bg').style.backgroundImage = `url('${evt.bg}')`;
-  playBGM('love');
   advanceDateEvent();
 }
 
@@ -6328,10 +6397,9 @@ function buildScene(slot) {
   }
 
   // 메인스토리 조사
-  if (slot.action === 'investigate1' || slot.action === 'investigate2') {
-    const caseNum = slot.action==='investigate1' ? 1 : 2;
-    const mc = caseNum===1 ? G.mainCase1 : G.mainCase2;
-    const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
+  if (/^investigate\d$/.test(slot.action)) {
+    const caseNum = parseInt(slot.action.replace('investigate',''));
+    const mc = getMainCaseObj(caseNum);
     if (!mc) return {bg:'배경/야근.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'info',resultLabel:'조사',text:'사건이 없다.',changes:[]};
     const changes = [];
     changes.push(...applyStatR('observation',1)); changes.push(...applyStatR('lawKnowledge',0.5));
@@ -6340,7 +6408,27 @@ function buildScene(slot) {
     const prep = 3 + Math.floor(G.stats.observation / 200);
     mc.preparation = Math.min(100, mc.preparation + prep);
     changes.push(`준비도 +${prep}`);
-    // 증거 발견
+    if (caseNum >= 3) {
+      // 사건3+: 조사로 증거 발견 (phase에 따라 풀 결정)
+      if (mc.phase === undefined || mc.phase === null) mc.phase = (mc.month < 5) ? 1 : 2; // 방어코드
+      const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
+      const pool = mc.phase===1 ? evData.phase1 : evData.phase2;
+      const notFound = pool.filter(e => !mc.foundEvidence.includes(e.id));
+      let text = '아직 결정적인 자료를 찾지 못했다. 더 조사해야 한다.';
+      if (notFound.length > 0) {
+        const chance = 30 + G.stats.observation * 0.03;
+        if (Math.random()*100 < chance) {
+          const found = notFound[Math.floor(Math.random()*notFound.length)];
+          mc.foundEvidence.push(found.id);
+          text = found.desc;
+          changes.push(`증거 발견: ${found.name}`);
+        }
+      }
+      const bgMap = {3:'배경/서면.webp', 4:'배경/군청.webp'};
+      return {bg:bgMap[caseNum]||'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'조사',text,changes};
+    }
+    // 사건1~2: 기존 방식
+    const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
     const notFound = evData.investigate.filter(e => !mc.investigateEvidence.includes(e.id));
     let text = '아직 결정적인 단서를 찾지 못했다. 더 조사해야 한다.';
     if (notFound.length > 0) {
@@ -6356,10 +6444,9 @@ function buildScene(slot) {
     return {bg,face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'조사',text,changes};
   }
   // 메인스토리 검토
-  if (slot.action === 'review1' || slot.action === 'review2') {
-    const caseNum = slot.action==='review1' ? 1 : 2;
-    const mc = caseNum===1 ? G.mainCase1 : G.mainCase2;
-    const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
+  if (/^review\d$/.test(slot.action)) {
+    const caseNum = parseInt(slot.action.replace('review',''));
+    const mc = getMainCaseObj(caseNum);
     if (!mc) return {bg:'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'info',resultLabel:'검토',text:'사건이 없다.',changes:[]};
     const changes = [];
     changes.push(...applyStatR('lawKnowledge',0.5)); changes.push(...applyStatR('debate',0.5));
@@ -6367,6 +6454,26 @@ function buildScene(slot) {
     const prep = 4 + Math.floor(G.stats.lawKnowledge / 200);
     mc.preparation = Math.min(100, mc.preparation + prep);
     changes.push(`준비도 +${prep}`);
+    if (caseNum >= 3) {
+      // 사건3+: 검토로 이미 발견한 증거의 의미 해석
+      const unreviewd = mc.foundEvidence.filter(id => !mc.reviewedEvidence.includes(id));
+      let text = mc.foundEvidence.length===0 ? '분석할 자료가 없다. 먼저 조사를 해야 한다.' : '현재까지 찾은 증거는 모두 분석했다. 새로운 증거를 찾아야 한다.';
+      if (unreviewd.length > 0) {
+        const chance = 30 + G.stats.lawKnowledge * 0.03;
+        if (Math.random()*100 < chance) {
+          const targetId = unreviewd[Math.floor(Math.random()*unreviewd.length)];
+          mc.reviewedEvidence.push(targetId);
+          const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
+          const allPool = [...(evData.phase1||[]), ...(evData.phase2||[])];
+          const ev = allPool.find(e=>e.id===targetId);
+          text = ev ? ev.reviewDesc : '증거의 의미를 파악했다.';
+          changes.push(`증거 분석 완료: ${ev?ev.name:targetId}`);
+        }
+      }
+      return {bg:'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'검토',text,changes};
+    }
+    // 사건1~2: 기존 방식
+    const evData = MAIN_STORY_EVIDENCE[caseNum===1?'case1':'case2'];
     const notFound = evData.review.filter(e => !mc.reviewEvidence.includes(e.id));
     let text = '판례와 기록을 더 분석해봐야 한다.';
     if (notFound.length > 0) {
@@ -6381,9 +6488,13 @@ function buildScene(slot) {
     return {bg:'배경/서면.webp',face:getPlayerFace(),speaker:G.name,date:dateStr,result:'success',resultLabel:'검토',text,changes};
   }
   // 메인스토리 재판
-  if (slot.action === 'mainTrial1' || slot.action === 'mainTrial2') {
-    const caseNum = slot.action==='mainTrial1' ? 1 : 2;
-    return {type:'mainTrial', caseNum, bg:'배경/재판.webp', date:dateStr, face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'재판을 시작하겠습니다.', changes:[]};
+  if (/^mainTrial\d$/.test(slot.action)) {
+    const caseNum = parseInt(slot.action.replace('mainTrial',''));
+    const bgMap = {1:'배경/재판.webp', 2:'배경/재판.webp', 3:'배경/재판.webp', 4:'배경/경찰서.webp'};
+    const textMap = {1:'재판을 시작하겠습니다.', 2:'재판을 시작하겠습니다.', 3:'변론기일을 시작하겠습니다.', 4:'조사를 시작하겠습니다.'};
+    const faceMap = {1:'캐릭터얼굴/판사.webp', 2:'캐릭터얼굴/판사.webp', 3:'캐릭터얼굴/판사.webp', 4:'캐릭터얼굴/수사관.webp'};
+    const spkMap = {1:'판사', 2:'판사', 3:'판사', 4:'수사관'};
+    return {type:'mainTrial', caseNum, bg:bgMap[caseNum], date:dateStr, face:faceMap[caseNum], speaker:spkMap[caseNum], text:textMap[caseNum], changes:[]};
   }
 
   if (slot.action === 'consult') {
@@ -6665,13 +6776,13 @@ function buildScene(slot) {
         return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
           result:'success', resultLabel:'데이트',
           text:'오늘도 즐거운 하루였어요!',
-          changes:['자금 -20만원', `${datingName} 호감도 +5`], bgmMode:'love',
+          changes:['자금 -20만원', `${datingName} 호감도 +5`],
           dateEvent: dateEvt};
       }
       return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
         result:'success', resultLabel:'데이트',
         text:'오늘도 즐거운 하루였어요!',
-        changes:['자금 -20만원', `${datingName} 호감도 +5`], bgmMode:'love'};
+        changes:['자금 -20만원', `${datingName} 호감도 +5`]};
     }
   }
 
@@ -7830,11 +7941,20 @@ function closeSummary(){
   G.totalMonths++;
   if(G.year>10){showEnding();return;}
   // 메인스토리 하위호환 보장
-  if (!G.mainStoryOffered) G.mainStoryOffered = { case1: false, case2: false };
-  if (!G.mainStoryFlag) G.mainStoryFlag = { case1_cleared: false, case2_cleared: false };
+  if (!G.mainStoryOffered) G.mainStoryOffered = { case1: false, case2: false, case3: false, case4: false };
+  if (!G.mainStoryFlag) G.mainStoryFlag = { case1_cleared: false, case2_cleared: false, case3_cleared: false, case4_cleared: false };
+  if (!G.mainStoryOffered.hasOwnProperty('case3')) { G.mainStoryOffered.case3=false; G.mainStoryOffered.case4=false; }
+  if (!G.mainStoryFlag.hasOwnProperty('case3_cleared')) { G.mainStoryFlag.case3_cleared=false; G.mainStoryFlag.case4_cleared=false; }
+  // 메인스토리 클리어 플래그 강제 동기화 (덮어쓰기 방어)
+  [G.mainCase1, G.mainCase2, G.mainCase3, G.mainCase4].forEach((mc, idx) => {
+    if (mc && mc.trialPhase >= 4) {
+      const key = ['case1_cleared','case2_cleared','case3_cleared','case4_cleared'][idx];
+      if (!G.mainStoryFlag[key]) { G.mainStoryFlag[key] = true; mc.cleared = true; mc.active = false; }
+    }
+  });
   // 메인스토리 수임 제안 체크
   const ay = 2029 + G.year;
-  console.log('[MainStory] closeSummary check:', {ay, month:G.month, year:G.year, offered:G.mainStoryOffered.case1, mc1:!!G.mainCase1, law:G.stats.lawKnowledge, rep:G.stats.reputation});
+  console.log('[MainStory] closeSummary check:', {ay, month:G.month, year:G.year, c3cleared:G.mainStoryFlag.case3_cleared, c4offered:G.mainStoryOffered.case4, mc3:!!G.mainCase3, mc4:!!G.mainCase4, mc3tp:G.mainCase3?G.mainCase3.trialPhase:'x', mc3active:G.mainCase3?G.mainCase3.active:'x', flags:JSON.stringify(G.mainStoryFlag)});
   if (!G.mainStoryOffered.case1 && !G.mainCase1 && G.month === 1 &&
       (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 900 && G.stats.reputation > 900) {
     console.log('[MainStory] Triggering case 1 offer!');
@@ -7843,6 +7963,21 @@ function closeSummary(){
   if (G.mainStoryFlag.case1_cleared && !G.mainStoryOffered.case2 && !G.mainCase2 && G.month === 1 &&
       (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 900 && G.stats.reputation > 900) {
     showMainStoryOffer(2); return;
+  }
+  // 사건3: 사건2 클리어 후 다음 해 1월
+  if (G.mainStoryFlag.case2_cleared && !G.mainStoryOffered.case3 && !G.mainCase3 && G.month === 1 &&
+      (ay === 2037 || ay === 2038 || ay === 2039)) {
+    showMainStoryOffer(3); return;
+  }
+  // 사건4: 사건3 클리어 후 2039년 1월
+  console.log('[MainStory] case4 check:', {ay, month:G.month, c3cleared:G.mainStoryFlag.case3_cleared, c4offered:G.mainStoryOffered.case4, mc4:G.mainCase4, mc3tp:G.mainCase3&&G.mainCase3.trialPhase, mc3active:G.mainCase3&&G.mainCase3.active});
+  if (G.mainStoryFlag.case3_cleared && !G.mainStoryOffered.case4 && !G.mainCase4 && G.month === 1 && ay === 2039) {
+    showMainStoryOffer(4); return;
+  }
+  // 사건4 압력 이벤트: 1회 조사 후(trialPhase===1), 아직 압력 미통과
+  if (G.mainCase4 && G.mainCase4.active && G.mainCase4.trialPhase === 1 && !G.mainCase4.pressurePassed && !G.mainCase4.pressureShown) {
+    G.mainCase4.pressureShown = true;
+    showCase4PressureEvent(); return;
   }
   if(G.stats.stress>900&&G.stats.fatigue>900){showEndingCustom('번아웃 은퇴','극심한 스트레스와 피로로 인해 더 이상 변호사 생활을 이어갈 수 없게 되었습니다.\n건강을 되찾기 위해 조용히 법조계를 떠났습니다.');return;}
   // 파산 유예 시스템 (자금 마이너스 3개월 지속 시 파산)
@@ -9699,9 +9834,9 @@ function loadGame(slot) {
   if (!data || !data.state) { showToast('저장 데이터가 없습니다.'); return; }
   // G 객체 복원
   // 메인스토리 필드 초기화 (이전 세션 잔류 방지)
-  G.mainCase1 = null; G.mainCase2 = null;
-  G.mainStoryFlag = { case1_cleared: false, case2_cleared: false };
-  G.mainStoryOffered = { case1: false, case2: false };
+  G.mainCase1 = null; G.mainCase2 = null; G.mainCase3 = null; G.mainCase4 = null;
+  G.mainStoryFlag = { case1_cleared: false, case2_cleared: false, case3_cleared: false, case4_cleared: false };
+  G.mainStoryOffered = { case1: false, case2: false, case3: false, case4: false };
   for (const k in data.state) { G[k] = data.state[k]; }
   // 연애 시스템 하위호환
   ensureRomance();
@@ -9819,12 +9954,55 @@ const MAIN_STORY_OFFER_DIALOGUES = {
     {bg:'배경/범행현장.webp', face:'player', speaker:'{name}', text:'외진 산속 한가운데서 피해자가 사망했고, 그 주변 CCTV에 찍힌 그 시간대에 지나간 차량은 피고인의 차량뿐. 피해자의 옷과 몸에서 피고인의 지문이 발견되었고, 나중에 발견된 흉기에서도 피고인의 지문이 발견되었다.'},
     {face:'player', speaker:'{name}', text:'피해자와 피고인은 도라고등학교 동창사이인데 장현우 군수 취임이후 개발사업 문제로 평소 자주 다퉜고, 사건 며칠 전에도 싸우는 모습이 목격되었다. 사건 당일 19시경 누군가가 정자에서 칼에 찔리는 모습을 봤다는 신고전화가 있었고..'},
     {face:'player', speaker:'{name}', text:'출동해보니 피해자가 죽어있었고 피고인이 그 옆에 있었단 말이지..'},
+  ],
+  case3: [
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님, 그때 정말 감사했습니다. 덕분에 무죄를 받았습니다.'},
+    {face:'player', speaker:'{name}', text:'박정호 씨, 잘 지내셨어요? 오늘은 무슨 일로...'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'네... 사실 부탁드릴 것이 있어서 왔습니다.'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'제가 그동안 반대해왔던 도라군 개발사업... 아시죠?'},
+    {face:'player', speaker:'{name}', text:'물론이죠. 이태준 국장 사건과도 관련이 있었던.'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'그 개발사업이 아직도 진행 중입니다. 장현우 군수가 밀어붙이고 있어요.'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님이 재판에서 밝혀주셨잖아요. 환경영향평가서 원본이 개발 불가 판정이었다는 것을.'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'그런데도 이 사업이 합법적으로 진행되고 있다니... 말이 됩니까?'},
+    {face:'player', speaker:'{name}', text:'(확실히... 앞 사건에서 드러난 것만으로도 이 개발사업에는 문제가 많다.)'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'개발사업시행승인처분 취소소송을 하고 싶습니다. 이 사업 자체가 위법하다는 걸 법정에서 증명하고 싶어요.'},
+    {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님이 맡아주실 수 있습니까?'},
+    {face:'player', speaker:'{name}', text:'(행정소송이라... 상대는 도라군, 사실상 장현우 군수다.)'},
+    {face:'player', speaker:'{name}', text:'(게다가 장현우 뒤에는 법조카르텔이 있다. 만만치 않겠지만...)'},
+  ],
+  case4: [
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'............'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'어떻게 오셨습니까?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'저는... 장현우의 동생 장선우입니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'장현우 군수의...? 복... 복수라도 하러 온 겁니까?'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(장현우... 군수실에서 숨진 채 발견됐다. 경찰은 자살로 결론 내렸지.)'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'당신이 우리 형을 그렇게 만들었다는 거... 알고 있어요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'아니.. 저는 장현우씨를 죽이지 않았습니다.. 그럴 시간도 없...'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'법정에서 형의 비리를 다 폭로했지요. 살인 의혹까지.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'솔직히 말하면... 당신이 너무 미웠습니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'............'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'하지만...'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'그 전에. 당신 왜 형을 죽이지 않았다는 말을 하죠? 형은 자살한 것으로 되어있는데.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'흠.. 아무리 생각해도 장현우씨는 자살할 것 같은 사람은 아니거든요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'맞아요. 형은 자살하지 않았어요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'네?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'형이 나쁜 짓을 많이 한 건 알아요. 개발사업으로 돈을 벌었다는 것도....'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'그래도 형은 지옥에 갈 지언정 자살같은 길을 선택할 사람이 아닙니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(그래.. 내 생각도 그렇다.)'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'그리고... 형이 죽기 전에 한 말이 있어요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'\'그 사람이 나를 버릴 수도 있다\'고요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'그 사람?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'모르겠어요... 형이 누구한테 지시를 받을 사람은 아닐텐데.. 저도 뭐가 뭔지 모르겠습니다.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'당신이 너무 미웠지만... 당신의 실력은 압니다. 아이러니하게도 이 사건을 제일 잘 아는 것도 당신이죠. 몇 년째 이 사건을 파고 있으니.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'제발... 형이 왜 죽었는지 밝혀주세요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(장현우의 배후... 법조카르텔의 핵심 인물. 그자가 장현우를 입막음한 건가.)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(장현우조차 그 사람의 이름을 함부로 말하지 못했다... 대체 어떤 인물이길래.)'},
   ]
 };
 
 function showMainStoryOffer(caseNum) {
   playBGM('trial');
-  const dialogues = MAIN_STORY_OFFER_DIALOGUES[caseNum===1?'case1':'case2'];
+  const dialogues = MAIN_STORY_OFFER_DIALOGUES['case'+caseNum];
   showMainTrialDialogueSequence(dialogues, 0, () => {
     // 마지막: 선택지 표시
     const modal = document.getElementById('status-event-modal');
@@ -9834,60 +10012,82 @@ function showMainStoryOffer(caseNum) {
     document.getElementById('se-face-img').src = getPlayerFace();
     document.getElementById('se-dialog').classList.remove('no-face');
     document.getElementById('se-speaker').textContent = G.name;
-    if (caseNum === 1) {
-      document.getElementById('se-text').textContent = '(성진그룹 횡령 사건... 억울한 누명을 쓴 사람을 도울 것인가?)';
-      document.getElementById('se-choices').innerHTML = `
-        <button class="event-choice" onclick="acceptMainStory(1)"><span class="choice-label">A</span> 맡겠습니다. 진실은 밝혀져야 합니다.</button>
-        <button class="event-choice" onclick="declineMainStory(1)"><span class="choice-label">B</span> 죄송합니다. 제가 감당하기엔 너무 큰 사건입니다.</button>`;
-    } else {
-      document.getElementById('se-text').textContent = '(증거가 명백한 사건의 항소심... 맡을 것인가?)';
-      document.getElementById('se-choices').innerHTML = `
-        <button class="event-choice" onclick="acceptMainStory(2)"><span class="choice-label">A</span> 맡겠습니다. 증거가 명백하다고 해서 진실까지 명백한 건 아닙니다.</button>
-        <button class="event-choice" onclick="declineMainStory(2)"><span class="choice-label">B</span> 죄송합니다. 사건이 너무 명백하네요. 1심 판결을 뒤집기는 어려울 것 같습니다.</button>`;
-    }
+    const offerTexts = {
+      1: {prompt:'(성진그룹 횡령 사건... 억울한 누명을 쓴 사람을 도울 것인가?)', accept:'맡겠습니다. 진실은 밝혀져야 합니다.', decline:'죄송합니다. 제가 감당하기엔 너무 큰 사건입니다.'},
+      2: {prompt:'(증거가 명백한 사건의 항소심... 맡을 것인가?)', accept:'맡겠습니다. 증거가 명백하다고 해서 진실까지 명백한 건 아닙니다.', decline:'죄송합니다. 사건이 너무 명백하네요. 1심 판결을 뒤집기는 어려울 것 같습니다.'},
+      3: {prompt:'(도라군 개발사업 취소소송... 장현우 군수를 상대할 것인가?)', accept:'맡겠습니다. 위법한 개발사업은 반드시 막아야 합니다.', decline:'죄송합니다. 행정소송은 제 전문 분야가 아닙니다.'},
+      4: {prompt:'(장현우의 죽음... 자살이 아니라면 진실을 밝힐 것인가?)', accept:'맡겠습니다. 진실은 반드시 밝혀져야 합니다.', decline:'죄송합니다. 이 사건은 제가 맡기 어렵습니다.'},
+    };
+    const ot = offerTexts[caseNum];
+    document.getElementById('se-text').textContent = ot.prompt;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="acceptMainStory(${caseNum})"><span class="choice-label">A</span> ${ot.accept}</button>
+      <button class="event-choice" onclick="declineMainStory(${caseNum})"><span class="choice-label">B</span> ${ot.decline}</button>`;
   });
 }
 
 function acceptMainStory(caseNum) {
   document.getElementById('status-event-modal').style.display = 'none';
   playBGM('normal');
-  const caseObj = {
-    active: true, month: 0, trialPhase: 0, preparation: 0,
-    investigateEvidence: [], reviewEvidence: [],
-    cleared: false, failed: false, wrongCount: 0,
-    startYear: G.year, startMonth: G.month,
-    trialScheduledPhase: -1
-  };
-  if (caseNum === 1) { G.mainCase1 = caseObj; G.mainStoryOffered.case1 = true; }
-  else { G.mainCase2 = caseObj; G.mainStoryOffered.case2 = true; }
-  showToast(caseNum===1 ? '메인스토리 사건 1: 재벌 총수의 비자금 — 수임!' : '메인스토리 사건 2: 살인 누명 — 수임!');
+  if (caseNum <= 2) {
+    const caseObj = {
+      active: true, month: 0, trialPhase: 0, preparation: 0,
+      investigateEvidence: [], reviewEvidence: [],
+      cleared: false, failed: false, wrongCount: 0,
+      startYear: G.year, startMonth: G.month,
+      trialScheduledPhase: -1
+    };
+    if (caseNum === 1) { G.mainCase1 = caseObj; G.mainStoryOffered.case1 = true; }
+    else { G.mainCase2 = caseObj; G.mainStoryOffered.case2 = true; }
+  } else {
+    // 사건3+: 새로운 증거 시스템
+    const caseObj = {
+      active: true, month: 0, trialPhase: 0, preparation: 0,
+      phase: 1,  // Phase 1(1~5월) / Phase 2(6~11월)
+      foundEvidence: [],      // 조사로 찾은 증거 ID
+      reviewedEvidence: [],   // 검토로 의미 파악된 증거 ID
+      cleared: false, failed: false, wrongCount: 0,
+      startYear: G.year, startMonth: G.month,
+      trialScheduledPhase: -1,
+      pressurePassed: false   // 사건4 압력 이벤트용
+    };
+    if (caseNum === 3) { G.mainCase3 = caseObj; G.mainStoryOffered.case3 = true; }
+    else { G.mainCase4 = caseObj; G.mainStoryOffered.case4 = true; }
+  }
+  const titles = {1:'재벌 총수의 비자금', 2:'살인 누명', 3:'도라군 개발사업 취소소송', 4:'장현우 살인사건'};
+  showToast(`메인스토리 사건 ${caseNum}: ${titles[caseNum]} — 수임!`);
   updateUI();
 }
 
 function declineMainStory(caseNum) {
   document.getElementById('status-event-modal').style.display = 'none';
   playBGM('normal');
-  if (caseNum === 1) G.mainStoryOffered.case1 = true;
-  else G.mainStoryOffered.case2 = true;
+  G.mainStoryOffered['case'+caseNum] = true;
   showToast('사건을 거절했습니다.');
   updateUI();
 }
 
 // --- 재판 증거 선택 UI ---
 function showMainTrialEvent(caseNum, callback) {
-  const mc = caseNum===1 ? G.mainCase1 : G.mainCase2;
+  const mc = getMainCaseObj(caseNum);
   if (!mc) { callback(); return; }
+  window._currentTrialCaseNum = caseNum;
   playBGM('trial');
   const phase = mc.trialPhase;
   mc.wrongCount = 0;
-  runMainTrialPhase(caseNum, phase, 0, callback);
+  runMainTrialPhase(caseNum, phase, 0, () => {
+    playBGM('normal');
+    window._currentTrialCaseNum = 0;
+    callback();
+  });
 }
 
 function runMainTrialPhase(caseNum, phase, step, callback) {
-  const trialData = caseNum===1 ? MAIN_TRIAL_1[phase] : MAIN_TRIAL_2[phase];
+  const trialArrays = {1:MAIN_TRIAL_1, 2:MAIN_TRIAL_2, 3:MAIN_TRIAL_3, 4:MAIN_TRIAL_4};
+  const trialData = (trialArrays[caseNum]||[])[phase];
   if (!trialData) { callback(); return; }
 
-  const mc = caseNum===1 ? G.mainCase1 : G.mainCase2;
+  const mc = getMainCaseObj(caseNum);
   const dialogues = trialData.dialogues;
   const evidenceSteps = trialData.evidenceSteps; // [{prompt, correct:['id1','id2'], count:1or2}]
 
@@ -9943,7 +10143,10 @@ function runMainTrialPhase(caseNum, phase, step, callback) {
 function showMainTrialDialogue(d, callback) {
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = `url('${d.bg || '배경/재판.webp'}')`;
+  // bg가 없으면 현재 진행 중인 사건에 맞는 기본 배경 사용
+  const cn = window._currentTrialCaseNum || getMainCaseNum();
+  const defaultBg = (cn >= 4) ? '배경/경찰서.webp' : '배경/재판.webp';
+  document.getElementById('se-bg').style.backgroundImage = `url('${d.bg || defaultBg}')`;
   if (d.face) {
     document.getElementById('se-face').style.display = 'block';
     document.getElementById('se-face-img').src = d.face === 'player' ? getPlayerFace() : d.face;
@@ -9964,11 +10167,12 @@ function showMainTrialDialogueSequence(arr, idx, callback) {
 }
 
 function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback) {
-  const mc = caseNum===1 ? G.mainCase1 : G.mainCase2;
+  const mc = getMainCaseObj(caseNum);
   const allFound = getAllFoundEvidence(caseNum);
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = "url('배경/재판.webp')";
+  const bgMap = {1:'배경/재판.webp', 2:'배경/재판.webp', 3:'배경/재판.webp', 4:'배경/경찰서.webp'};
+  document.getElementById('se-bg').style.backgroundImage = `url('${bgMap[caseNum]||'배경/재판.webp'}')`;
   document.getElementById('se-face').style.display = 'block';
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-dialog').classList.remove('no-face');
@@ -10008,19 +10212,29 @@ function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback)
       if (mc.wrongCount >= 3) {
         // 패소
         mc.failed = true; mc.active = false;
-        showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
-          showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 증거를 제대로 제시하지 못했다. 실패했어.)'}, () => {
-            showToast('메인스토리 사건 패소... 메인스토리가 종료됩니다.');
-            playBGM('normal');
-            finalCallback();
+        const failFace = caseNum>=4 ? '캐릭터얼굴/수사관.webp' : '캐릭터얼굴/판사.webp';
+        const failSpk = caseNum>=4 ? '수사관' : '판사';
+        const failText = caseNum>=4 ? '더 이상 조사를 진행할 수 없습니다. 조사를 종결하겠습니다.' : (caseNum===3 ? '원고 측 변호사, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.' : '변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.');
+        const sentenceText = caseNum>=4 ? '피고소인은 혐의없음으로 불송치 처분하겠습니다.' : (caseNum===3 ? '판결을 선고합니다. 원고의 청구를 기각한다.' : '판결을 선고합니다. 피고인을 징역 30년형에 처한다.');
+        showMainTrialDialogue({face:failFace, speaker:failSpk, text:failText}, () => {
+          showMainTrialDialogue({face:failFace, speaker:failSpk, text:sentenceText}, () => {
+            showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 증거를 제대로 제시하지 못했다. 실패했어.)'}, () => {
+              showToast('메인스토리 사건 패소... 메인스토리가 종료됩니다.');
+              playBGM('normal');
+              finalCallback();
+            });
           });
         });
         return;
       }
       // 오답 연출
-      showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그건 뭡니까?'}, () => {
-        showMainTrialDialogue({face:'player', speaker:G.name, text:'그.. 글쎄요.'}, () => {
-          showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'판사', text:`법정에서 장난치면 안 됩니다. (경고 ${mc.wrongCount}/3)`}, () => {
+      const wrongFace = caseNum>=4 ? '캐릭터얼굴/수사관.webp' : '캐릭터얼굴/판사.webp';
+      const wrongSpk = caseNum>=4 ? '수사관' : '판사';
+      const wrongQ = caseNum>=3 ? '그건 이 쟁점과 무슨 관련이 있습니까?' : '그건 뭡니까?';
+      const wrongW = caseNum>=4 ? '관련 있는 증거를 제시하십시오.' : (caseNum===3 ? '원고 측은 주장에 맞는 증거를 제출하십시오.' : '법정에서 장난치면 안 됩니다.');
+      showMainTrialDialogue({face:wrongFace, speaker:wrongSpk, text:wrongQ}, () => {
+        showMainTrialDialogue({face:'player', speaker:G.name, text:'그.. 잠시만요.'}, () => {
+          showMainTrialDialogue({face:wrongFace, speaker:wrongSpk, text:`${wrongW} (경고 ${mc.wrongCount}/3)`}, () => {
             showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback);
           });
         });
@@ -10124,7 +10338,9 @@ const MAIN_TRIAL_1 = [
       {face:'캐릭터얼굴/군수.webp', speaker:'???', text:'아주 인상적이었네. {name} 변호사.'},
       {face:'player', speaker:'{name}', text:'누구시죠?'},
       {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'???', text:'나도 아주 인상적이었어, {name} 변호사 양반. 이 쪽은 장현우 군수님이고.. 나는 차차 알게 될 걸세. 앞으로 자주 보게 될 것 같은 느낌이구만.'},
-      {face:'player', speaker:'{name}', text:'(장현우... 어디선가 들어본 이름이야. 이 사건 아무래도 수상해. 이만석에게 권력이 있다고는 하나, 검찰에서 이렇게 명백한 사건을 재벌 비자금이 아닌 횡령사건으로 처리한다고..?\n\n좀 더 알아봐야겠어.)'},
+      {face:'player', speaker:'{name}', text:'(장현우... 어디선가 들어본 이름이야. 이 사건 아무래도 수상해. 이만석에게 권력이 있다고는 하나, 검찰에서 이렇게 명백한 사건을 재벌 비자금이 아닌 횡령사건으로 처리한다고..?)'},
+      {face:'player', speaker:'{name}', text:'(그래.. 생각났어. 장현우. 도라군수. 도라군은 성진이 지금 대규모 개발사업을 진행하고 있는 곳...그리고 장현우는 유명한 법조인 출신 해결사. 과연..)'},
+      {face:'player', speaker:'{name}', text:'(좀 더 알아봐야겠어.)'},
     ]
   }
 ];
@@ -10307,13 +10523,564 @@ const MAIN_TRIAL_2 = [
   }
 ];
 
+// --- 사건3 재판 데이터 ---
+const MAIN_TRIAL_3 = [
+  // phase 0: 1회 재판 — 환경영향평가 절차상 하자
+  {
+    dialogues: [
+      {bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'도라군 개발사업시행승인처분 취소소송 제1회 변론기일을 시작하겠습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 청구 취지와 이유를 진술하세요.'},
+      {face:'player', speaker:'{name}', text:'원고 측은 도라군의 개발사업시행승인처분이 위법하므로 취소되어야 한다고 주장합니다.\n해당 처분은 환경영향평가법에서 정한 절차를 위반하였을 뿐 아니라 부실한 환경영향평가에 터잡아 이루어진 것입니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'원고의 주장은 근거 없는 억측입니다.\n도라군 개발사업은 환경영향평가법이 정한 모든 절차를 적법하게 거쳤습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'환경영향평가도 실시했고, 주민 의견 수렴 절차도 마쳤습니다. 어떤 절차적 하자도 없습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 구체적으로 어떤 절차가 위반되었다는 건가요?'},
+      {face:'player', speaker:'{name}', text:'(장현우... 법조인 출신이라지만 직접 나와서 변론을 할 줄이야.)'},
+      {face:'player', speaker:'{name}', text:'재판장님, 핵심은 공청회입니다.\n환경영향평가법상, 주민들이 공청회 개최를 요청한 경우에는 반드시 공청회를 열어야 합니다.\n그런데 도라군은 공청회를 열지 않았습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'글쎄요. 공청회 요청도 없었지만, 공청회를 열지 않았다고 해서 위법하다는 근거가 있습니까?'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고 측 주장에도 일리가 있습니다. 원고 측, 공청회를 하지 않은 경우 그에 따른 처분이 위법해진다는 법적 근거가 있습니까?'},
+    ],
+    evidenceSteps: [{prompt:'공청회 미개최가 위법하다는 법적 근거를 제시하세요.', correct:['inv3_casebook'], count:1}],
+    successDialogues: [
+      {face:'player', speaker:'{name}', text:'여기 환경영향평가 관련 판례집을 봐 주십시오.\n대법원 판례에 따르면, \'주민이 공청회 개최를 요청했음에도 공청회를 열지 않은 경우, 그 환경영향평가 대상 개발사업에 대한 처분은 위법하다\'고 명시되어 있습니다.'},
+      {face:'player', speaker:'{name}', text:'즉, 공청회 개최는 행정청의 재량이 아닙니다. 주민 요청이 있으면 반드시 열어야 하는 의무입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'대법원 판례가 있군요.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'하지만 재판장님, 저희는 공청회 요청 자체를 받은 적이 없습니다. 공청회 개최 요청이 있었다는 근거가 어디 있습니까?'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 그렇다는데요?'},
+      {face:'player', speaker:'{name}', text:'재판장님, 피고의 주장은 당연히 사실과 다릅니다.'},
+    ],
+    evidenceSteps2: [{prompt:'공청회 요청이 있었다는 증거를 제시하세요.', correct:['inv3_hearing_req'], count:1}],
+    successDialogues2: [
+      {face:'player', speaker:'{name}', text:'이 공청회 요청서를 봐 주십시오.\n도라군 주민 300명이 서명하여 공청회 개최를 정식으로 요청했습니다. 300명입니다. 한두 명이 아닙니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'300명이면 상당한 수입니다. 피고 측, 이에 대한 의견은?'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'이 문서의 진위 여부를 확인할 수 없습니다.\n설령 이런 요청서가 있었다 하더라도, 도라군에 정식으로 접수된 적이 없습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 이 요청서가 도라군에 실제로 접수되었다는 증거가 있습니까?'},
+    ],
+    // 3번째 증거 선택 (등기내역) — evidenceSteps3로 추가 처리
+    evidenceSteps3: [{prompt:'요청서가 접수되었다는 증거를 제시하세요.', correct:['inv3_registry'], count:1}],
+    successDialogues3: [
+      {face:'player', speaker:'{name}', text:'여기 군청의 문서 접수 등기내역이 있습니다.\n이 등기내역을 보시면... 공청회 요청서가 도라군청에 정식으로 접수된 기록이 명확하게 남아 있습니다.\n도라군은 이 요청서를 받았습니다. 분명히 받았으면서도 무시한 것입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'접수 기록이 있군요...피고측?'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'저는 저런 요청서를 본 적이 없는데, 한 번 검토해보겠습니다.'},
+      {face:'player', speaker:'{name}', text:'정리하겠습니다. 300명의 주민이 공청회를 요청했고, 그 요청서는 군청에 정식 접수되었습니다.\n그럼에도 도라군은 공청회를 열지 않았습니다. 대법원 판례에 따르면 이것만으로도 이 개발사업 처분은 위법합니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측의 주장에 상당한 근거가 있는 것으로 보입니다.\n피고 측은 공청회를 열지 않은 경위에 대해 다음 변론기일까지 소명하시기 바랍니다.\n다음 변론기일은 6월 첫째 주로 지정하겠습니다.'},
+      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 희망이 보입니다. 감사합니다.'},
+      {face:'player', speaker:'{name}', text:'(절차적 하자를 증명했다. 하지만 피고 측이 어떤 변명을 해올지... 방심할 수 없다.)'},
+    ]
+  },
+  // phase 1: 2회 재판 — 환경영향평가 실질적 하자
+  {
+    dialogues: [
+      {bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'제2회 변론기일을 시작하겠습니다.\n피고 측, 지난번 재판에서 요구한 공청회 미개최 경위에 대해 소명하십시오.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'재판장님, 도라군이 공청회를 열지 못한 데는 합당한 이유가 있었습니다.\n당시 개발 반대파 주민들이 집단으로 행정기관에 찾아와 항의하고, 업무를 방해하는 일이 잦았습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'이러한 상황에서 공청회를 열면 물리적 충돌이 우려되었고, 주민의 안전을 위해 부득이하게 공청회를 보류한 것입니다.\n즉, 공청회를 열지 않은 것이 아니라 열지 못한 것입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'음... 안전상의 이유라... 원고 측, 이에 대한 의견은?'},
+      {face:'player', speaker:'{name}', text:'(공청회 방해를 핑계로 내세우는군. 예상했던 변명이다.)'},
+      {face:'player', speaker:'{name}', text:'재판장님, 피고 측의 변명은 논점을 벗어났습니다만..\n오늘은 절차적 하자뿐만 아니라, 환경영향평가의 실질적 내용에 대해서도 말씀드리고자 합니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'실질적 내용이요?'},
+      {face:'player', speaker:'{name}', text:'네. 이 환경영향평가서 자체가 사실과 다르게 허위로 작성되었습니다. 도라군에는 많은 철새들이 서식하는데, 그 내용이 환경영향평가에는 완전히 누락되어있습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'허위라니요! 환경영향평가는 전문기관에서 실시한 것입니다. 도라군에는 철새도래지 같은 곳은 없어요. 원고측의 억지주장입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 그렇다는데요? 본인 주장에 대한 증거를 제출해보세요.'},
+    ],
+    evidenceSteps: [{prompt:'환경영향평가서가 허위라는 증거 2개를 제시하세요.', correct:['inv3_eia_report','inv3_bird_photo'], count:2}],
+    successDialogues: [
+      {face:'player', speaker:'{name}', text:'먼저 이 환경영향평가서를 봐 주십시오.\n이 평가서에는 \'대상 지역에 철새 도래지가 없으며, 천연기념물 서식지도 확인되지 않는다\'고 기재되어 있습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그런데요?'},
+      {bg:'배경/철새도래지.webp', face:'player', speaker:'{name}', text:'그리고 이 사진들을 봐 주십시오. 제가 직접 현지 답사를 통해 촬영한 것입니다.\n보시다시피, 개발 대상 지역에 철새들이 다수 서식하고 있습니다.\n환경영향평가서에는 \'없다\'고 했지만, 실제로는 철새 도래지가 버젓이 존재하고 있는 것입니다.'},
+      {bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'사진으로 보니 확실히 새들이 있군요.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'사진 한 장으로 환경영향평가서 전체를 부정할 수는 없습니다!\n그 사진이 정말 해당 지역에서 촬영된 건지도 확인할 수 없고, 철새가 잠깐 지나간 것일 수도 있습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'전문기관의 평가 결과를 변호사 개인이 찍은 사진으로 뒤집을 수 있다고 생각하십니까?'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고 측 주장에도 일리가 있습니다. 원고 측, 좀 더 객관적인 근거가 있습니까?'},
+    ],
+    evidenceSteps2: [{prompt:'학술적 근거를 제시하세요.', correct:['inv3_ecology_paper'], count:1}],
+    successDialogues2: [
+      {face:'player', speaker:'{name}', text:'이 학술 논문을 봐 주십시오.\n이것은 생태학 분야의 권위 있는 학술지에 게재된 논문입니다.\n이 논문에 따르면, 도라군 개발 대상 지역에는 천연기념물을 포함한 희귀 동식물이 다수 서식하고 있다고 명확하게 기술되어 있습니다.'},
+      {face:'player', speaker:'{name}', text:'변호사 개인이 찍은 사진이 아닙니다. 전문 연구자들이 학술적 방법론에 따라 조사한 결과입니다.'},
+      {face:'player', speaker:'{name}', text:'정리하겠습니다. 환경영향평가서에는 \'철새와 천연기념물이 없다\'고 기재되어 있지만...\n현지 답사 사진과 학술 논문 모두 정반대의 사실을 증명하고 있습니다.\n이 환경영향평가서는 허위로 작성된 것입니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'그... 그건...'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'환경영향평가의 절차적 하자에 이어 내용의 진실성에도 의문이 제기되었습니다.\n피고 측은 이에 대해 소명하시기 바랍니다.\n다음 변론기일은 9월 첫째 주로 지정하겠습니다.'},
+      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님, 대단하십니다. 환경영향평가 자체가 거짓이었다는 걸 증명하다니...'},
+      {face:'player', speaker:'{name}', text:'(환경영향평가의 절차적·실질적 하자를 모두 증명했다. 하지만 아직 부족하다.)'},
+      {face:'player', speaker:'{name}', text:'(장현우가 왜 이 개발사업에 이렇게 집착하는지... 그 이유를 밝혀야 한다.)'},
+    ]
+  },
+  // phase 2: 3회 재판 — 장현우의 이해관계 폭로
+  {
+    dialogues: [
+      {bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'제3회 변론기일을 시작하겠습니다.\n피고 측, 환경영향평가서의 내용에 대한 소명은?'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'환경영향평가서는 당시 기준으로 정당하게 작성된 것입니다.\n이후 생태 환경이 변했을 가능성도 있고, 조사 시점의 차이일 뿐입니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'무엇보다 이 개발사업은 도라군의 경제 발전과 주민 복리를 위한 것입니다.\n저는 오직 공익을 위해 이 사업을 추진하고 있습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 추가로 주장할 것이 있습니까?'},
+      {face:'player', speaker:'{name}', text:'네, 당연히 피고측의 주장은 완전히 사실과 다릅니다.\n피고 측은 이 개발사업이 공익을 위한 것이라 했습니다.\n하지만 이 사업의 실질적 수혜자는 도라군 주민이 아닙니다.\n바로 장현우 군수 본인입니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'근거 없는 인신공격입니다! 원고 측은 소송과 무관한 주장을 하고 있습니다!'},
+      {face:'player', speaker:'{name}', text:'이 개발사업을 통해 가장 큰 이득을 보는 것은 우리나라 대기업 중 한 곳인 성진기업과 주식회사 전우라는 회사입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'주식회사 전우가 이 사업을 통해 이득을 본다는 증거가 있습니까?'},
+    ],
+    evidenceSteps: [{prompt:'주식회사 전우가 개발사업에 참여하고 있다는 증거를 제시하세요.', correct:['inv3_company_list'], count:1}],
+    successDialogues: [
+      {face:'player', speaker:'{name}', text:'먼저 이 개발사업 참여 회사 명단을 봐 주십시오.\n도라군 개발사업에 참여하고 있는 회사들의 목록입니다.\n여기... \'주식회사 전우\'가 포함되어 있습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'방금 말한 그 회사군요. 그런데 주식회사 전우랑 장현우 군수가 무슨 상관입니까?'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'...'},
+      {face:'player', speaker:'{name}', text:'이걸 봐 주십시오, 재판장님.'},
+    ],
+    evidenceSteps2: [{prompt:'주식회사 전우와 장현우의 관계를 증명할 증거 2개를 제시하세요.', correct:['inv3_corp_reg','inv3_interview'], count:2}],
+    successDialogues2: [
+      {face:'player', speaker:'{name}', text:'첫 번째는 \'주식회사 전우\'의 법인등기사항전부증명서입니다.\n이 증명서에 따르면 주식회사 전우의 대표이사는... \'임순애\'입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'임순애... 그래서요?'},
+      {face:'player', speaker:'{name}', text:'두 번째 문서는 장현우 군수의 과거 인터뷰 기사입니다.\n이 인터뷰에서 장현우 군수는 본인 부인의 이름을 밝혔습니다. \'임순애\'라고요.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'잠깐... 주식회사 전우의 대표이사가 장현우 군수의 부인이란 말입니까?'},
+      {face:'player', speaker:'{name}', text:'그렇습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'부인이 회사를 운영한다고 해서 그게 군수와 무슨 상관입니까?\n부부라도 사업은 각자의 영역입니다!'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고 측 주장도 일리가 있습니다. 원고 측, 부인의 회사와 이 개발사업 사이에 직접적인 연관이 있다는 증거가 있습니까?'},
+      {face:'player', speaker:'{name}', text:'재판장님, 늘 그렇듯 피고의 주장은 사실과 너무나도 다릅니다.'},
+    ],
+    evidenceSteps3: [{prompt:'장현우가 직접 이익을 받고 있다는 증거를 제시하세요.', correct:['inv3_account'], count:1}],
+    successDialogues3: [
+      {face:'player', speaker:'{name}', text:'이것을 봐 주십시오. 장현우 군수의 차명계좌 거래내역입니다.\n이 계좌로 주식회사 전우에서 거액의 자금이 입금되고 있습니다.\n이래도, 부부끼리는 각자의 영역에서 일한다고만 하시겠습니까?'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'!!!'},
+      {face:'player', speaker:'{name}', text:'정리하겠습니다.\n장현우 군수의 부인이 대표이사인 주식회사 전우가 이 개발사업에 참여하고 있고...\n그 회사에서 장현우 군수의 차명계좌로 거액이 흘러들어가고 있습니다.\n이 개발사업은 공익을 위한 것이 아닙니다. 장현우 군수가 자신과 가족의 사적 이익을 위해 추진하고 있는 것입니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'그... 이건...'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이것은 매우 심각한 문제로 보이는군요.\n이 처분의 공정성 자체에 의문이 생깁니다.\n피고 측은 이에 대해 반드시 소명하십시오.\n다음 변론기일은 12월 첫째 주로 지정하겠습니다. 특별한 사정이 없으면 그 날 결심하겠습니다.'},
+      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 장현우가 자기 잇속을 챙기려고 이 짓을 한 거였군요.'},
+      {face:'player', speaker:'{name}', text:'(장현우의 사적 이익 관계를 폭로했다. 그런데... 차명계좌에서 \'김철민\'이라는 이름이 계속 걸린다.)'},
+      {face:'player', speaker:'{name}', text:'(주식회사 전우에서 돈이 들어오고, 김철민에게 거액이 나간다... 김철민은 대체 누구지?)'},
+      {face:'player', speaker:'{name}', text:'(어디선가 본 이름이다.. 김철민.. 이태준 국장 살인사건. 그 사건의 진실도 여기에 있을지 모른다.)'},
+    ]
+  },
+  // phase 3: 4회 재판 — 장현우가 사건2의 진범
+  {
+    dialogues: [
+      {bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'제4회 변론기일을 시작하겠습니다. 오늘 결심할 예정이니 양측 최종 주장을 하십시오.\n피고 측, 지난번 지적에 대한 소명은?'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'저의 차명계좌 건은 현재 조사 중이며, 개발사업 자체와는 별개의 문제입니다.\n설령 저 개인에게 문제가 있다 하더라도, 적법한 절차를 거친 행정처분의 효력에는 영향이 없습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 최종 주장하십시오.'},
+      {face:'player', speaker:'{name}', text:'재판장님, 원고 측은 지금까지 이 개발사업의 환경영향평가가 절차적으로도, 내용적으로도 하자가 있다는 것을 증명했습니다.\n그리고 장현우 군수가 이 사업의 직접적 이해관계자라는 것도 밝혔습니다.\n오늘은... 이 모든 것의 배후에 있는 진실을 밝히겠습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'진실이요?'},
+      {face:'player', speaker:'{name}', text:'장현우 군수는 단순히 개발사업으로 이익만을 취한 것이 아닙니다.\n이 사업의 비밀을 지키기 위해... 사람까지 죽였습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'무슨 소리를 하는 겁니까! 이건 행정소송입니다. 갑자기 저에 대한 인신공격을!!'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측 변호사, 지금 매우 중대한 발언을 하고 있습니다. 증거가 있어야 합니다.'},
+      {face:'player', speaker:'{name}', text:'물론입니다. 재판장님.'},
+    ],
+    evidenceSteps: [{prompt:'장현우와 살인사건의 연관을 증명할 증거 2개를 제시하세요.', correct:['inv3_account','inv3_report_record'], count:2}],
+    successDialogues: [
+      {face:'player', speaker:'{name}', text:'재판장님, 다시 이 차명계좌를 봐 주십시오.\n주식회사 전우에서 돈이 들어오고 있다는 것은 지난번에 보여드렸습니다.\n오늘은 다른 부분을 주목해 주십시오. \'김철민\'이라는 사람에게 거액이 송금되고 있습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'김철민? 그게 누군데요?'},
+      {face:'player', speaker:'{name}', text:'이 사건신고서를 봐 주십시오.\n작년에 있었던 이태준 국장 살인사건... 기억하시겠지요? 제가 피고인 박정호의 무죄를 밝혀낸 그 사건입니다.\n그 살인사건을 경찰에 신고한 사람... 바로 \'김철민\'입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'!!!'},
+      {face:'player', speaker:'{name}', text:'장현우 군수가 거액을 보낸 바로 그 사람이, 살인사건의 신고자입니다.\n인적 없는 외진 산속에서 일어난 살인을 어떻게 목격할 수 있었을까요?\n답은 하나입니다. 김철민은 장현우가 고용한 사람이고, 현장에 있었기 때문에 신고할 수 있었던 것입니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'이... 이건 추측에 불과합니다! 제가 어떻게 박정호랑 이태준이 만나는 것을 알 수 있었겠습니까?'},
+      {face:'player', speaker:'{name}', text:'추측이 아닙니다. 더 있습니다.\n재판장님, 장현우는 박정호와 이태준이 만나는 것을 알고 있었습니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'어떻게 알고 있었다는 것이지요?'},
+    ],
+    evidenceSteps2: [{prompt:'장현우가 박정호의 동선을 알고 있었다는 증거를 제시하세요.', correct:['inv3_phone_data'], count:1}],
+    successDialogues2: [
+      {face:'player', speaker:'{name}', text:'박정호 씨의 핸드폰 분석자료를 봐 주십시오.\n박정호 씨의 핸드폰에는 도청앱이 설치되어 있었습니다. 위치추적 기능이 포함된.\n이 도청앱은 장현우가 보낸 문자메시지의 링크를 통해 설치된 것입니다.\n장현우는 박정호 씨의 위치를 실시간으로 파악하고 있었습니다.'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'맞습니다. 제가 왜 이태준 국장을... 제게는 살인의 동기가 없습니다.'},
+      {face:'player', speaker:'{name}', text:'존경하는 재판장님, 피고의 말은 완전히 사실과 다릅니다. 제가 장현우 군수의 살인동기를 밝히겠습니다.'},
+    ],
+    evidenceSteps3: [{prompt:'장현우의 살인 동기를 증명할 증거를 제시하세요.', correct:['inv3_eia_original'], count:1}],
+    successDialogues3: [
+      {face:'player', speaker:'{name}', text:'이 환경영향평가서 원본을 봐 주십시오.\n원래 환경영향평가 결과는 \'개발 불가\' 판정이었습니다.\n이태준 국장은 이 사실을 알고 있었고, 양심의 가책을 느껴 이 원본을 박정호 씨에게 전달하려 했습니다.\n그래서 그날 밤 둘이 만난 것입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그렇다면...'},
+      {face:'player', speaker:'{name}', text:'장현우는 도청앱으로 박정호 씨의 위치를 추적하고 있었고, 이태준 국장과 만나는 것도 알았습니다. 그리고 이태준이 환경영향평가서 원본을 박정호에게 주려 한다는 사실도요.\n환경영향평가서 원본이 넘어가면 개발사업의 비밀이 탄로 날 것을 두려워한 장현우는...\n김철민을 시켜 이태준 국장을 살해하고, 그 죄를 박정호 씨에게 뒤집어씌운 것입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'............'},
+      {face:'player', speaker:'{name}', text:'장현우 군수는 위법한 개발사업으로 사적 이익을 취했을 뿐만 아니라...\n그 비밀을 지키기 위해 살인까지 저질렀습니다.\n이러한 개발사업시행승인처분이 유효할 수 있겠습니까?'},
+      {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'............'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'본 재판부는 충분히 심리하였으므로 결심하겠습니다.\n선고합니다.\n도라군의 개발사업시행승인처분을 취소합니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'환경영향평가의 절차적·실질적 하자가 인정되고, 그 외 중대한 위법사유가 확인되었습니다.\n아울러 오늘 법정에서 제기된 살인 관련 의혹에 대해서는 검찰에 수사를 촉구하겠습니다.'},
+      {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'(눈물) 변호사님... 해냈습니다... 정말로 해냈습니다...\n이태준이... 이태준이 목숨 걸고 지키려 한 이 땅을... 드디어 지켜냈습니다.'},
+      {face:'player', speaker:'{name}', text:'박정호 씨, 축하합니다. 이 개발사업은 이제 끝났습니다.'},
+      {face:'player', speaker:'{name}', text:'(개발사업은 취소되었고, 장현우의 비리와 살인 의혹도 세상에 드러났다.)'},
+      {face:'player', speaker:'{name}', text:'(하지만... 장현우 혼자의 힘으로 이 모든 것을 할 수 있었을까?)'},
+      {face:'player', speaker:'{name}', text:'(법조카르텔... 장현우 뒤에 있는 진짜 세력. 이 싸움은 아직 끝나지 않았다.)'},
+      // 페이드아웃 후 기자 씬
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'변호사님, 이번 사건 승소 축하드립니다.'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'별 말씀을요.'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'그런데 그 이야기 들으셨어요?'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'무슨 이야기요?'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'아직은 보도가 안 되고 있는데, 어제밤 장현우가 스스로 목숨을 끊었대요.'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'네?'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'아무래도... 개발도 무산된데다가 살인죄로 재판까지 받게 될 처지에, 무서웠겠죠.'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(그럴리가... 그 장현우가 그 정도로 목숨을 끊는다고...? 아니야, 뭔가가 더 있다.)'},
+    ]
+  }
+];
+
+// 사건3 재판에서 evidenceSteps3 지원을 위한 runMainTrialPhase 확장
+// (기존 2단계까지만 지원하던 것을 3단계까지 확장)
+const _origRunMainTrialPhase = runMainTrialPhase;
+runMainTrialPhase = function(caseNum, phase, step, callback) {
+  if (caseNum >= 3) {
+    const trialArrays = {3:MAIN_TRIAL_3, 4:MAIN_TRIAL_4};
+    const trialData = (trialArrays[caseNum]||[])[phase];
+    if (!trialData) { callback(); return; }
+    const mc = getMainCaseObj(caseNum);
+    const dialogues = trialData.dialogues;
+    const es1 = trialData.evidenceSteps || [];
+    const sd1 = trialData.successDialogues || [];
+    const es2 = trialData.evidenceSteps2 || [];
+    const sd2 = trialData.successDialogues2 || [];
+    const es3 = trialData.evidenceSteps3 || [];
+    const sd3 = trialData.successDialogues3 || [];
+
+    // 모든 단계를 순차 실행
+    function runDialogues(arr, idx, cb) {
+      if (idx >= arr.length) { cb(); return; }
+      showMainTrialDialogue(arr[idx], () => runDialogues(arr, idx+1, cb));
+    }
+    function runEvSteps(steps, idx, cb) {
+      if (idx >= steps.length) { cb(); return; }
+      showEvidenceSelection(caseNum, phase, steps[idx], () => runEvSteps(steps, idx+1, cb), callback);
+    }
+
+    // 1단계: 대사 → 증거1 → 성공대사1 → 증거2 → 성공대사2 → 증거3 → 성공대사3 → 완료
+    runDialogues(dialogues, 0, () => {
+      runEvSteps(es1, 0, () => {
+        runDialogues(sd1, 0, () => {
+          if (es2.length === 0) { mc.trialPhase++; mc.preparation=0; callback(); return; }
+          runEvSteps(es2, 0, () => {
+            runDialogues(sd2, 0, () => {
+              if (es3.length === 0) { mc.trialPhase++; mc.preparation=0; callback(); return; }
+              runEvSteps(es3, 0, () => {
+                runDialogues(sd3, 0, () => {
+                  // 특수 선택지 (사건4 4회차 족적 선택)
+                  if (trialData.specialChoice) {
+                    showCase4SpecialChoice(caseNum, trialData.specialChoice, mc, () => {
+                      mc.trialPhase++; mc.preparation=0;
+                      runDialogues(trialData.finalDialogues||[], 0, callback);
+                    }, callback);
+                  } else {
+                    mc.trialPhase++; mc.preparation=0;
+                    runDialogues(trialData.finalDialogues||[], 0, callback);
+                  }
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+    return;
+  }
+  // 사건1~2: 기존 로직
+  _origRunMainTrialPhase(caseNum, phase, step, callback);
+};
+
+// --- 사건4 조사/대질신문 데이터 ---
+const MAIN_TRIAL_4 = [
+  // phase 0: 1회 조사 — 자살이 아니라는 증거
+  {
+    dialogues: [
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'고소인 장선우씨 대리인 {name} 변호사 되시죠? 장현우 씨 사망 건에 대해 고소를 하셨는데...'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'솔직히 말씀드리면, 이 건은 이미 자살로 결론이 난 사건입니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'부검 결과도 질식사. 유서는 없지만, 상황적으로 자살이 명백합니다.\n최근 비리가 폭로되어 궁지에 몰린 상황이었으니까요. 게다가 피고소인도 성명불상.. 이러시면 수사가 곤란합니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'수사관님, 이 사건은 자살이 아닙니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'네, 수사관님. 형은 자살할 사람이 아닙니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'근거가 있으신 겁니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'물론입니다.'},
+    ],
+    evidenceSteps: [{prompt:'자살이 아니라는 증거 2개를 제시하세요.', correct:['inv4_autopsy','inv4_forensic_book'], count:2}],
+    successDialogues: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'먼저 이 부검서를 봐 주십시오.\n장현우는 질식사입니다. 목맴에 의한 사망이죠.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그런데 부검서를 자세히 보시면... 삭흔 주변에 움직인 흔적이 전혀 없습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'움직인 흔적이요? 그게 왜 중요합니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'이 법의학 전문서적을 봐 주십시오.\n법의학에 따르면, 자살에 의한 목맴의 경우에도 삭흔에 움직인 반응이 반드시 나타납니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'사람이 목에 줄이 감기면 본능적으로 발버둥치게 되어 있습니다. 아무리 죽으려는 의지가 강해도, 신체가 반사적으로 반응합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'그런데 부검서에는 그런 흔적이 없다?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그렇습니다. 움직인 흔적이 전혀 없다는 것은...\n장현우가 의식이 없는 상태에서 매달렸다는 뜻입니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'의식이 없는 사람이 스스로 목을 맬 수는 없지요.\n이것은 자살이 아닙니다. 누군가가 의식을 잃은 장현우를 매달아 자살로 위장한 것입니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'일리가 있는 주장입니다. 부검서를 다시 검토해 보겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'다만, 이것만으로는 타살이라고 단정하기 어렵습니다. 추가 증거가 더 필요합니다.\n다음 조사일까지 더 준비해 오십시오.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(첫 번째 벽을 넘었다. 자살이 아니라는 의심을 심었다.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(다음에는 현장에 다른 사람이 있었다는 것을 증명해야 한다.)'},
+    ]
+  },
+  // phase 1: 2회 조사 — 다른 사람이 드나든 증거
+  {
+    dialogues: [
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'2차 조사를 시작하겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'지난번에 자살이 아닐 수 있다는 주장을 하셨는데, 추가 증거가 있습니까?\n타살이라면, 범인이 군수실에 들어갔다는 증거가 있어야 합니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'물론 있습니다. 현장에 다른 사람이 드나들 수 있었다는 증거를 보여드리겠습니다.'},
+    ],
+    evidenceSteps: [{prompt:'현장에 다른 사람이 드나들 수 있었다는 증거 2개를 제시하세요.', correct:['inv4_cctv','inv4_access_log'], count:2}],
+    successDialogues: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'먼저 이 CCTV 영상을 봐 주십시오.\n군수실 복도의 20시부터 24시까지 영상입니다.'},
+      {bg:'배경/건물내cctv.webp', face:'player', speaker:'{name}', text:'잘 보시면... 21시에서 22시까지의 영상과, 22시에서 23시까지의 영상이 겹치고 있습니다.'},
+      {bg:'배경/건물내cctv.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'겹친다고요? 무슨 뜻입니까?'},
+      {bg:'배경/건물내cctv.webp', face:'player', speaker:'{name}', text:'같은 장면이 반복되고 있다는 뜻입니다. 이 영상은 편집된 것입니다.\n보시면 21시 20분과 22시 20분에 같은 고양이가 똑같은 모습으로 지나가고 있지요.'},
+      {bg:'배경/건물내cctv.webp', face:'player', speaker:'{name}', text:'누군가가 특정 시간대의 진짜 영상을 삭제하고, 다른 시간대의 영상을 복사해서 덮어씌운 것이지요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'영상 조작이라...'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그리고 이 출입기록을 봐 주십시오.\n군수실 전자 출입기록에 20시와 22시 30분, 두 번의 출입이 기록되어 있습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'지금까지는 20시에 드나들었던 남자 한 명 이외에는 CCTV 영상에 찍힌 사람이 아무도 없었기 때문에, 더더욱 자살이라고 봤던 거지요.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'하지만 22시에서 23시의 영상이 21시에서 22시의 영상으로 반복된 거라면, 그 사이에 누가 드나드는 것은 충분히 가능합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'CCTV가 조작되었고, 출입기록에 이상이 있다...'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'하지만 CCTV는 단순 오작동을 한 것이고, 22시 30분에 장현우 본인이 잠깐 나갔다 돌아온 것일 수도 있지 않습니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'아닙니다. 다른 사람이 들어왔다는 직접적인 증거가 있습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'어떤 증거입니까?'},
+    ],
+    evidenceSteps2: [{prompt:'다른 사람이 들어왔다는 직접적 증거 2개를 제시하세요.', correct:['inv4_access_card','inv4_scene_photo'], count:2}],
+    successDialogues2: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'이 출입카드를 봐 주십시오.\n군수실 출입에 사용된 카드입니다. 지문 감식을 의뢰했습니다.\n그 결과... 이 카드에서 장현우의 지문이 검출되지 않았습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'본인 카드인데 지문이 없다고요?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'장현우 본인이 이 카드를 사용한 것이 아니거나, 장현우가 평소에도 장갑을 끼고 이 카드를 사용했다는 뜻이겠지요?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'누군가가 장현우의 출입카드를 가져가서 군수실에 들어갔습니다.\n그런데 현장사진을 보시면.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'당연하게도 장현우는 맨손입니다. 이 상태에서 출입카드에 지문이 안 남았다는건..'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'누군가가 출입카드를 사용하고 지문을 닦아냈다...'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'이 정도면... 타살 가능성을 정식으로 수사해야 할 것 같습니다.\n고소인 측에서 생각하는 용의자가 있습니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'있습니다. 20시에 CCTV에 찍혔던 그 사람.. 그 사람을 의심하고 있습니다. 좀 알아보니 박진서라는 사람이더군요. 법조계의 거물 중 거물이고요. 증거를 더 찾으면 말씀드리겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(법조수괴... 장현우를 조종하던 그 인물. 반드시 찾아내겠다.)'},
+    ]
+  },
+  // phase 2: 3회 대질신문 — 박진서의 알리바이 붕괴
+  {
+    dialogues: [
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'오늘은 고소인 측이 지목한 용의자 박진서 씨를 출석시켜 대질신문을 진행하겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'허... 참 황당하군요. 수사관님, 제가 왜 여기 불려 나와야 하는 건지 이해가 안 됩니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'저는 장현우 군수와 아무 관계도 없습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(역시 그렇게 나오시겠다... 몇 년 전 둘이 함께 내게 인사 걸었던 것을 내가 뻔히 기억하는데, 날 도발하는군.)'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 사건 당일 밤의 행적에 대해 말씀해 주시겠습니까?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'사건 당일이요? 글쎄... 기억이 정확하지는 않지만...\n그날 8시에 장현우군수랑 헤어진 후에는 도라군 근처에도 가지 않았습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'제 휴대폰으로 이동내역 확인해보셨을텐데요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'네 그렇더군요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'고소인 대리인, 이 진술에 대해 반박할 증거가 있습니까?'},
+    ],
+    evidenceSteps: [{prompt:'박진서의 이동 내역에 의심을 제기할 증거 2개를 제시하세요.', correct:['inv4_park_phone_loc','inv4_secretary_phone_loc'], count:2}],
+    successDialogues: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'비서 분의 핸드폰 위치 내역을 봐 주십시오.\n사무실에서 식당으로, 식당에서 주유소로, 주유소에서 사무실로. 그리고 박진서씨의 핸드폰 위치 내역도 동일하네요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'그게 이상한건가요?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'어떻게 둘의 위치내역이 이렇게까지 완벽히 일치할 수가 있지요?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'자자 두 분이 이야기하지 마시고... 제가 수사관입니다. 질문은 제가 할게요.\n박진서씨, 고소인측의 주장에 대한 의견 있으십니까?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'저도 나름 지위가 있는 사람입니다. 비서와 함께 움직이면서 일정을 소화하는게 이상할 것은 없지요. 그 날 비서와 함께 다녔기 때문에 위치 내역이 동일한 거예요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'일리가 있습니다. 고소인측은 여기에 대해 어떻게 생각하세요.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'수사관님, 박진서님은 그 날 비서와 같이 다니셨다고 하는데, 저희는 그 주장을 받아들이기 어렵습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그 이유는....'},
+    ],
+    evidenceSteps2: [{prompt:'박진서가 비서와 함께 있지 않았다는 증거를 제시하세요.', correct:['inv4_restaurant_cctv'], count:1}],
+    successDialogues2: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'이 식당의 CCTV 영상을 봐 주십시오.\n그 날 비서 분이 식당에서 식사하는 모습이 선명하게 찍혀 있습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'하지만... 박진서 씨, 이 영상 어디에도 당신은 없습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'!!!'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'정말... 비서 혼자만 보입니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'그.. 그날은 피곤해서 차에서 기다렸을 수도 있습니다. 매번 같이 들어가지는 않으니까.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'정말 그렇습니까? 그럼 이 증거도 봐 주십시오.'},
+    ],
+    evidenceSteps3: [{prompt:'박진서가 차에서 기다리지 않았다는 증거를 제시하세요.', correct:['inv4_park_call_log'], count:1}],
+    successDialogues3: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'박진서 씨의 통화내역입니다.\n비서 분이 식당에 있던 시간대에... 박진서 씨에게 부재중 통화가 와 있는데, 전화를 전혀 안 받으셨더군요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'부재중 통화요?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'차에서 쉬고 있으셨다면 전화를 받지 못할 이유가 전혀 없을 것 같은데요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'그건...'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'박진서 씨, 당신은 핸드폰을 비서에게 맡기고... 다른 곳에 갔던 것 아닙니까?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'아니.. 잠깐 차에서 잠들어서 못 받았을 수도 있지 않나...'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그래요? 그럴 수도 있겠지요. 그런데 왜 비서가 밥 먹고 돌아온 후에도 한참이 지난 밤 12시가 되어서야 부재중 전화에 대해 답신을 하셨죠?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 답변하십시오. 사건 당일 밤 실제로 어디에 있었습니까?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'...변호사를 선임하겠습니다. 더 이상 답변하지 않겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'알겠습니다. 오늘 조사는 여기까지 하겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(박진서의 알리바이가 무너졌다. 핸드폰을 비서에게 맡겨 위치를 조작했다.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(다음 대질신문에서 결정타를 날려야 한다.)'},
+    ]
+  },
+  // phase 3: 4회 대질신문 — 박진서의 범죄 증명
+  {
+    dialogues: [
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'장현우 사망사건 최종 대질신문을 시작하겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 지난번에 답변을 거부하셨는데, 오늘은 답변해 주셔야 합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'저는 장현우 군수의 죽음과 아무 관련이 없습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'알리바이가 어쩌고 하셨지만, 제가 식당에 안 갔다고 해서 살인을 했다는 건 비약이지요.\n저와 장현우 군수는 아는 사이도 아닙니다. 동기가 없어요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/여검사.webp', speaker:'강선 변호사', text:'저는 박진서씨의 변호인 강선 변호사입니다. 자살로 끝난 사건을 이렇게 물고 늘어지다니.. 참으로 안타까운 일입니다. 수사기관은 이렇게 할 일이 없나요?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'강선 변호사님. 이제는 검사님이 아니신데 말을 좀 가려서 해주시지요.\n그나저나 고소인측, 박진서 씨에게 범행 동기가 있다는 증거가 있습니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(강선 저 사람 언제 검사 그만두고 변호사가 된 거야? 그나저나 여기가 중요하다. 장현우와 박진서가 관련있다는 증거는..)'},
+    ],
+    evidenceSteps: [{prompt:'박진서의 범행 동기를 증명할 증거 2개를 제시하세요.', correct:['inv4_ledger','inv4_victim_text'], count:2}],
+    successDialogues: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'수사관님, 박진서씨는 장현우와 관련이 없다고 하셨죠?\n이 장부를 봐 주십시오.'},
+      {bg:'배경/장부족적.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'이건... 뭔가요? 어디서 난 겁니까?'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'이건 박진서 씨가 소지하고 있던 장부입니다. 법조카르텔의 비리가 상세하게 기록되어 있습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/여검사.webp', speaker:'강선 변호사', text:'박진서씨가 일부 비리가 있을지 몰라도, 그건 본 살인사건과는 무관합니다! 저건 박진서씨 개인의 것이에요. 장현우와는 관계가 없습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'그렇다는데요?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그럼 이것도 봐 주십시오.\n장현우가 박진서 씨에게 보낸 문자메시지입니다.'},
+      {bg:'배경/장부사진.webp', face:'player', speaker:'{name}', text:'박진서씨 개인의 것을 어떻게 장현우씨가 찍어서 박진서씨에게 보냈을까요? 박진서씨가 장현우에게 자랑한다고 사본이라도 보내준걸까요?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'그럴리가 없죠?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그건, 원래 이 장부는 박진서가 아니라 장현우의 것이기 때문입니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'장현우는 이 장부로 박진서 씨를 위협하고 있었습니다.\n이전 재판에서 장현우의 비리가 폭로되면서, 장현우가 궁지에 몰리자 장현우는 이것을 이용해 박진서를 위협하며 자신을 살려줄 것을 요청했습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'박진서 입장에서는 이 장부가 공개되면 끝장이지요. 장현우가 자신을 끌어내리기 전에 입을 막아야 했습니다.\n그것이 박진서 씨의 살해 동기입니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'추측에 불과합니다! 동기가 있다고 해서 범인이라는 법은 없습니다!'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/여검사.webp', speaker:'강선 변호사', text:'맞습니다. 대체 이런 물건은 어디서 찾은겁니까?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'애시당초에 내가 무슨 힘이 있어서 장현우 같은 거한을 죽일 수 있단 말이오!'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'고소인 대리인, 장현우씨는 확실히 거구에 힘도 센 반면, 박진서씨는 그다지 체격이 크지 않은데요.\n박진서씨가 장현우씨를 육체적인 방법으로 목을 졸라 죽일 수 있다는 건가요?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'있습니다. 그 증거를 제시하겠습니다.'},
+    ],
+    evidenceSteps2: [{prompt:'박진서가 장현우를 죽일 수 있었던 방법을 증명할 증거 2개를 제시하세요.', correct:['inv4_autopsy2','inv4_prescription'], count:2}],
+    successDialogues2: [
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'이 추가 부검 결과를 봐 주십시오.\n장현우의 혈액 정밀검사에서... 수면제 성분이 검출되었습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'수면제요?!'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'장현우는 수면 상태에서 목이 졸린 것입니다.\n1회 조사에서 말씀드렸지요? 삭흔에 움직인 흔적이 없었다고.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'수면제를 먹여 의식을 잃게 한 다음 매달았기 때문에 움직인 흔적이 없었던 겁니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'그... 그건 장현우가 스스로 수면제를 먹었을 수도...'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그리고 이것을 봐 주십시오. 박진서 씨의 병원 처방전입니다.\n박진서 씨, 당신은 수면제를 처방받고 있었습니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그리고 그 수면제는... 장현우의 체내에서 검출된 것과 동일한 성분입니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'그것은 우연의 일치요!'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/여검사.webp', speaker:'강선 변호사', text:'맞습니다. 수사관님. 이런 억지만으로 기소가 가능하다고 생각합니까?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'확실히 의심스럽긴 하지만 이것만으로는 증거가 완벽하다고 할 수는 없습니다.\n박진서가 범인이라는 것을 명백히 가리키는 증거가 있습니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(거의 다 왔다. 잘 생각해보자. 분명 어딘가 증거는 있다.)'},
+    ],
+    evidenceSteps3: [{prompt:'박진서가 현장에 있었다는 결정적 증거를 제시하세요.', correct:['inv4_ledger'], count:1}],
+    successDialogues3: [
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'바로 박진서씨의 비리장부입니다.'},
+      {bg:'배경/장부족적.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'난 또 뭐라고. 내가 비리가 좀 있다고 해서 사람을 죽일 것 같나?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'네, {name} 변호사님. 이건 박진서씨의 비리의 증거는 될 수 있어도, 살인의 증거는.. 이게 장현우씨의 물건이었다고 하더라도 그냥 훔쳐서 가져온 것일 수도 있어요.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'아닙니다. 다들 이 부분을 잘 봐주십시오.'},
+    ],
+    // 특수 선택지: 3지선다
+    specialChoice: {
+      prompt: '장부의 어떤 부분을 주목해야 할까?',
+      choices: [
+        {label:'발자국을 잘 봐주십시오.', correct:true},
+        {label:'여기 적힌 금액을 잘 봐 주십시오.', correct:false},
+        {label:'여기 적힌 이름들을 잘 봐주십시오.', correct:false}
+      ]
+    },
+    finalDialogues: [
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'박진서 씨는 장현우를 돕지 않으면 자신의 비리를 폭로할 것이 두려워졌습니다. 그런데, 국민적 관심을 끈 사건이 되어버린지라, 장현우를 도와주기에도 어려운 상황이었죠.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'사건 당일 밤, 8시에 장현우를 만나 장현우의 일을 잘 처리해줄 것처럼 달랜후, 수면제가 든 음료를 장현우에게 줬을겁니다. 그리고 군청에서 나와 핸드폰을 비서에게 맡겨 알리바이를 조작하고...'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'장현우가 잠이 들었을만한 시간인 10시30분쯤 장현우의 사무실에서 나올때 몰래 챙겨둔 출입카드를 이용해 군수실로 다시 들어가, 수면제로 인해 깊게 잠이든 장현우를 교살하고..'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'목을 매달아 자살로 위장했습니다.\nCCTV 영상도 조작하고, 출입카드의 지문도 다 지워버렸기에 지문도 없었죠.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'그런데 그 과정에서 하나의 실수가 있었습니다.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'바로 이 족적입니다. 장현우는 수면제에 취해 쓰러지면서 자신이 마시던 커피와 책상위에 있던 비리장부를 바닥에 떨어뜨렸지요.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'그 과정에서 급하게 자신의 비리의 증거를 챙기려던 박진서는, 본인의 발에 묻은 커피를 눈치채지 못하고 책상위에 비리장부가 보이지 않자 어딨는지 찾다가 비리장부를 밟아버리고 만 것입니다. 그 결과 이렇게 족적이 남았지요.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'이 족적은, 박진서씨가 그 날 신었던 신발, CCTV에 찍힌 바로 그 신발의 무늬와 일치합니다. 아마 아직도 집에 가지고 계실지도 모르지요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'............'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'...후. 거기까지 알아낸건가.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'참... 대단하군. 이름 없는 변호사 나부랭이가...'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'처음 성진그룹 사건 재판때 널 봤을때 조치를 취했어야 하는데, 너 때문에 모든 걸 망쳤어.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'성진그룹의 막대한 비자금을 도라군 개발사업으로 세탁하고, 그걸로 장현우와 나도 한몫챙길 생각이었어서 이만석의 멍청한 부탁을 들어줬었는데.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'하하.. 네 놈 때문에 이렇게 될 줄이야.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 장현우 살해 혐의로 긴급체포합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'당신은 진술하지 아니할 권리가 있고, 변호인은 이미 선임하셨네요?'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'{name} 변호사님.. 수고하셨습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'(눈물) 변호사님... 형의 억울함을 풀어주셔서... 감사합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'형은 정말 나쁜 사람이었을지 모르지만, 우리 가족에게는 그러지 않았어요.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'모두가 먹고 살기 힘들던 시절 형이 법조인이 되어서 번 돈으로 우리를 부양하지 않았더라면, 우리는 지금 이렇게 살지 못했을 겁니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'누군가에게는 나쁜 사람이, 우리에게는 좋은 사람이기도 했어요.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그러셨군요... 장현우 씨의 명복을 빕니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(끝났다...)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(몇년전부터 시작된 법조카르텔과의 싸움이 드디어 끝났다.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(재벌의 비자금, 누명을 쓴 환경운동가, 위법한 개발사업, 그리고 자살로 위장된 살인.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(모든 것의 배후에 있었던 박진서... 법조카르텔의 수괴.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(법은 때로는 느리지만... 결국 진실에 도달한다.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(변호사로서 걸어온 이 길이... 틀리지 않았다.)'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'(하지만, 정말 이걸로 끝난 것일까...)'},
+    ]
+  }
+];
+
+// 사건4 특수 선택지 (3지선다)
+function showCase4SpecialChoice(caseNum, choiceData, mc, onCorrect, finalCallback) {
+  const modal = document.getElementById('status-event-modal');
+  modal.style.display = 'flex';
+  document.getElementById('se-bg').style.backgroundImage = "url('배경/장부족적.webp')";
+  document.getElementById('se-face').style.display = 'block';
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-dialog').classList.remove('no-face');
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = choiceData.prompt;
+  let html = '';
+  choiceData.choices.forEach((c, i) => {
+    const label = String.fromCharCode(65+i);
+    html += `<button class="event-choice" onclick="window._case4Choice(${i})"><span class="choice-label">${label}</span> ${c.label}</button>`;
+  });
+  document.getElementById('se-choices').innerHTML = html;
+  window._case4Choice = function(idx) {
+    if (choiceData.choices[idx].correct) {
+      document.getElementById('status-event-modal').style.display = 'none';
+      onCorrect();
+    } else {
+      mc.wrongCount = (mc.wrongCount||0) + 1;
+      if (mc.wrongCount >= 3) {
+        mc.failed = true; mc.active = false;
+        showMainTrialDialogue({bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'더 이상 조사를 진행할 수 없습니다. 조사를 종결하겠습니다.'}, () => {
+          showMainTrialDialogue({bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'피고소인은 혐의없음으로 불송치 처분하겠습니다.'}, () => {
+            showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 증거를 제대로 제시하지 못했다. 실패했어.)'}, () => {
+              showToast('메인스토리 사건 패소... 메인스토리가 종료됩니다.');
+              playBGM('normal'); finalCallback();
+            });
+          });
+        });
+        return;
+      }
+      showMainTrialDialogue({bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'그건 이 사건과 어떤 관련이 있습니까?'}, () => {
+        showMainTrialDialogue({bg:'배경/경찰서.webp', face:'player', speaker:G.name, text:'그.. 잠시만요.'}, () => {
+          showMainTrialDialogue({bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:`관련 있는 증거를 제시하십시오. (경고 ${mc.wrongCount}/3)`}, () => {
+            showCase4SpecialChoice(caseNum, choiceData, mc, onCorrect, finalCallback);
+          });
+        });
+      });
+    }
+  };
+}
+
+// 사건4 압력 이벤트
+function showCase4PressureEvent() {
+  playBGM('trial');
+  const pressureDialogues = [
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'앗.. 수사관님. {name} 변호사입니다. 무슨 일이신지요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'(전화) 변호사님, 죄송한데... 상부에서 연락이 왔습니다.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'장현우 건에 대해... 더 이상 조사하지 말라는 지시가 내려왔어요.\n이미 자살로 종결된 사건을 뒤집을 이유가 없다는 겁니다.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'저도 어쩔 수가 없습니다. 죄송합니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(상부에서 압력이라... 법조카르텔이 움직이고 있다.)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(이대로 포기할 수는 없다. 하지만 혼자서는...)'},
+  ];
+
+  if (G.stats.sociability >= 700) {
+    // 성공: 조력자 등장
+    const allyFace = G.gender==='male' ? '캐릭터얼굴/동료여자어쏘.webp' : '캐릭터얼굴/동료남자어쏘.webp';
+    const allyName = G.gender==='male' ? '동료 어쏘' : '동료 어쏘';
+    const successDialogues = [
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(지금까지 쌓아온 인맥... 도움을 청할 때다.)'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'(전화) 들었네. 상부에서 압력이 들어왔다며?\n나도 나름 법조계에 뼈가 굵은 사람이라 여기저기 아는 사람이 있어. 부당한 수사 중단 지시에 대해 항의를 넣어 보겠네.'},
+      {bg:'배경/상담.webp', face:allyFace, speaker:allyName, text:'내가 언론 쪽에 아는 기자가 있어. \'장현우 사건 수사 중단 압력\' 기사가 나가면 함부로 못 할 거야.'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/검사.webp', speaker:'강혁검사', text:'(전화) 이 건 저도 그냥 넘어갈 수 없어요.\n검찰 내부에서도 이 사건이 석연치 않다는 목소리가 있어요.\n제가 검찰 쪽에서도 움직여 보겠습니다.'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'(전화) 이런 일이... 학계에서도 성명을 내겠네.\n부당한 수사 중단은 법치주의의 근간을 흔드는 일이야.'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(모두가 힘을 보태주고 있다. 혼자가 아니다.)'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'(전화) 변호사님, 상부에서 다시 연락이 왔습니다.\n어째서인지 조사를 계속하래요.\n다음 조사일 잡겠습니다.'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(압력을 이겨냈다. 조사를 계속할 수 있다.)'},
+    ];
+    showMainTrialDialogueSequence([...pressureDialogues, ...successDialogues], 0, () => {
+      G.mainCase4.pressurePassed = true;
+      playBGM('normal');
+      buildSchedule();
+      updateUI();
+      openScheduleOverlay();
+    });
+  } else {
+    // 실패: 메인스토리 종료
+    const failDialogues = [
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(도움을 청할 사람이... 없다.)'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(혼자서는 이 압력을 이겨낼 수 없다.)'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'(전화) 변호사님, 결국... 사건은 자살로 종결됩니다.\n정말 죄송합니다.'},
+      {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'변호사님... 이제 아무도 형의 억울함을 풀어줄 사람이 없는 건가요...'},
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(힘이 부족했다... 미안합니다, 장선우 씨.)'},
+    ];
+    showMainTrialDialogueSequence([...pressureDialogues, ...failDialogues], 0, () => {
+      G.mainCase4.failed = true;
+      G.mainCase4.active = false;
+      showToast('메인스토리 사건 4 실패... 사교성이 부족했습니다.');
+      playBGM('normal');
+      buildSchedule();
+      updateUI();
+      openScheduleOverlay();
+    });
+  }
+}
+
 // --- 월말 트리거: 메인스토리 진행도 관리 ---
 function processMainStoryMonthEnd(checkOffer) {
-  // 진행중인 메인스토리 월 카운트
-  [G.mainCase1, G.mainCase2].forEach((mc, idx) => {
+  [G.mainCase1, G.mainCase2, G.mainCase3, G.mainCase4].forEach((mc, idx) => {
     if (mc && mc.active) {
       mc.month++;
-      // 4회 재판 모두 클리어 시
+      // 사건3+: Phase 전환 (5개월차 이후 Phase 2)
+      if ((idx+1) >= 3 && mc.month >= 5 && mc.phase === 1) {
+        mc.phase = 2;
+      }
+      // 4회 재판/조사 모두 클리어 시
       if (mc.trialPhase >= 4 && !mc.cleared) {
         mc.cleared = true;
         mc.active = false;
@@ -10323,18 +11090,46 @@ function processMainStoryMonthEnd(checkOffer) {
           G.stats.morality = Math.min(999, G.stats.morality + 30);
           G.funds += 500000000;
           showToast('메인스토리 사건 1 클리어! 명성 +50, 도덕성 +30, 자금 +5억원');
-        } else {
+        } else if (idx === 1) {
           G.mainStoryFlag.case2_cleared = true;
           G.stats.reputation = Math.min(999, G.stats.reputation + 80);
           G.stats.morality = Math.min(999, G.stats.morality + 50);
           G.stats.karma = Math.max(0, G.stats.karma - 10);
           showToast('메인스토리 사건 2 클리어! 명성 +80, 도덕성 +50, 업보 -10');
+        } else if (idx === 2) {
+          G.mainStoryFlag.case3_cleared = true;
+          G.stats.reputation = Math.min(999, G.stats.reputation + 100);
+          G.stats.morality = Math.min(999, G.stats.morality + 60);
+          G.funds += 300000000;
+          console.log('[MainStory] CASE3 CLEARED! trialPhase:', mc.trialPhase, 'flag:', G.mainStoryFlag.case3_cleared);
+          showToast('메인스토리 사건 3 클리어! 명성 +100, 도덕성 +60, 자금 +3억원');
+        } else if (idx === 3) {
+          G.mainStoryFlag.case4_cleared = true;
+          G.stats.reputation = Math.min(999, G.stats.reputation + 150);
+          G.stats.morality = Math.min(999, G.stats.morality + 80);
+          G.stats.karma = Math.max(0, G.stats.karma - 20);
+          showToast('메인스토리 사건 4 클리어! 명성 +150, 도덕성 +80, 업보 -20 — 메인스토리 완결!');
         }
       }
     }
   });
   return false;
 }
+
+// ==================== 임시 디버그 (배포 전 삭제) ====================
+function debugClearCase3() {
+  if (!G.mainCase3) {
+    G.mainCase3 = {active:false, month:12, trialPhase:4, preparation:0, phase:2, foundEvidence:[], reviewedEvidence:[], cleared:true, failed:false, wrongCount:0, startYear:G.year-1, startMonth:1, trialScheduledPhase:3, pressurePassed:false};
+  } else {
+    G.mainCase3.trialPhase = 4; G.mainCase3.cleared = true; G.mainCase3.active = false;
+  }
+  G.mainStoryFlag.case3_cleared = true;
+  G.mainStoryOffered.case3 = true;
+  showToast('DEBUG: 사건3 강제 클리어! case3_cleared=' + G.mainStoryFlag.case3_cleared);
+  console.log('[DEBUG] case3 forced clear:', G.mainStoryFlag, G.mainCase3);
+  updateUI();
+}
+// 콘솔에서 debugClearCase3() 호출하거나, 게임 화면에서 아래 버튼 사용
 
 // ==================== ENDING ====================
 function showEnding(){
