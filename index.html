@@ -991,7 +991,7 @@ const MAIN_STORY_EVIDENCE = {
       {id:'inv4_park_phone_loc', name:'박진서 핸드폰 위치', desc:'박진서의 핸드폰 위치 내역을 확보했다.', reviewDesc:'위치 내역을 분석하니... 사무실→식당→주유소→사무실. 비서의 동선과 완전히 동일하다.'},
       {id:'inv4_secretary_phone_loc', name:'비서 핸드폰 위치', desc:'박진서 비서의 핸드폰 위치 내역을 확보했다.', reviewDesc:'비서의 위치 내역을 분석하니... 박진서와 동일한 경로다.'},
       {id:'inv4_restaurant_cctv', name:'식당 CCTV', desc:'박진서의 비서가 갔던 식당의 CCTV 영상을 확보했다.', reviewDesc:'식당 CCTV를 분석하니... 비서는 확인되지만 박진서는 영상에 없다!'},
-      {id:'inv4_park_call_log', name:'박진서 통화내역', desc:'박진서의 통화내역을 확보했다.', reviewDesc:'통화내역을 분석하니... 비서가 식당에 있던 시간대에 부재중 통화가 있다. 전화를 받지 못했다?'},
+      {id:'inv4_park_call_log', name:'박진서 통화내역', desc:'박진서의 통화내역을 확보했다.', reviewDesc:'통화내역을 분석하니... 장현우가 죽던 사건 당일 9시에서 10시사이 여러차례의 부재중 통화가 있었고, 박진서는 밤 12시이후에야 답을 한 것이 확인된다.'},
       {id:'inv4_ledger', name:'박진서의 비리 장부', desc:'박진서가 소지하고 있던 비리 관련 장부를 입수했다.', reviewDesc:'장부를 분석하니... 비리내용을 기록한 장부이다. 장부에 발자국이 찍혀있다.'},
       {id:'inv4_victim_text', name:'장현우가 보낸 문자', desc:'장현우의 핸드폰에서 박진서에게 보낸 문자메시지를 발견했다.', reviewDesc:'문자를 분석하니... 박진서가 가지고 있는 장부를 장현우가 문자로 보냈다.'},
       {id:'inv4_autopsy2', name:'부검서 (수면제)', desc:'부검서의 추가 분석 결과를 입수했다. 혈액 정밀검사 결과가 포함되어 있다.', reviewDesc:'추가 부검 결과를 분석하니... 체내에서 수면제 성분이 검출되었다!'},
@@ -1078,7 +1078,7 @@ function checkAndInsertEvent(eventDef, vnScenes) {
 function getGeneralEvents() {
   return [
     // 1. 선배의 부탁
-    { id:'senbaeButak', prob:0.005, dayOnly:true,
+    { id:'senbaeButak', prob:0.003, dayOnly:true,
       bg:'배경/상담.webp', faceFn: randomColleagueFace,
       dialogues: [
         {speaker:'선배', text:'{name}변호사, 미안한데 좀 도와줘. 세금 문제 때문에 그러는데 이거 처리좀 해주면 안 될까?'},
@@ -1089,24 +1089,24 @@ function getGeneralEvents() {
       choices:[
         {text:'들어준다', effects:{karma:5,sociability:5,stress:5}},
         {text:'합법적인 부분만 일부 도와준다', effects:{sociability:1,stress:3}},
-        {text:'도와주지 않는다', effects:{sociability:-3,morality:5}}
+        {text:'도와주지 않는다', effects:{sociability:-2,morality:3}}
       ]
     },
     // 2. 언론 인터뷰
-    { id:'interview', prob:0.005, dayOnly:true, condition:()=>G.cases>0,
+    { id:'interview', prob:0.003, dayOnly:true, condition:()=>G.cases>0,
       bg:'배경/상담.webp', face:'캐릭터얼굴/기자.webp',
       dialogues: [
         {speaker:'기자', text:'{name}변호사님, 지금 진행중인 사건에 대한 인터뷰, 가능하실까요?'}
       ],
       prompt:'어떡하지? 비밀유지의무 위반 소지가 있는데..',
       choices:[
-        {text:'인터뷰한다', effects:{reputation:3,karma:3}},
+        {text:'인터뷰한다', effects:{reputation:2,karma:3}},
         {text:'의뢰인에게 물어본다', effects:{reputation:1}},
         {text:'거절한다', effects:{morality:2,charm:-1}}
       ]
     },
     // 3. 동료의 실수 발견
-    { id:'colleagueMistake', prob:0.005, dayOnly:true,
+    { id:'colleagueMistake', prob:0.003, dayOnly:true,
       condition:()=>G.status==='associate'||G.status==='partner'||G.status==='inhouse',
       bg:'배경/상담.webp', faceFn: randomColleagueFace,
       dialogues: [
@@ -1115,13 +1115,13 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지? 김변호사의 서면의 오류에 대해..',
       choices:[
-        {text:'알려준다', effects:{morality:3,sociability:3}},
+        {text:'알려준다', effects:{morality:1,sociability:2}},
         {text:'가만히 있는다', effects:{karma:2,stress:3}},
-        {text:'상사에게 말한다', effects:{reputation:3,karma:1,sociability:-2}}
+        {text:'상사에게 말한다', effects:{reputation:2,karma:1,sociability:-2}}
       ]
     },
     // 4. 뇌물 유혹
-    { id:'bribe', prob:0.005, dayOnly:true, condition:()=>G.cases>0,
+    { id:'bribe', prob:0.003, dayOnly:true, condition:()=>G.cases>0,
       bg:'배경/상담.webp', faceFn: randomClientFace,
       dialogues: [
         {speaker:'상대방', text:'{name}변호사님, 지금 맡고 계신 사건, 저를 이기게 도와주시면 사례드리겠습니다.'},
@@ -1130,13 +1130,13 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'거절하고 돌려보낸다', effects:{morality:5,mental:5}},
-        {text:'거절하고 신고한다', effects:{morality:5,reputation:5,karma:5}},
+        {text:'거절하고 돌려보낸다', effects:{morality:2,mental:1}},
+        {text:'거절하고 신고한다', effects:{morality:2,reputation:1}},
         {text:'받아들인다', effects:{funds:10000000,karma:15}, special:'forceLose'}
       ]
     },
     // 5. 의뢰인의 거짓말
-    { id:'clientLie', prob:0.005, dayOnly:true, condition:()=>G.cases>0,
+    { id:'clientLie', prob:0.003, dayOnly:true, condition:()=>G.cases>0,
       bg:'배경/상담.webp', faceFn: randomClientFace,
       dialogues: [
         {speaker:'{name}', text:'선생님, 지난번 말씀드린 증인은 섭외가 된 거지요?'},
@@ -1144,26 +1144,26 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'위증은 안 된다고 한다', effects:{morality:5,debate:1}},
+        {text:'위증은 안 된다고 한다', effects:{morality:2,debate:1}},
         {text:'못 들은 척하고 넘긴다', effects:{karma:5}, special:'forceWin'},
         {text:'위증에 적극 협조한다', effects:{karma:15}, special:'forceWinOrDisbar'}
       ]
     },
     // 6. 후배의 고민 상담
-    { id:'juniorAdvice', prob:0.005,
+    { id:'juniorAdvice', prob:0.003,
       bg:'배경/상담.webp', faceFn: randomColleagueFace,
       dialogues: [
         {speaker:'후배', text:'{name}변호사님. 요즘 변호사 너무 어렵다고 하고, 어떻게 살아야 할지 고민입니다. 이 길이 맞는 걸까요?'}
       ],
       prompt:'어떻게 대답해줄까..',
       choices:[
-        {text:'진지하게 조언한다', effects:{sociability:3,mental:3,debate:1}},
+        {text:'진지하게 조언한다', effects:{sociability:2,debate:1}},
         {text:'대충 힘내라고 한다', effects:{sociability:1}},
-        {text:'그런 나약한 마인드로 어떻게 살 거냐고 혼낸다', effects:{sociability:-2,karma:2,stress:-2}}
+        {text:'그런 나약한 마인드로 어떻게 살 거냐고 혼낸다', effects:{sociability:-2,karma:1,stress:-2}}
       ]
     },
     // 7. 진상 의뢰인 (저녁/주말에만)
-    { id:'troubleClient', prob:0.005, eveningOnly:true, condition:()=>G.cases>0,
+    { id:'troubleClient', prob:0.003, eveningOnly:true, condition:()=>G.cases>0,
       bg:'배경/야근.webp', faceFn: randomClientFace,
       dialogues: [
         {speaker:'의뢰인', text:'{name}변호사님, 지금 맡고 계신 사건, 제대로 처리하고 계신건 맞나요?'},
@@ -1189,8 +1189,8 @@ function getGeneralEvents() {
       prompt:'어떡하지? 상사의 부당한 지시를..',
       choices:[
         {text:'받아들인다', effects:{karma:5,stress:10}, special:'bossOrderAccept'},
-        {text:'받아들이지 않는다', effects:{morality:5}, special:'inhouseEvalChange', evalDelta:-5},
-        {text:'외부에 고발한다', effects:{morality:5,reputation:20,stress:20}, special:'inhouseEvalChange', evalDelta:-30}
+        {text:'받아들이지 않는다', effects:{morality:3}, special:'inhouseEvalChange', evalDelta:-5},
+        {text:'외부에 고발한다', effects:{morality:3,reputation:3,stress:20}, special:'inhouseEvalChange', evalDelta:-30}
       ]
     },
     // 9. 너튜버가 되인가요?
@@ -1218,9 +1218,9 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지? 동료들 사건까지 도와주려고 온 게 아닌데..',
       choices:[
-        {text:'도와준다', effects:{sociability:3,stress:10}, special:'inhouseEvalChange', evalDelta:5},
+        {text:'도와준다', effects:{sociability:2,stress:10}, special:'inhouseEvalChange', evalDelta:5},
         {text:'거절한다', effects:{mental:5}, special:'inhouseEvalChange', evalDelta:-5},
-        {text:'다른 변호사를 소개한다', effects:{sociability:3}, special:'inhouseEvalChange', evalDelta:-2}
+        {text:'다른 변호사를 소개한다', effects:{sociability:2}, special:'inhouseEvalChange', evalDelta:-2}
       ]
     },
     // 11. 사장님의 심부름
@@ -1287,7 +1287,7 @@ function getGeneralEvents() {
       ]
     },
     // 15. 의뢰인의 감사 선물
-    { id:'thankYouGift', prob:0.005, dayOnly:true, condition:()=>G.wins>=10,
+    { id:'thankYouGift', prob:0.002, dayOnly:true, condition:()=>G.wins>=10,
       bg:'배경/상담.webp', faceFn: randomClientFace,
       dialogues: [
         {speaker:'의뢰인', text:'{name}변호사님! 지난번 사건 정말 감사했습니다. 이건 감사의 표시로 준비한 선물입니다.'},
@@ -1296,24 +1296,24 @@ function getGeneralEvents() {
       prompt:'어떡하지?',
       choices:[
         {text:'감사히 받겠습니다', effects:{funds:1000000}},
-        {text:'마음만 받겠습니다.', effects:{morality:5,reputation:2}},
-        {text:'감사합니다. 대신 주변에 소개 부탁드립니다', effects:{sales:2,sociability:2}}
+        {text:'마음만 받겠습니다.', effects:{morality:2,reputation:1}},
+        {text:'감사합니다. 대신 주변에 소개 부탁드립니다', effects:{sales:2,sociability:1}}
       ]
     },
     // 16. 변호사 윤리 딜레마
-    { id:'ethicsDilemma', prob:0.003, dayOnly:true, condition:()=>G.cases>0,
+    { id:'ethicsDilemma', prob:0.002, dayOnly:true, condition:()=>G.cases>0,
       bg:'배경/서면.webp', faceFn: getPlayerFace,
       dialogues: [
         {speaker:'{name}', text:'의뢰인이 준 서류를 검토하다 보니... 이건 의뢰인이 유죄라는 결정적 증거잖아. 의뢰인은 이 증거의 존재를 모르는 것 같은데...'}
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'의뢰인에게 알리고 정직하게 대응 방안을 논의한다', effects:{morality:3,debate:2}},
-        {text:'이 증거는 본 적 없는 걸로 한다', effects:{karma:5,stress:10}},
+        {text:'의뢰인에게 알리고 정직하게 대응 방안을 논의한다', effects:{morality:2,debate:1}},
+        {text:'이 증거는 본 적 없는 걸로 한다', effects:{karma:3,stress:10}},
         {text:'사건을 사임한다', effects:{reputation:-2}, special:'resignCase'}
       ]
     },
-    // 17. 부동산 투자 제안
+    // 17. 코인 투자 제안
     { id:'investOffer', prob:0.003, dayOnly:true, condition:()=>G.funds>=300000000,
       bg:'배경/상담.webp', faceFn: randomClientFace,
       dialogues: [
@@ -1329,7 +1329,7 @@ function getGeneralEvents() {
       ]
     },
     // 18. 로스쿨 특강 요청
-    { id:'lectureRequest', prob:0.005, condition:()=>G.phdCompleted,
+    { id:'lectureRequest', prob:0.003, condition:()=>G.phdCompleted,
       bg:'배경/대학원.webp', face:'캐릭터얼굴/법학교수.webp',
       dialogues: [
         {speaker:'법학교수', text:'{name}변호사, 이번에 우리 로스쿨에서 실무 특강을 해줄 수 있겠나?'},
@@ -1338,12 +1338,12 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'기꺼이 하겠습니다', effects:{reputation:3,stress:5,funds:1000000}},
+        {text:'기꺼이 하겠습니다', effects:{reputation:2,stress:5,funds:1000000}},
         {text:'시간이 안 될 것 같습니다', effects:{}}
       ]
     },
     // 19. 의뢰인의 협박
-    { id:'clientThreat', prob:0.003, eveningOnly:true, condition:()=>G.cases>0,
+    { id:'clientThreat', prob:0.002, eveningOnly:true, condition:()=>G.cases>0,
       bg:'배경/야근.webp', faceFn: randomClientFace,
       dialogues: [
         {speaker:'의뢰인', text:'{name}변호사, 이번 사건 지면 가만 안 두겠어. 알겠어?'},
@@ -1352,13 +1352,13 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'협박에 굴하지 않겠습니다. 경찰에 신고하겠습니다', effects:{morality:5,reputation:3,stress:15}, special:'resignCase'},
-        {text:'최선을 다하겠습니다. 걱정 마세요', effects:{stress:10,mental:-3}},
+        {text:'협박에 굴하지 않겠습니다. 경찰에 신고하겠습니다', effects:{morality:3,stress:15}, special:'resignCase'},
+        {text:'최선을 다하겠습니다. 걱정 마세요', effects:{stress:10,mental:1}},
         {text:'이 사건 사임하겠습니다', effects:{stress:-5}, special:'resignCase'}
       ]
     },
     // 20. 길거리 법률 상담
-    { id:'streetConsult', prob:0.005, eveningOnly:true, condition:()=>(G.youtubeSubscribers>=200000||G.snsFollowers>=50000),
+    { id:'streetConsult', prob:0.002, eveningOnly:true, condition:()=>(G.youtubeSubscribers>=200000||G.snsFollowers>=50000),
       bg:'배경/저녁외출.webp', faceFn: randomClientFace,
       dialogues: [
         {speaker:'행인', text:'저기요, 혹시 변호사님이세요? 인터넷에서 뵀던 것 같아서...'},
@@ -1367,9 +1367,9 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'그럼요, 말씀해보세요', effects:{morality:3,sociability:2,fatigue:3}},
+        {text:'그럼요, 말씀해보세요', effects:{morality:1,sociability:1,sales:1,fatigue:3}},
         {text:'죄송합니다, 지금은 퇴근 시간이라서요', effects:{}},
-        {text:'저희 사무실로 내일 오세요. 명함 드릴게요', effects:{sales:2,sociability:1}}
+        {text:'저희 사무실로 내일 오세요. 명함 드릴게요', effects:{sales:1,sociability:1}}
       ]
     },
     // 21. 변호사 징계 위원회 소환
@@ -1388,7 +1388,7 @@ function getGeneralEvents() {
       ]
     },
     // 22. 동료 변호사의 스캔들
-    { id:'colleagueScandal', prob:0.003, dayOnly:true,
+    { id:'colleagueScandal', prob:0.002, dayOnly:true,
       bg:'배경/상담.webp', face:'캐릭터얼굴/기자.webp',
       dialogues: [
         {speaker:'기자', text:'{name}변호사님, 같은 사무실의 김변호사에 대해 좀 여쭤볼 게 있는데요. 비리 의혹이 있어서 취재 중입니다.'},
@@ -1397,12 +1397,12 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'동료에 대해 말씀드리기 어렵습니다', effects:{morality:3,sociability:2}},
+        {text:'동료에 대해 말씀드리기 어렵습니다', effects:{morality:2,sociability:1}},
         {text:'제가 아는 범위에서 말씀드리겠습니다', effects:{reputation:2,sociability:-3,karma:2}}
       ]
     },
     // 23. 갑작스러운 정전
-    { id:'powerOutage', prob:0.003, dayOnly:true,
+    { id:'powerOutage', prob:0.002, dayOnly:true,
       bg:'배경/야근.webp', faceFn: getPlayerFace,
       dialogues: [
         {speaker:'{name}', text:'앗, 갑자기 정전이 됐네. 지금 작성하던 서면이... 설마 저장 안 한 건 아니겠지?!'}
@@ -1411,11 +1411,11 @@ function getGeneralEvents() {
       choices:[
         {text:'차분히 자동저장 파일을 찾아본다', effects:{observation:2}},
         {text:'멘붕한다. 오늘 하루 망했어...', effects:{stress:15,mental:-3}},
-        {text:'이럴 줄 알고 항상 수시로 저장해뒀지', effects:{mental:3}}
+        {text:'이럴 줄 알고 항상 수시로 저장해뒀지', effects:{mental:2}}
       ]
     },
     // 24. 변호사 체육대회
-    { id:'sportsDay', prob:0.003, dayOnly:true, condition:()=>G.stats.stamina>=300,
+    { id:'sportsDay', prob:0.002, dayOnly:true, condition:()=>G.stats.stamina>=300,
       bg:'배경/운동모임.webp', faceFn: randomColleagueFace,
       dialogues: [
         {speaker:'동료', text:'{name}변호사님! 이번에 변호사 체육대회가 열리는데, 같이 나가실래요?'},
@@ -1424,9 +1424,9 @@ function getGeneralEvents() {
       ],
       prompt:'어떡하지?',
       choices:[
-        {text:'좋아요! 나가봅시다', effects:{stamina:3,sociability:3,reputation:1,fatigue:5,stress:-5}},
+        {text:'좋아요! 나가봅시다', effects:{stamina:2,sociability:1,reputation:1,fatigue:5,stress:-5}},
         {text:'저는 운동을 잘 못해서...', effects:{}},
-        {text:'응원만 하러 갈게요', effects:{sociability:2,stress:-3}}
+        {text:'응원만 하러 갈게요', effects:{sociability:1,stress:-3}}
       ]
     },
     // 25. 배우자의 불만
@@ -1516,7 +1516,7 @@ function getActionEvents(actionId) {
           ]
         },
         // 법정 모욕
-        { id:'courtInsult', prob:0.03,
+        { id:'courtInsult', prob:0.02,
           bg:'배경/재판.webp', faceFn: randomColleagueFace,
           dialogues: [
             {speaker:'상대방 변호사', text:'이의있습니다! 상대측 변호사는 법도 제대로 모르면서 엉터리 변론을 하고 있습니다!'},
@@ -1524,9 +1524,9 @@ function getActionEvents(actionId) {
           ],
           prompt:'어떡하지?',
           choices:[
-            {text:'침착하게 논리로 반박한다', effects:{debate:3,reputation:2}},
+            {text:'침착하게 논리로 반박한다', effects:{debate:2,reputation:1}},
             {text:'재판장에게 상대방 변호사의 모욕적 발언에 대해 이의를 제기한다', effects:{reputation:1,stress:5}},
-            {text:'똑같이 언성을 높인다', effects:{karma:3,reputation:-5,stress:10}}
+            {text:'똑같이 언성을 높인다', effects:{debate:-1,reputation:-5,stress:10}}
           ]
         }
       ];
@@ -1724,7 +1724,7 @@ function getActionEvents(actionId) {
     case 'drive':
       return [
         // 교통사고
-        { id:'carAccident', prob:0.03,
+        { id:'carAccident', prob:0.02,
           bg:'배경/여행.webp', face: null,
           dialogues: [
             {speaker:'{name}', text:'앗, 차가 미끄러졌다... 접촉사고가 나버렸네.'}
@@ -10633,7 +10633,7 @@ const MAIN_TRIAL_3 = [
     evidenceSteps: [{prompt:'공청회 미개최가 위법하다는 법적 근거를 제시하세요.', correct:['inv3_casebook'], count:1}],
     successDialogues: [
       {face:'player', speaker:'{name}', text:'여기 환경영향평가 관련 판례집을 봐 주십시오.\n대법원 판례에 따르면, \'주민이 공청회 개최를 요청했음에도 공청회를 열지 않은 경우, 그 환경영향평가 대상 개발사업에 대한 처분은 위법하다\'고 명시되어 있습니다.'},
-      {face:'player', speaker:'{name}', text:'즉, 공청회 개최는 행정청의 재량이 아닙니다. 주민 요청이 있으면 반드시 열어야 하는 의무입니다.'},
+      {face:'player', speaker:'{name}', text:'즉, 공청회 개최 요건이 충족됐음에도 행정청이 공청회를 열지 않은경우 그것만으로도 처분이 위법해지는 것입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'대법원 판례가 있군요.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'하지만 재판장님, 저희는 공청회 요청 자체를 받은 적이 없습니다. 공청회 개최 요청이 있었다는 근거가 어디 있습니까?'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 그렇다는데요?'},
