@@ -9029,7 +9029,7 @@ function openInvestMenu() {
       <div class="effects">투자 ${f(c.amount)} → 현재 ${f(c.currentValue)} (${pct(c.currentValue,c.amount)})</div></div>
       <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCoin(${i})">판매</div></div>`;
   });
-  if(iv.coins.length<2) html+=`<div class="action-option" onclick="investInput('coin')"><div><div class="name">💎 코인 투자</div><div class="effects">1000만~10억 | 매월 -80%~+200% 변동</div></div></div>`;
+  if(iv.coins.length<2) html+=`<div class="action-option" onclick="investInput('coin')"><div><div class="name">💎 코인 투자</div><div class="effects">1000만~10억 | 매월 -95%~+200% 변동</div></div></div>`;
 
   // 주식
   if(iv.domesticStock){
@@ -9168,8 +9168,8 @@ function processInvestmentsMonthly(){
   if(iv.savings){iv.savings.monthsLeft--;if(iv.savings.monthsLeft>0){G.funds-=iv.savings.monthly;iv.savings.totalPaid+=iv.savings.monthly;}}
   if(iv.fund)iv.fund.monthsLeft--;
   if(iv.venture)iv.venture.monthsLeft--;
-  // 코인 변동 (50% 하락 0~-80%, 50% 상승 0~+200%)
-  iv.coins.forEach(c=>{const rate=Math.random()<0.5?-Math.random()*0.8:Math.random()*2.0;c.currentValue=Math.max(0,Math.floor(c.currentValue*(1+rate)));});
+  // 코인 변동 (50% 하락 0~-95%, 50% 상승 0~+200%)
+  iv.coins.forEach(c=>{const rate=Math.random()<0.5?-Math.random()*0.95:Math.random()*2.0;c.currentValue=Math.max(0,Math.floor(c.currentValue*(1+rate)));});
   // 국내주식 변동 (50% 하락 0~-30%, 50% 상승 0~+50%)
   if(iv.domesticStock){const rate=Math.random()<0.5?-Math.random()*0.3:Math.random()*0.5;iv.domesticStock.currentValue=Math.max(0,Math.floor(iv.domesticStock.currentValue*(1+rate)));}
   // 해외주식 변동 (50% 하락 0~-15%, 50% 상승 0~+30%)
@@ -9719,7 +9719,7 @@ function loadGame(slot) {
   const bgMap = {oneroom:'원룸.webp', apartment:'아파트.webp', luxury:'최고급아파트.webp'};
   document.querySelector('.room-bg').style.backgroundImage = `url('${bgMap[G.housing]||'원룸.webp'}')`;
   updateUI();
-  playBGM('normal');
+  if (G.bgmOn) { playBGM('normal'); } else { if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; } }
   showToast(`슬롯 ${slot+1} 불러오기 완료!`);
 }
 
