@@ -3486,16 +3486,21 @@ const SCENE_DATA = {
     fail:'오늘은 분위기가 좀 그랬죠? 다음에는 좀 더 업된 분위기에서 보아요.'
   },
   wineMeet: {
-    bg:'배경/와인모임.webp', faceMale:'캐릭터얼굴/와인녀.webp', faceFemale:'캐릭터얼굴/강민우.webp', speakerMale:'와인모임 회원', speakerFemale:'와인모임 회원',
+    bg:'배경/와인모임.webp', faceMale:'캐릭터얼굴/강민우.webp', faceFemale:'캐릭터얼굴/와인녀.webp', speakerMale:'와인모임 회원', speakerFemale:'와인모임 회원',
     great:'{name} 변호사님은 와인도 너무 잘 아시네요. 다음에 가르쳐주세요.',
     success:'오늘도 와인모임 즐거웠어요. 다음에 또 봐요!',
     fail:'오늘 와인리스트가 영.... 다음에는 기대해도 되려나요?'
   },
   publicService: {
-    bg:'배경/공익활동.webp', face:'캐릭터얼굴/검사.webp', speaker:'검사',
-    great:'역시 사회정의를 위해 노력하시는 {name} 변호사님. 오늘도 감동했습니다.',
-    success:'하하하. 오늘도 유익한 봉사활동이었네요.',
-    fail:'오늘 대상자분들이 좀 기분이 안 좋아보이셨어요. 다음에는 우리가 더 힘냅시다.'
+    bg:'배경/공익활동.webp',
+    faceMale:'캐릭터얼굴/검사.webp', faceFemale:'캐릭터얼굴/이희선.webp',
+    speakerMale:'강혁', speakerFemale:'이희선',
+    greatMale:'역시 사회정의를 위해 노력하시는 {name} 변호사님. 오늘도 감동했습니다.',
+    successMale:'하하하. 오늘도 유익한 봉사활동이었네요.',
+    failMale:'오늘 대상자분들이 좀 기분이 안 좋아보이셨어요. 다음에는 우리가 더 힘냅시다.',
+    greatFemale:'{name} 변호사님 오늘 정말 대단했어요! 어르신들이 너무 좋아하셨다!',
+    successFemale:'오늘도 수고하셨어요! 변호사님이 와주시면 다들 든든해하신다니까요.',
+    failFemale:'오늘은 좀 힘든 하루였죠? 괜찮아요, 이런 날도 있는 거예요. 다음에 또 힘내봐요!',
   },
   gradSchool: {
     bg:'배경/대학원.webp', face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수',
@@ -6854,7 +6859,8 @@ function buildScene(slot) {
 
   const face=getSceneFace(sd);
   const speaker=getSceneSpeaker(sd);
-  const dialogText = sd.text ? t(sd.text) : t(sd[result]);
+  const genderKey = G.gender === 'male' ? result+'Male' : result+'Female';
+  const dialogText = sd.text ? t(sd.text) : t(sd[genderKey] || sd[result]);
 
   return {bg:sd.bg, face, speaker, date:dateStr,
     result, resultLabel:result==='great'?'대성공':result==='success'?'성공':'실패',
