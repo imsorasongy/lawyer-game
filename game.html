@@ -1039,13 +1039,13 @@ const EVENING_ACTIONS = {
     {id:'lawStudy',name:'법학 공부',cost:50000,effects:{lawKnowledge:2,debate:1,stress:2,fatigue:1}},
     {id:'speech',name:'웅변',cost:50000,effects:{debate:1,sales:1,charm:1,stress:2,fatigue:1}},
     {id:'studyGroup',name:'스터디',cost:10000,effects:{lawKnowledge:1,debate:1,sociability:1,stress:2,fatigue:2}},
-    {id:'pt',name:'PT (운동)',cost:100000,effects:{stamina:3,charm:3,fatigue:3}},
+    {id:'pt',name:'PT (운동)',cost:100000,effects:{stamina:3,charm:2,fatigue:3}},
   ]},
   social: { category:'사회활동', items:[
     {id:'sportClub',name:'운동모임',cost:30000,effects:{sociability:1,sales:1,stamina:2,charm:1,stress:1,fatigue:2}},
     {id:'industryMeet',name:'업계모임',cost:30000,effects:{sociability:1,lawKnowledge:1,mental:2,stress:1,fatigue:2}},
     {id:'wineMeet',name:'와인모임',cost:100000,effects:{sociability:2,sales:2,mental:2,stamina:-1,stress:-5,fatigue:2}},
-    {id:'publicService',name:'공익 활동',cost:0,effects:{morality:5,mental:5,stress:2,fatigue:3}},
+    {id:'publicService',name:'공익 활동',cost:0,effects:{morality:3,mental:3,stress:2,fatigue:3}},
     {id:'gradSchool',name:'대학원',cost:100000,effects:{lawKnowledge:3,sales:1,sociability:1,reputation:0.5,stress:5,fatigue:5}},
     {id:'partTimeJob',name:'아르바이트',cost:0,effects:{observation:2,mental:1,stress:5,fatigue:5}},
     {id:'golf',name:'골프모임',cost:300000,effects:{sales:3,sociability:2,stress:-2,fatigue:5}},
@@ -6871,7 +6871,7 @@ function judgeAction(){
   if(G.isSick)return{result:'fail',mult:0.5};
   let s=(G.stats.stamina*0.03)+(G.stats.mental*0.03)-(G.stats.fatigue*0.2)-(G.stats.stress*0.3)+(Math.random()*20-10);
   s=Math.max(0,Math.min(100,s+50));
-  if(s>=90)return{result:'great',mult:2};if(s>=50)return{result:'success',mult:1};return{result:'fail',mult:0.5};
+  if(s>=90&&Math.random()<0.5)return{result:'great',mult:2};if(s>=50)return{result:'success',mult:1};return{result:'fail',mult:0.5};
 }
 function judgeConsult(){
   let s=(G.stats.sales*0.02)+(G.stats.charm*0.02)-(G.stats.fatigue*0.2)-(G.stats.stress*0.3)+(Math.random()*20-10);
@@ -8000,12 +8000,12 @@ function closeSummary(){
   const ay = 2029 + G.year;
   console.log('[MainStory] closeSummary check:', {ay, month:G.month, year:G.year, c3cleared:G.mainStoryFlag.case3_cleared, c4offered:G.mainStoryOffered.case4, mc3:!!G.mainCase3, mc4:!!G.mainCase4, mc3tp:G.mainCase3?G.mainCase3.trialPhase:'x', mc3active:G.mainCase3?G.mainCase3.active:'x', flags:JSON.stringify(G.mainStoryFlag)});
   if (!G.mainStoryOffered.case1 && !G.mainCase1 && G.month === 1 &&
-      (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 900 && G.stats.reputation > 900) {
+      (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 700 && G.stats.reputation > 700) {
     console.log('[MainStory] Triggering case 1 offer!');
     showMainStoryOffer(1); return;
   }
   if (G.mainStoryFlag.case1_cleared && !G.mainStoryOffered.case2 && !G.mainCase2 && G.month === 1 &&
-      (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 900 && G.stats.reputation > 900) {
+      (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 800 && G.stats.reputation > 800) {
     showMainStoryOffer(2); return;
   }
   // 사건3: 사건2 클리어 후 다음 해 1월
