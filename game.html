@@ -10133,6 +10133,29 @@ function acceptMainStory(caseNum) {
   const titles = {1:'재벌 총수의 비자금', 2:'살인 누명', 3:'도라군 개발사업 취소소송', 4:'장현우 살인사건'};
   showToast(`메인스토리 사건 ${caseNum}: ${titles[caseNum]} — 수임!`);
   updateUI();
+
+  // 수임 직후 튜토리얼 대사
+  const tutorialDialogues = {
+    1: [
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(성진그룹 비자금 사건... 우선 증거를 모아야겠군.)'},
+      {face:'player', speaker:'{name}', text:'(업무 중 \'사건 조사\'를 하면 현장에서 물증이나 기록 같은 증거를 찾을 수 있고, \'사건 검토\'를 하면 판례나 문서를 분석해서 법리적 근거를 확보할 수 있다.)'},
+      {face:'player', speaker:'{name}', text:'(조사와 검토, 두 가지를 균형 있게 진행해서 충분한 증거를 확보한 뒤 재판에 임해야 한다. 재판 날짜가 정해지면 그때까지 준비해야 하니까 서두르자.)'},
+      {face:'player', speaker:'{name}', text:'(찾은 증거들은 \'증거함\'에서 언제든 확인할 수 있다. 수시로 체크하면서 빠진 게 없는지 확인하자.)'},
+    ],
+    3: [
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(도라군 개발사업 취소소송... 이번 사건은 좀 다르게 접근해야겠어.)'},
+      {face:'player', speaker:'{name}', text:'(이번엔 \'사건 조사\'로 증거를 찾은 다음, \'사건 검토\'로 그 증거가 무슨 의미인지 분석해야 한다. 찾기만 하고 분석을 안 하면 재판에서 쓸 수가 없어.)'},
+      {face:'player', speaker:'{name}', text:'(그리고 사건 전반부와 후반부에 찾을 수 있는 증거가 다르다. 전반부에서 찾을 수 있는 건 미리미리 확보해두자.)'},
+      {face:'player', speaker:'{name}', text:'(찾은 증거와 분석 현황은 \'증거함\'에서 확인할 수 있다. 어떤 증거를 찾았고, 어떤 걸 아직 분석 안 했는지 수시로 체크하자.)'},
+    ],
+  };
+  const tut = tutorialDialogues[caseNum];
+  if (tut) {
+    showMainTrialDialogueSequence(tut, 0, () => {
+      document.getElementById('status-event-modal').style.display = 'none';
+      playBGM('normal');
+    });
+  }
 }
 
 function declineMainStory(caseNum) {
