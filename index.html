@@ -3821,7 +3821,7 @@ function getRomanceTargets() {
   if (G.gender === 'male') {
   targets.push({
     id:'seungha', name:'최승하', title:'소꿉친구', face:'캐릭터얼굴/최승하.webp', birthday:'3-8',
-    encounters:[{action:'homeRest', prob:0.05}],
+    encounters:[{action:'homeRest', prob:0.05, condition:()=>!G.isMarried}],
     dialoguesFirst:[
       {speaker:'', text:'딩동딩동'},
       {speaker:'{name}', text:'누구지?'},
@@ -4670,7 +4670,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha1', charId:'seungha',
     triggerAction:'homeRest', prob:0.25,
-    condition:()=> G.gender==='male' && G.romance.dating===null && !G.brokenUp.seungha && (G.romance.affection.seungha||0)>=80 && !G.romanceEvents.seungha1,
+    condition:()=> G.gender==='male' && !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && (G.romance.affection.seungha||0)>=80 && !G.romanceEvents.seungha1,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'오빠오빠!'},
@@ -4696,7 +4696,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha2', charId:'seungha',
     triggerAction:'homeRest', prob:1.0,
-    condition:()=> G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha1pass && !G.romanceEvents.seungha2,
+    condition:()=> !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha1pass && !G.romanceEvents.seungha2,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'오빠오빠!'},
@@ -4722,7 +4722,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha3', charId:'seungha',
     triggerAction:'homeRest', prob:1.0,
-    condition:()=> G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha2pass && !G.romanceEvents.seungha3,
+    condition:()=> !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha2pass && !G.romanceEvents.seungha3,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'아 또 졌네.'},
@@ -4745,7 +4745,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha4', charId:'seungha',
     triggerAction:'homeRest', prob:1.0,
-    condition:()=> G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha3pass && !G.romanceEvents.seungha4,
+    condition:()=> !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha3pass && !G.romanceEvents.seungha4,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'아싸 오늘은 이겼다.'},
@@ -7666,6 +7666,16 @@ function finishMonth(){
           {speaker: spouseName, face: spouseFace, text: '응. 병원에서 확인했어.'},
           {speaker: G.name, face: getPlayerFace(), text: '와... 정말 기쁘다!'}
         ];
+      } else if (G.romance.dating === 'minwoo') {
+        pregFace = '캐릭터얼굴/강민우.webp';
+        pregDialogues = [
+          {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: G.name+', 나 할 말이 있어.'},
+          {speaker: G.name, face: getPlayerFace(), text: '무슨 일이야?'},
+          {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: '내가 오늘 당신 검진 결과를 봤는데... 임신이야.'},
+          {speaker: G.name, face: getPlayerFace(), text: '정말?!'},
+          {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: '응. 약 7주 정도 됐어. 의사인 남편이 직접 확인했으니 확실하지.'},
+          {speaker: G.name, face: getPlayerFace(), text: '와... 정말 기쁘다!'}
+        ];
       } else {
         pregFace = '캐릭터얼굴/강민우.webp';
         pregDialogues = [
@@ -7714,7 +7724,13 @@ function finishMonth(){
       const spouseName = spouseTarget ? spouseTarget.name : '배우자';
       const spouseFace = spouseTarget ? spouseTarget.face : null;
 
-      const birthDialogues = [
+      const isMinwooHusband = G.gender === 'female' && G.romance.dating === 'minwoo';
+      const birthDialogues = isMinwooHusband ? [
+        {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: '수고했어, 여보. 건강한 아기야.'},
+        {speaker: G.name, face: getPlayerFace(), text: '당신이 직접 옆에 있어줘서 든든했어.'},
+        {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: '의사지만... 내 아이가 태어나는 건 차원이 다르게 떨리더라.'},
+        {speaker: G.name, face: getPlayerFace(), text: '이름을 뭘로 할까?'}
+      ] : [
         {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: '축하드립니다! 건강한 아기입니다!'},
         {speaker: G.name, face: getPlayerFace(), text: '감사합니다...'},
         {speaker: spouseName, face: spouseFace, text: '우리 아기... 너무 예뻐.'},
@@ -9599,18 +9615,18 @@ function openHousing() {
     html += `<div class="action-option" onclick="buyHousing('apartment')">
       <span style="font-size:1.5rem;margin-right:8px">🏢</span>
       <div style="flex:1"><div class="name">아파트로 이사</div>
-      <div class="effects">명성+50, 멘탈+100, 체력+50, 스트레스-100, 피로-100</div></div>
+      <div class="effects">명성+10, 멘탈+30, 체력+50, 스트레스-100, 피로-100</div></div>
       <div class="cost">5억원</div></div>`;
     html += `<div class="action-option" onclick="buyHousing('luxury')">
       <span style="font-size:1.5rem;margin-right:8px">🏰</span>
       <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
-      <div class="effects">명성+150, 매력+200, 체력+100, 스트레스-200, 피로-200</div></div>
+      <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
       <div class="cost">20억원</div></div>`;
   } else if (G.housing === 'apartment') {
     html += `<div class="action-option" onclick="buyHousing('luxury')">
       <span style="font-size:1.5rem;margin-right:8px">🏰</span>
       <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
-      <div class="effects">명성+150, 매력+200, 체력+100, 스트레스-200, 피로-200</div></div>
+      <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
       <div class="cost">20억원</div></div>`;
   } else {
     html += `<div style="text-align:center;color:#c9a84c;padding:20px 0">이미 최고급 아파트에 살고 있습니다.</div>`;
@@ -9999,14 +10015,14 @@ const MAIN_STORY_OFFER_DIALOGUES = {
   case1: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'안녕하세요. {name} 변호사님..맞으시죠? 변호사님, 저를 도와주실 수 있으신가요?'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'저기.. 진정하시고.. 일단 어떤 일이신지 말씀해 보세요.'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'저는 성진그룹 재무팀에서 일했습니다. 이만석 회장이 10년간 비자금을 조성해온 증거를 가지고 있었는데요...'},
+    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'제 이름은 한정민입니다. 성진그룹 재무팀에서 일했습니다. 이만석 회장이 10년간 비자금을 조성해온 증거를 가지고 있었는데요...'},
     {face:'player', speaker:'{name}', text:'성진그룹이라면... 상당히 큰 사건이 되겠군요.'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'네. 저는 이걸 상부에 보고했다가.. 오히려 횡령범으로 몰려서 해고당하고 지금 재판을 받게됐습니다. 비자금의 정체가 드러날 것 같으니 비자금을 제가 횡령한거라고 뒤집어씌웠어요.'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'다른 변호사들은 다 거절했습니다. 성진그룹을 상대로 나서고 싶은 사람이 없으니까요.'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님이라면... 변호사님의 명성이라면 가능할 거라고 생각했습니다.'},
     {face:'player', speaker:'{name}', text:'증거라 하면 어떤 것을 가지고 계신 겁니까?'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'해고되기 전에 핵심 자료를 USB에 복사해 가지고 나왔습니다. 10년간의 자금 흐름 기록이에요.'},
-    {face:'player', speaker:'{name}', text:'(성진그룹... 대한민국 10대그룹이고 마찬가지로 10대 로펌인 법무법인 태산의 실체.. 법무법인 태산이 될 거다. 쉽지 않겠지만...)'},
+    {face:'player', speaker:'{name}', text:'(성진그룹... 대한민국 10대그룹.. 쉽지는 않겠지만...)'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'그래서 원하시는 게 어떤겁니까?'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'복직은 하지 못해도 좋습니다. 다만 횡령범이라는 억울한 누명을 벗고 싶고, 이 사건이 공론화되어 저와 저희 가족의 안전을 확보하고 싶습니다.'},
   ],
@@ -10133,6 +10149,29 @@ function acceptMainStory(caseNum) {
   const titles = {1:'재벌 총수의 비자금', 2:'살인 누명', 3:'도라군 개발사업 취소소송', 4:'장현우 살인사건'};
   showToast(`메인스토리 사건 ${caseNum}: ${titles[caseNum]} — 수임!`);
   updateUI();
+
+  // 수임 직후 튜토리얼 대사
+  const tutorialDialogues = {
+    1: [
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(성진그룹 비자금 사건... 우선 증거를 모아야겠군.)'},
+      {face:'player', speaker:'{name}', text:'(업무 중 \'사건 조사\'를 하면 현장에서 물증이나 기록 같은 증거를 찾을 수 있고, \'사건 검토\'를 하면 판례나 문서를 분석해서 법리적 근거를 확보할 수 있다.)'},
+      {face:'player', speaker:'{name}', text:'(조사와 검토, 두 가지를 균형 있게 진행해서 충분한 증거를 확보한 뒤 재판에 임해야 한다. 재판 날짜가 정해지면 그때까지 준비해야 하니까 서두르자.)'},
+      {face:'player', speaker:'{name}', text:'(찾은 증거들은 \'증거함\'에서 언제든 확인할 수 있다. 수시로 체크하면서 빠진 게 없는지 확인하자.)'},
+    ],
+    3: [
+      {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(도라군 개발사업 취소소송... 이번 사건은 좀 다르게 접근해야겠어.)'},
+      {face:'player', speaker:'{name}', text:'(이번엔 \'사건 조사\'로 증거를 찾은 다음, \'사건 검토\'로 그 증거가 무슨 의미인지 분석해야 한다. 찾기만 하고 분석을 안 하면 재판에서 쓸 수가 없어.)'},
+      {face:'player', speaker:'{name}', text:'(그리고 사건 전반부와 후반부에 찾을 수 있는 증거가 다르다. 전반부에서 찾을 수 있는 건 미리미리 확보해두자.)'},
+      {face:'player', speaker:'{name}', text:'(찾은 증거와 분석 현황은 \'증거함\'에서 확인할 수 있다. 어떤 증거를 찾았고, 어떤 걸 아직 분석 안 했는지 수시로 체크하자.)'},
+    ],
+  };
+  const tut = tutorialDialogues[caseNum];
+  if (tut) {
+    showMainTrialDialogueSequence(tut, 0, () => {
+      document.getElementById('status-event-modal').style.display = 'none';
+      playBGM('normal');
+    });
+  }
 }
 
 function declineMainStory(caseNum) {
@@ -10326,7 +10365,7 @@ const MAIN_TRIAL_1 = [
   // phase 0: 1회 재판 — 증거 채택 공방
   {
     dialogues: [
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'재판시작하겠습니다. 검사, 공소사실 요지를 진술하세요.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 한정민에 대한 횡령재판을 시작하겠습니다. 검사, 공소사실 요지를 진술하세요.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'피고인은 2030. 1. 1. 불상의 장소에서 피해자 회사의 돈 10억원을 횡령하는등 총 78차례에 걸쳐 피해자 회사의 돈 3500억원을 횡령하였습니다. 구체적인 일시, 방법, 금액은 공소장 별지에 기재된 바와 같습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'변호인, 의견 진술하세요.'},
       {face:'player', speaker:'{name}', text:'말도 안 되는 소설입니다. 무죄를 주장합니다.'},
@@ -10357,6 +10396,7 @@ const MAIN_TRIAL_1 = [
   // phase 1: 2회 재판 — 핵심 증인 심문
   {
     dialogues: [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 한정민에 대한 횡령사건의 두 번째 재판을 시작하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'증인 김서연 씨, 선서하세요. 검찰측 먼저 주신문하세요.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'... 이상입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'변호인, 반대신문하세요.'},
@@ -10381,6 +10421,7 @@ const MAIN_TRIAL_1 = [
   // phase 2: 3회 재판 — 상대측 반격
   {
     dialogues: [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 한정민에 대한 횡령사건의 세 번째 재판을 시작하겠습니다.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'재판장님, 증거기록 순번 50번을 봐주십시오. 2033년 당시 성진그룹의 내부감사보고서입니다. 당시 성진그룹에서 이미 피고인이 2억원을 횡령했다고 보고, 내부감사를 진행한 후 횡령으로 판단한 전례가 있습니다.'},
       {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'그건 거짓말입니다! 저는 횡령한 적이 없어요!'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'여기 내부 감사 보고서가 있습니다. 한정민 씨 명의의 계좌로 회사 자금 2억 원이 이체된 기록이 있습니다.'},
@@ -10407,6 +10448,7 @@ const MAIN_TRIAL_1 = [
   // phase 3: 4회 재판 — 최종 변론
   {
     dialogues: [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 한정민에 대한 횡령사건의 네 번째 재판을 시작하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이만석씨, 선서하시고... 검찰측부터 증인신문하세요.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'... 이상입니다.'},
       {face:'player', speaker:'{name}', text:'(12개월간의 싸움이 마무리되는 순간이다. 여기서 모든 것을 쏟아야 한다. 그나저나 어디서 많이 본 것 같은 얼굴이군.)'},
@@ -10443,7 +10485,7 @@ const MAIN_TRIAL_2 = [
   // phase 0: 1회 재판 — 유인 주장 반박 + 제3자 존재
   {
     dialogues: [
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'재판시작하겠습니다. 검사, 공소사실 요지를 진술하세요.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 박정호의 살인사건에 대한 재판을 시작하겠습니다. 검사, 공소사실 요지를 진술하세요.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'피고인 박정호는 피해자 이태준에게 전화하여 산 위 정자로 유인한 뒤 살해한 것입니다.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'CCTV에도 범행 추정시간 1시간30분 전 근처 도로를 지나가는 피고인의 모습이 찍혀 있습니다. 아마도 피고인은 먼저 와서 범행을 준비한 것으로 보입니다.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'흉기와 피해자의 몸에서 피고인의 지문이 발견되었고, 인적 없는 외진 곳에 두 사람만 있었습니다.'},
@@ -10485,6 +10527,7 @@ const MAIN_TRIAL_2 = [
   // phase 1: 2회 재판 — 환경영향평가 은폐
   {
     dialogues: [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 박정호의 살인사건의 두 번째 재판을 시작하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰측, 지난 번 요청한 부분에 대한 소명은 준비됐습니까?'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'신고기록은 누군가가 장난으로 신고를 한 것으로 보입니다. 통화기록은 별로 중요하지 않습니다. 다른 날 이미 약속을 잡았을 수도 있지요.'},
       {face:'player', speaker:'{name}', text:'(뭐..뭐라고?)'},
@@ -10520,6 +10563,7 @@ const MAIN_TRIAL_2 = [
   // phase 2: 3회 재판 — CCTV 시간 조작
   {
     dialogues: [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 박정호의 살인사건의 세 번째 재판을 시작하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검사, 지난번 변호인이 제출한 환경영향평가서원본에 대한 증거의견을 말씀해주세요.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'부동의합니다. 어디서 굴러온 문서인지도 모르는 데 저희가 동의할 이유가 없지요.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그.. 그렇군요.'},
@@ -10573,6 +10617,7 @@ const MAIN_TRIAL_2 = [
   // phase 3: 4회 재판 — 지문 조작 + 무죄
   {
     dialogues: [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'피고인 박정호의 살인사건의 네 번째 재판을 시작하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰측, 지난번 문제에 대해서는 알아봤습니까?'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'그.. 그것이, 일단 CCTV는 용량문제도 있고, 자주 정전도 되어서 1시간 분량만 녹화된 것 같습니다. 그리고 시간오류도 그것때문에 발생한 것 같고요.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'범행시간에 대해서는 저희가 신고내역을 바탕으로 19시로 생각했었는데, 지난 번 밝힌 바와 같이 그 신고자체가 장난전화일 수 있어서 범행시간은 19시보다 늦을 수도 있습니다.'},
