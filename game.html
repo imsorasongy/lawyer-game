@@ -4670,7 +4670,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha1', charId:'seungha',
     triggerAction:'homeRest', prob:0.25,
-    condition:()=> G.gender==='male' && G.romance.dating===null && !G.brokenUp.seungha && (G.romance.affection.seungha||0)>=80 && !G.romanceEvents.seungha1,
+    condition:()=> G.gender==='male' && !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && (G.romance.affection.seungha||0)>=80 && !G.romanceEvents.seungha1,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'오빠오빠!'},
@@ -4696,7 +4696,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha2', charId:'seungha',
     triggerAction:'homeRest', prob:1.0,
-    condition:()=> G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha1pass && !G.romanceEvents.seungha2,
+    condition:()=> !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha1pass && !G.romanceEvents.seungha2,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'오빠오빠!'},
@@ -4722,7 +4722,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha3', charId:'seungha',
     triggerAction:'homeRest', prob:1.0,
-    condition:()=> G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha2pass && !G.romanceEvents.seungha3,
+    condition:()=> !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha2pass && !G.romanceEvents.seungha3,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'아 또 졌네.'},
@@ -4745,7 +4745,7 @@ function getMaleRomanceEvents() {
   events.push({
     id:'seungha4', charId:'seungha',
     triggerAction:'homeRest', prob:1.0,
-    condition:()=> G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha3pass && !G.romanceEvents.seungha4,
+    condition:()=> !G.isMarried && G.romance.dating===null && !G.brokenUp.seungha && G.romanceEvents.seungha3pass && !G.romanceEvents.seungha4,
     bg:'배경/방.webp', face:'캐릭터얼굴/최승하.webp',
     dialogues:[
       {speaker:'최승하', text:'아싸 오늘은 이겼다.'},
