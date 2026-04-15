@@ -497,6 +497,7 @@ body {
 <div id="opening-screen" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:300;cursor:pointer">
   <img id="opening-bg" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 2.5s">
   <div id="opening-text" style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:90%;max-width:750px;background:rgba(20,18,12,0.88);border:2px solid #8b7355;border-radius:10px;padding:18px 32px;color:#e8d5b5;font-size:1.4rem;line-height:2;text-align:left;opacity:0;transition:opacity 1.5s"></div>
+  <button id="opening-skip-btn" onclick="skipOpening()" style="position:absolute;top:12px;right:16px;z-index:10;background:rgba(20,18,12,0.7);border:1px solid #8b7355;border-radius:6px;color:#c0b090;font-size:1.08rem;padding:6px 18px;cursor:pointer;opacity:0.7;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">스킵 ▶▶</button>
 </div>
 
 <!-- Gender Selection -->
@@ -707,7 +708,7 @@ body {
     <div class="vn-dialog-box" id="se-dialog" style="overflow-y:auto">
       <div class="vn-speaker" id="se-speaker"></div>
       <div id="se-text" style="font-size:0.88rem;color:#e8d5b5;line-height:1.7"></div>
-      <div id="se-choices" style="margin-top:12px"></div>
+      <div id="se-choices" style="margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -1959,9 +1960,18 @@ function advanceOpening() {
   }
 }
 
+function skipOpening() {
+  openingTransitioning = true;
+  const screen = document.getElementById('opening-screen');
+  screen.onclick = null;
+  document.getElementById('opening-skip-btn').style.display = 'none';
+  finishOpening();
+}
+
 function finishOpening() {
   const screen = document.getElementById('opening-screen');
   screen.onclick = null; // 즉시 클릭 차단 (중복 호출 방지)
+  document.getElementById('opening-skip-btn').style.display = 'none';
   const bgEl = document.getElementById('opening-bg');
   const textEl = document.getElementById('opening-text');
 
@@ -3654,6 +3664,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'네, 박민영 변호사님도요. 오늘 어떤 일이세요?'},
         {speaker:'박민영', text:'요즘 맡은 사건이 좀 복잡해서요. 나중에 의견 좀 여쭤봐도 될까요?'},
       ],
+      farewell:'오늘 좋은 이야기 많이 나눴네요. 다음에 또 뵈어요.',
       affectionFn:()=>((G.stats.lawKnowledge+G.stats.debate)/randInt(400,600)),
     });
     targets.push({
@@ -3669,6 +3680,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'이은경 씨도 오셨군요. 오늘은 어떤 와인이 좋았어요?'},
         {speaker:'이은경', text:'이 레드와인 진짜 맛있어요. 한잔 드셔보세요!'},
       ],
+      farewell:'아~ 벌써 시간이 이렇게! 다음에 또 와인 마셔요~',
       affectionFn:()=>((G.stats.charm/200)*randFloat(0.5,1.5)),
     });
     targets.push({
@@ -3687,6 +3699,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'추사랑 변호사님도요. 요즘 바쁘시죠?'},
         {speaker:'추사랑', text:'네~ 그래도 좋은 분들이랑 일하니까 힘이 나요.'},
       ],
+      farewell:'오늘 즐거웠어요! 내일 사무실에서 봐요~',
       affectionFn:()=>((G.stats.debate+G.stats.sales+G.stats.reputation)/randInt(600,900)),
     });
     targets.push({
@@ -3705,6 +3718,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'박연아 씨, 안녕하세요.'},
         {speaker:'박연아', text:'...오늘 날씨가 좋네요.'},
       ],
+      farewell:'...그럼 저 먼저 갈게요.',
       affectionFn:()=>((G.stats.reputation+G.stats.charm)/randInt(600,900)),
     });
   } else {
@@ -3727,6 +3741,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'김원형 변호사님도요. 요즘 어떠세요?'},
         {speaker:'김원형', text:'바쁘긴 한데... 이렇게 만나면 기분이 좋아지네요.'},
       ],
+      farewell:'오늘 즐거웠습니다. 다음에 또 뵙죠.',
       affectionFn:()=>((G.stats.lawKnowledge+G.stats.debate)/randInt(400,600)),
     });
     targets.push({
@@ -3742,6 +3757,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'강민우 선생님도 자주 오시네요.'},
         {speaker:'강민우', text:'여기 와인이 제 스트레스 해소제거든요. 하하.'},
       ],
+      farewell:'시간 가는 줄 몰랐네요. 다음에 또 만나요!',
       affectionFn:()=>((G.stats.charm/200)*randFloat(0.5,1.5)),
     });
     targets.push({
@@ -3760,6 +3776,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'김창욱 변호사님도요. 커피 한잔 하실래요?'},
         {speaker:'김창욱', text:'좋죠. 요즘 사건이 좀 몰려서 커피가 필수에요.'},
       ],
+      farewell:'수고하셨습니다. 내일 사무실에서 봐요.',
       affectionFn:()=>((G.stats.debate+G.stats.sales+G.stats.reputation)/randInt(600,900)),
     });
     targets.push({
@@ -3775,6 +3792,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'안자성 씨도! 오늘도 활기차시네요.'},
         {speaker:'안자성', text:'하하, 변호사님 보면 저도 기분이 좋아져요!'},
       ],
+      farewell:'오늘 너무 재밌었어요! 다음에 꼭 또 봐요~!',
       affectionFn:()=>((G.stats.reputation+G.stats.charm)/randInt(500,800)),
     });
     targets.push({
@@ -3790,6 +3808,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'상민규 씨도요. 요즘 사업은 잘 되세요?'},
         {speaker:'상민규', text:'덕분에요. 법률 공부가 사업에 도움이 많이 돼요.'},
       ],
+      farewell:'오늘 유익했어요. 다음에 또 이야기해요.',
       affectionFn:()=>((G.stats.charm+G.stats.sales)/randInt(500,800)),
     });
     targets.push({
@@ -3810,6 +3829,7 @@ function getRomanceTargets() {
         {speaker:'{name}', text:'아뇨, 괜찮아요.'},
         {speaker:'성요셉', text:'그래. 뭐 필요한 거 있으면 말하고.'},
       ],
+      farewell:'그래, 가봐. 일 열심히 하고.',
       affectionFn:()=>((G.stats.morality+G.stats.charm)/randInt(500,800)),
     });
     targets.push({
@@ -3825,6 +3845,7 @@ function getRomanceTargets() {
         {speaker:'강혁', text:'하하, 저야 뭐, 이거 말고는 취미가 없습니다.'},
         {speaker:'{name}', text:'멋지시네요. 그럼 오늘도 힘 내자고요.'},
       ],
+      farewell:'오늘 수고하셨습니다. 또 뵙겠습니다.',
       affectionFn:()=>((G.stats.morality+G.stats.mental)/randInt(500,800)),
     });
   }
@@ -3854,6 +3875,7 @@ function getRomanceTargets() {
       {speaker:'최승하', text:'크긴 뭘 다 크냐. 게임이나 한 판 하자고.'},
       {speaker:'{name}', text:'그래.. 알았다 알았어.'},
     ],
+    farewell:'그럼 나 간다~ 오빠 밥 잘 챙겨먹어!',
     affectionFn:()=>((G.stats.morality-G.stats.karma)/randInt(200,300)),
   });
   targets.push({
@@ -3869,6 +3891,7 @@ function getRomanceTargets() {
       {speaker:'{name}', text:'네, 이희선 씨도 항상 열심이시네요.'},
       {speaker:'이희선', text:'이런 일은 할수록 보람이 있어요. 변호사님 덕분에 힘이 나요!'},
     ],
+    farewell:'오늘도 보람찬 하루였어요! 다음에 또 봐요!',
     affectionFn:()=>((G.stats.morality+G.stats.charm)/randInt(400,600)),
   });
   targets.push({
@@ -3884,6 +3907,7 @@ function getRomanceTargets() {
       {speaker:'{name}', text:'김혜민 씨, 공부는 잘 되고 있어요?'},
       {speaker:'김혜민', text:'변호사님 강의 듣고 실력이 많이 늘었어요! 감사해요!'},
     ],
+    farewell:'오늘 강의 감사했어요! 다음 강의도 기대할게요!',
     affectionFn:()=>((G.stats.debate+G.stats.charm)/randInt(400,600)),
   });
   } // end if gender === 'male'
@@ -4816,7 +4840,7 @@ function getMaleRomanceEvents() {
     dialogues:[
       {speaker:'이희선', text:'변호사님 상담 잘 하셨어요?'},
       {speaker:'{name}', text:'네. 상담 잘 했습니다. 아무래도 재판까지 가셔야 할 것 같긴한데.'},
-      {speaker:'이희선', text:'그렇군요. 그런데 아마 저희도 저 분도 돈이 없으실거예요.'},
+      {speaker:'이희선', text:'그렇군요. 그런데 아마 저 분 돈이 없으실거예요. 저희도 힘들고...'},
     ],
     choices:[
       {text:'그래도 도와드려야죠.', pass:true, passDialogues:[
@@ -6127,7 +6151,7 @@ function showRomanceDialogue(isFirst) {
     // 얼굴 복원
     document.getElementById('se-face-img').src = target.face;
     document.getElementById('se-speaker').textContent = target.name;
-    document.getElementById('se-text').textContent = '그럼 오늘은 이만! 다음에 또 봐요.';
+    document.getElementById('se-text').textContent = target.farewell || '오늘 즐거웠어요. 또 만나요!';
     document.getElementById('se-choices').innerHTML =
       `<button class="event-choice" onclick="finishRomanceScene()"><span class="choice-label">확인</span></button>`;
   }
@@ -7155,7 +7179,7 @@ function showMilestonePopup(ms, callback) {
     document.getElementById('se-dialog').classList.add('no-face');
   }
   document.getElementById('se-speaker').textContent = ms.speaker || '';
-  document.getElementById('se-text').innerHTML = `<div style="font-size:1.1rem;font-weight:700;color:#f0c850;margin-bottom:10px;text-align:center">${ms.title}</div><div style="white-space:pre-line;margin-bottom:12px;color:#c0b090;font-size:0.85rem;text-align:center">${ms.desc}</div><div style="color:#e8d5b5">${ms.text}</div>`;
+  document.getElementById('se-text').innerHTML = `<div style="font-size:0.95rem;font-weight:700;color:#f0c850;margin-bottom:4px">${ms.title}</div><div style="white-space:pre-line;color:#c0b090;font-size:0.75rem;margin-bottom:4px">${ms.desc}</div><div style="color:#e8d5b5;font-size:0.82rem">${ms.text}</div>`;
   const btnLabel = ms.btnLabel || '축하합니다!';
   document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="document.getElementById('status-event-modal').style.display='none';if(window._milestoneCallback)window._milestoneCallback()"><span class="choice-label">${btnLabel}</span></button>`;
   window._milestoneCallback = callback;
@@ -10964,9 +10988,12 @@ const MAIN_TRIAL_4 = [
     dialogues: [
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'2차 조사를 시작하겠습니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'지난번에 자살이 아닐 수 있다는 주장을 하셨는데, 추가 증거가 있습니까?\n타살이라면, 범인이 군수실에 들어갔다는 증거가 있어야 합니다.'},
-      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'물론 있습니다. 현장에 다른 사람이 드나들 수 있었다는 증거를 보여드리겠습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'그런데 CCTV 영상을 보면 그 날 밤 8시 이후로는 아무도 군수실에 접근하지 않았어요.\n사망추정시간인 10시에서 11시 사이에는 아무도 군수실에 접근하지 않은 것으로 보입니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'아닙니다. 당시 10시에서 11시 사이에 누군가 몰래 군수실에 들어갔을 가능성이 있습니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'흠... 그에 대한 증거가 있습니까?'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'물론 있습니다.'},
     ],
-    evidenceSteps: [{prompt:'현장에 다른 사람이 드나들 수 있었다는 증거 2개를 제시하세요.', correct:['inv4_cctv','inv4_access_log'], count:2}],
+    evidenceSteps: [{prompt:'사건 당일 10시에서 11시 사이 누군가 군수실에 들어갔을 가능성이 있다는 증거 2개를 제시하세요.', correct:['inv4_cctv','inv4_access_log'], count:2}],
     successDialogues: [
       {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'먼저 이 CCTV 영상을 봐 주십시오.\n군수실 복도의 20시부터 24시까지 영상입니다.'},
       {bg:'배경/건물내cctv.webp', face:'player', speaker:'{name}', text:'잘 보시면... 21시에서 22시까지의 영상과, 22시에서 23시까지의 영상이 겹치고 있습니다.'},
@@ -10974,10 +11001,10 @@ const MAIN_TRIAL_4 = [
       {bg:'배경/건물내cctv.webp', face:'player', speaker:'{name}', text:'같은 장면이 반복되고 있다는 뜻입니다. 이 영상은 편집된 것입니다.\n보시면 21시 20분과 22시 20분에 같은 고양이가 똑같은 모습으로 지나가고 있지요.'},
       {bg:'배경/건물내cctv.webp', face:'player', speaker:'{name}', text:'누군가가 특정 시간대의 진짜 영상을 삭제하고, 다른 시간대의 영상을 복사해서 덮어씌운 것이지요.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'영상 조작이라...'},
-      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그리고 이 출입기록을 봐 주십시오.\n군수실 전자 출입기록에 20시와 22시 30분, 두 번의 출입이 기록되어 있습니다.'},
-      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'지금까지는 20시에 드나들었던 남자 한 명 이외에는 CCTV 영상에 찍힌 사람이 아무도 없었기 때문에, 더더욱 자살이라고 봤던 거지요.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그리고 이 출입기록을 봐 주십시오.\n20시와 22시 30분, 두 번의 출입이 기록되어 있습니다. 즉, 사망추정시각에도 누군가 군수실에 출입한 것입니다.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'지금까지는 20시에 출입한 사람 외에는 CCTV에 아무도 찍히지 않아 자살이라 생각했던 거지요.'},
       {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'하지만 22시에서 23시의 영상이 21시에서 22시의 영상으로 반복된 거라면, 그 사이에 누가 드나드는 것은 충분히 가능합니다.'},
-      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'CCTV가 조작되었고, 출입기록에 이상이 있다...'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'CCTV는 조작되었고, 마침 그 시간에 군수실 출입기록이 있고, 그 시간이 사망추정시간이라...'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'하지만 CCTV는 단순 오작동을 한 것이고, 22시 30분에 장현우 본인이 잠깐 나갔다 돌아온 것일 수도 있지 않습니까?'},
       {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'아닙니다. 다른 사람이 들어왔다는 직접적인 증거가 있습니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'어떤 증거입니까?'},
@@ -10987,7 +11014,7 @@ const MAIN_TRIAL_4 = [
       {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'이 출입카드를 봐 주십시오.\n군수실 출입에 사용된 카드입니다. 지문 감식을 의뢰했습니다.\n그 결과... 이 카드에서 장현우의 지문이 검출되지 않았습니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'본인 카드인데 지문이 없다고요?'},
       {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'장현우 본인이 이 카드를 사용한 것이 아니거나, 장현우가 평소에도 장갑을 끼고 이 카드를 사용했다는 뜻이겠지요?'},
-      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'누군가가 장현우의 출입카드를 가져가서 군수실에 들어갔습니다.\n그런데 현장사진을 보시면.'},
+      {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'그런데 현장사진을 보시면.'},
       {bg:'배경/경찰서.webp', face:'player', speaker:'{name}', text:'당연하게도 장현우는 맨손입니다. 이 상태에서 출입카드에 지문이 안 남았다는건..'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'누군가가 출입카드를 사용하고 지문을 닦아냈다...'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'이 정도면... 타살 가능성을 정식으로 수사해야 할 것 같습니다.\n고소인 측에서 생각하는 용의자가 있습니까?'},
@@ -11452,7 +11479,7 @@ function showEnding(){
      G.mainStoryFlag && G.mainStoryFlag.case4_cleared) {
     ending = {title:'전설의 변호사', bg:'배경/서면.webp',
       commonText:'변호사란 무엇일까. 변호사의 길의 끝에 가면 그 답을 찾을 수 있을 거라 생각했고, 나는 그 길의 끝에 드디어 도달했다. 변호사가 다다를 수 있는 극한, 전설의 변호사, 그 경지에 도달한 것이다. 그렇다. 나는 전설이다.',
-      grade:null, gradeText:''};
+      grade:null, gradeText:'법조카르텔의 일각을 무너뜨렸다. 하지만 아직 끝이 아니다. 법을 무기삼아 자신들의 이익을 챙기고, 이 사회에 해악을 끼치는 자들은 여전히 많다. 그들은 법의 이름 뒤에 숨어 약자를 짓밟고, 정의를 조롱한다. 나는 안다. 내가 무너뜨린 것은 거대한 벽의 일부에 불과하다는 것을. 하지만 그래서 멈출 수는 없다. 끝까지, 그들에게 맞서 싸우겠다. 그것이 전설이라 불리는 자의 책임이니까.'};
   }
   // 1. 악덕변호사
   if(!ending && s.karma>=100) {
