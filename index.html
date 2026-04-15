@@ -676,7 +676,7 @@ body {
     <div id="ending-stats" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px"></div>
     <div style="display:flex;gap:12px;justify-content:center">
       <button class="btn btn-primary" onclick="location.reload()">타이틀로 돌아가기</button>
-      <button class="btn btn-secondary" onclick="document.body.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#c9a84c;font-size:2rem;font-weight:900\'>게임 끝</div>'">게임 끝</button>
+      <button class="btn btn-secondary" onclick="showFinScreen()">게임 끝</button>
     </div>
   </div>
 </div>
@@ -12001,6 +12001,17 @@ function showEndingCredits(ending, gradeLabel) {
   creditBg.style.cursor = 'pointer';
 
   showCredit();
+}
+
+function showFinScreen() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;opacity:0;transition:opacity 2s;z-index:9999;display:flex;align-items:center;justify-content:center';
+  const finText = document.createElement('div');
+  finText.textContent = '- Fin -';
+  finText.style.cssText = 'color:#c9a84c;font-size:2.8rem;font-weight:300;font-style:italic;letter-spacing:0.3em;opacity:0;transition:opacity 2s ease 1.5s;font-family:Georgia,"Times New Roman",serif';
+  overlay.appendChild(finText);
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; finText.style.opacity = '1'; });
 }
 
 function showEndingStats(ending, gradeLabel) {
