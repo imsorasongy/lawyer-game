@@ -934,28 +934,28 @@ const MAIN_STORY_EVIDENCE = {
     investigate: [
       {id:'inv_usb', name:'USB 자료 정밀 분석', desc:'USB 자료를 정밀 분석했다. 10년간의 자금 흐름이 명확하게 보인다. 해외 페이퍼컴퍼니를 통한 이중장부다.'},
       {id:'inv_remittance', name:'해외 송금 기록', desc:'금융감독원 외환거래 기록을 입수했다. 2030년 1월 홍콩 SJ인터내셔널로 10억 원 송금... 김서연 비서실장이 처리했군.'},
+      {id:'inv_audit', name:'최종 감사 보고서', desc:'성진그룹 내부 감사 최종 보고서를 입수했다. 과거 한정민에 대한 횡령 혐의는 \'혐의 없음\'으로 종결됐다.'},
       {id:'inv_paper_company', name:'페이퍼컴퍼니 실체', desc:'홍콩, 싱가포르, 케이맨 제도... 3개국에 걸친 페이퍼컴퍼니 네트워크. 모두 이만석 회장의 차명 계좌와 연결돼 있다.'},
-      {id:'inv_audit', name:'최종 감사 보고서', desc:'성진그룹 내부 감사 최종 보고서를 입수했다. 한정민에 대한 횡령 혐의는 \'혐의 없음\'으로 종결됐다.'},
     ],
     review: [
       {id:'rev_whistleblower', name:'개인정보보호법 판례', desc:'대법원 2023도27590 판결... 방어권 행사를 위한 개인정보 포함 증거 제출은 위법성이 조각된다.'},
-      {id:'inv_account', name:'한정민 경비 처리 기록', desc:'한정민 명의 계좌로의 2억 원 이체... 업무상 정당한 경비 처리였다는 증빙서류를 확보했다.'},
+      {id:'inv_account', name:'한정민 경비 처리 기록', desc:'과거 한정민 명의 계좌로의 2억 원 이체... 업무상 정당한 경비 처리였다는 증빙서류를 확보했다.'},
       {id:'rev_fund_flow', name:'비자금 흐름 분석', desc:'USB 데이터와 공시자료를 대조했다. 성진그룹 공식 재무제표에 기재되지 않은 3,000억 원 규모의 자금 흐름이 존재한다.'},
     ]
   },
   case2: {
     investigate: [
-      {id:'inv_weapon', name:'흉기와 지문', desc:'흉기를 다시 살펴보니... 지문 상태가 이상하다. 너무 완벽하게 찍혀 있어.'},
+      {id:'inv_phone', name:'피고인 핸드폰', desc:'피고인의 핸드폰을 조사하니 이상한 앱이 설치되어 있다...'},
       {id:'inv_eia', name:'환경영향평가 원본', desc:'환경영향평가 원본을 입수했다. 위에서 은폐한 내용이... 개발 불가 판정이었어.'},
       {id:'inv_cctv', name:'CCTV 영상', desc:'CCTV 원본을 확보했다. 17시에서 18시까지의 영상만 있다.'},
-      {id:'inv_phone', name:'피고인 핸드폰', desc:'피고인의 핸드폰을 조사하니 이상한 앱이 설치되어 있다...'},
       {id:'inv_cctv_del', name:'CCTV 삭제 기록', desc:'CCTV 관리 로그를 확인하니... 사건 직후 누군가 16시에서 17시까지 시간대 영상을 삭제했다.'},
+      {id:'inv_weapon', name:'흉기와 지문', desc:'흉기를 다시 살펴보니... 지문 상태가 이상하다. 너무 완벽하게 찍혀 있어.'},
     ],
     review: [
-      {id:'rev_fingerprint', name:'피고인의 지문정보', desc:'지문 감정서를 정밀 분석하니... 흉기의 지문과 피고인 지문정보가 \'정확하게\' 일치한다. 이건 실제 접촉으론 불가능한 수준이다.'},
-      {id:'rev_report', name:'신고 기록 상세', desc:'신고 기록을 보니 \'목격자\'가 신고한 거다. 인적 없는 곳에 목격자라니... 제3자가 있었다는 뜻이다.'},
+      {id:'rev_report', name:'신고 기록 상세', desc:'신고기록을 확인하니... 목격자 김철민이 19시경 누군가가 범행현장에서 피해자를 칼로 찌르는 것을 목격했다고 신고했다.'},
       {id:'rev_call', name:'휴대폰 통화 기록', desc:'통화기록을 분석하니... 전화를 먼저 건 건 피해자 쪽이다. 피고인이 유인했다는 주장이 맞지 않는다.'},
       {id:'rev_sunset', name:'사건 당일 일몰시간', desc:'기상청 기록으로 사건 당일 일몰시간을 확인하니... CCTV 영상 속 일몰 시점과 1시간 차이가 난다.'},
+      {id:'rev_fingerprint', name:'피고인의 지문정보', desc:'지문감정서의 분석결과에 따르면 흉기의 지문과 피고인의 지문은 100% 완벽하게 일치한다.'},
       {id:'rev_app', name:'도청앱 정보', desc:'피고인 핸드폰에 설치된 앱을 조사하니... 위치추적 기능이 있는 도청앱이다. 누군가 피고인의 위치를 실시간으로 파악하고 있었다.'},
     ]
   },
@@ -2868,6 +2868,7 @@ function filterCopiedAction(actionId) {
   if (actionId === 'phdThesis' && G.phdCompleted) return 'homeRest';
   if (actionId === 'golf' && !(G.status==='partner'||G.status==='senior'||G.status==='solo'||G.status==='suspended')) return 'homeRest';
   if (actionId === 'drive' && !G.currentCar) return 'homeRest';
+  if (actionId === 'assocTraining' && (!(G.status==='partner'||G.status==='senior'||G.status==='solo') || G.hiredAssocs.length===0)) return 'document';
   if (actionId === 'hospital' && !G.isSick) return 'homeRest';
   if (/^investigate\d$/.test(actionId) || /^review\d$/.test(actionId) || /^mainTrial\d$/.test(actionId) || /^mainInvestigation\d$/.test(actionId) || /^mainConfrontation\d$/.test(actionId)) return 'homeRest';
   return actionId;
@@ -2909,16 +2910,26 @@ function applyAutoFill(type) {
   // 지난달 복사 모드
   if (type === 'last' && G._lastSchedulePattern) {
     const pat = G._lastSchedulePattern;
-    let evIdx = 0, wkIdx = 0;
+    console.log('[DEBUG] 복사 시 pat.daytime:', JSON.stringify(pat.daytime));
+    console.log('[DEBUG] 복사 시 isDaytime 빈 슬롯:', G.schedule.reduce((c,ds)=>c+ds.slots.filter(s=>!s.locked&&!s.forced&&!s.action&&s.isDaytime).length,0));
+    let evIdx = 0, wkIdx = 0, dtIdx = 0;
     G.schedule.forEach(ds => {
       ds.slots.forEach(slot => {
         if (slot.locked || slot.forced || slot.action) return;
         if (slot.isDaytime && !slot.suspendedSlot) {
-          // 일과시간 빈 슬롯 (휴업 제외)
-          let pick = workPool[Math.floor(Math.random() * workPool.length)];
-          if (pick === 'consult' && consultRemaining <= 0) pick = 'document';
-          if (pick === 'consult') consultRemaining--;
-          assignAction(slot, pick);
+          // 일과시간 빈 슬롯 — 지난달 패턴 우선, 없으면 랜덤
+          if (pat.daytime && pat.daytime.length > 0) {
+            let pick = filterCopiedAction(pat.daytime[dtIdx % pat.daytime.length]);
+            if (pick === 'consult' && consultRemaining <= 0) pick = 'document';
+            if (pick === 'consult') consultRemaining--;
+            assignAction(slot, pick);
+            dtIdx++;
+          } else {
+            let pick = workPool[Math.floor(Math.random() * workPool.length)];
+            if (pick === 'consult' && consultRemaining <= 0) pick = 'document';
+            if (pick === 'consult') consultRemaining--;
+            assignAction(slot, pick);
+          }
         } else if (ds.isWeekend || ds.isHoliday || slot.suspendedSlot) {
           if (pat.weekend.length > 0) {
             assignAction(slot, filterCopiedAction(pat.weekend[wkIdx % pat.weekend.length]));
@@ -3037,6 +3048,7 @@ function assignAction(slot, actionId) {
   if (actionId === 'document') { slot.action='document'; slot.label='서면작성'; slot.slotClass='slot-work'; return; }
   if (actionId === 'consult') { slot.action='consult'; slot.label='상담'; slot.slotClass='slot-work'; return; }
   if (actionId === 'hoemu') { slot.action='hoemu'; slot.label='회무'; slot.slotClass='slot-work'; return; }
+  if (actionId === 'assocTraining') { slot.action='assocTraining'; slot.label='어쏘 교육'; slot.slotClass='slot-work'; return; }
   if (actionId === 'councilWork') { slot.action='councilWork'; slot.label='의정활동'; slot.slotClass='slot-work'; return; }
   if (actionId === 'phdThesis') { slot.action='phdThesis'; slot.label='박사논문'; slot.slotClass='slot-study'; return; }
   // EVENING_ACTIONS에서 검색
@@ -6208,16 +6220,20 @@ function doStartExecution() {
     if(!slot.locked&&!slot.action){slot.action='homeRest';slot.label='집에서 휴식';slot.slotClass='slot-rest';}
   });});
   // 지난달 스케줄 패턴 저장 (자동배치 '지난달 복사'용) — 휴식 채운 후 저장
-  const eveningPattern = [], weekendPattern = [];
+  const eveningPattern = [], weekendPattern = [], daytimePattern = [];
   G.schedule.forEach(ds => {
     ds.slots.forEach(slot => {
       if (slot.locked || slot.forced || !slot.action) return;
       if (slot.action === 'specialTraining') return;
       if (ds.isWeekend || ds.isHoliday) weekendPattern.push(slot.action);
+      else if (slot.isDaytime && !slot.suspendedSlot) daytimePattern.push(slot.action);
       else if (slot.time === 'evening') eveningPattern.push(slot.action);
     });
   });
-  G._lastSchedulePattern = { evening: eveningPattern, weekend: weekendPattern, status: G.status, firmId: G.firmId };
+  G._lastSchedulePattern = { evening: eveningPattern, weekend: weekendPattern, daytime: daytimePattern, status: G.status, firmId: G.firmId };
+  console.log('[DEBUG] 저장된 daytimePattern:', JSON.stringify(daytimePattern));
+  console.log('[DEBUG] 저장된 eveningPattern:', JSON.stringify(eveningPattern));
+  console.log('[DEBUG] isDaytime 슬롯 수:', G.schedule.reduce((c,ds)=>c+ds.slots.filter(s=>s.isDaytime).length,0));
   continueExecution();
 }
 
@@ -6975,7 +6991,7 @@ function showVNScene(idx) {
         if (notFound.length > 0) {
           const chance = 30 + G.stats.observation * 0.03;
           if (Math.random()*100 < chance) {
-            const found = notFound[Math.floor(Math.random()*notFound.length)];
+            const found = notFound[0];
             mc.investigateEvidence.push(found.id);
             scene.text = found.desc;
             if (scene.changes) scene.changes.push(`증거 발견: ${found.name}`);
@@ -7014,7 +7030,7 @@ function showVNScene(idx) {
         if (notFound.length > 0) {
           const chance = 30 + G.stats.lawKnowledge * 0.03;
           if (Math.random()*100 < chance) {
-            const found = notFound[Math.floor(Math.random()*notFound.length)];
+            const found = notFound[0];
             mc.reviewEvidence.push(found.id);
             scene.text = found.desc;
             if (scene.changes) scene.changes.push(`증거 발견: ${found.name}`);
@@ -10015,37 +10031,39 @@ const MAIN_STORY_OFFER_DIALOGUES = {
   case1: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'안녕하세요. {name} 변호사님..맞으시죠? 변호사님, 저를 도와주실 수 있으신가요?'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'저기.. 진정하시고.. 일단 어떤 일이신지 말씀해 보세요.'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'제 이름은 한정민입니다. 성진그룹 재무팀에서 일했습니다. 이만석 회장이 10년간 비자금을 조성해온 증거를 가지고 있었는데요...'},
-    {face:'player', speaker:'{name}', text:'성진그룹이라면... 상당히 큰 사건이 되겠군요.'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'네. 저는 이걸 상부에 보고했다가.. 오히려 횡령범으로 몰려서 해고당하고 지금 재판을 받게됐습니다. 비자금의 정체가 드러날 것 같으니 비자금을 제가 횡령한거라고 뒤집어씌웠어요.'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'다른 변호사들은 다 거절했습니다. 성진그룹을 상대로 나서고 싶은 사람이 없으니까요.'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님이라면... 변호사님의 명성이라면 가능할 거라고 생각했습니다.'},
-    {face:'player', speaker:'{name}', text:'증거라 하면 어떤 것을 가지고 계신 겁니까?'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'해고되기 전에 핵심 자료를 USB에 복사해 가지고 나왔습니다. 10년간의 자금 흐름 기록이에요.'},
-    {face:'player', speaker:'{name}', text:'(성진그룹... 대한민국 10대그룹.. 쉽지는 않겠지만...)'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'제 이름은 한정민입니다. 성진그룹 재무팀에서 일했습니다. 이만석 회장이 10년간 비자금을 조성해온 증거를 가지고 있었는데요...'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'성진그룹이라면... 상당히 큰 사건이 되겠군요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'네. 저는 이걸 상부에 보고했다가.. 오히려 횡령범으로 몰려서 해고당하고 지금 재판을 받게됐습니다. 비자금의 정체가 드러날 것 같으니 비자금을 제가 횡령한거라고 뒤집어씌웠어요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'다른 변호사들은 다 거절했습니다. 성진그룹을 상대로 나서고 싶은 사람이 없으니까요.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님이라면... 변호사님의 명성이라면 가능할 거라고 생각했습니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'증거라 하면 어떤 것을 가지고 계신 겁니까?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'해고되기 전에 핵심 자료를 USB에 복사해 가지고 나왔습니다. 10년간의 자금 흐름 기록이에요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(성진그룹... 대한민국 10대그룹.. 쉽지는 않겠지만...)'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'그래서 원하시는 게 어떤겁니까?'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'복직은 하지 못해도 좋습니다. 다만 횡령범이라는 억울한 누명을 벗고 싶고, 이 사건이 공론화되어 저와 저희 가족의 안전을 확보하고 싶습니다.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'복직은 하지 못해도 좋습니다. 다만 횡령범이라는 억울한 누명을 벗고 싶고, 이 사건이 공론화되어 저와 저희 가족의 안전을 확보하고 싶습니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'그렇군요. 혹시 그 외에 제가 알아둬야 할 점이 있나요?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'사실 몇 년전에도 회사에서 횡령혐의로 내사를 받은 적이 있습니다. 그렇지만 그건 정당한 자금집행이었고, 최종적으로는 징계위원회에서도 제 주장을 받아들였어요.'},
   ],
   case2: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'변호사님, 한정민 씨 소개로 찾아왔습니다.'},
-    {face:'player', speaker:'{name}', text:'네, 어떤 일이신가요?'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'제 남편 박정호가... 사람을 죽였다고 무기징역을 받았어요.'},
-    {face:'player', speaker:'{name}', text:'(박정호... 어디서 많이 들어본 이름인데...)'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'도라군 도시개발국장이 산 위 정자 부근에서 살해된 사건인데...\n남편이 개발사업을 반대하는 환경운동가라 용의자로 체포되어 재판을 받았고..'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'CCTV, 지문, 통화기록... 증거가 너무 명백하다면서 1심에서 유죄 판결이 났습니다.'},
-    {face:'player', speaker:'{name}', text:'들은적이 있습니다. 얼마전 상당히 떠들썩했던 사건이군요. 환경을 위해서 사람을 죽이는 게 허용될 수 있느냐.. 이런 이야기도 나왔었고.'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'남편이 환경을 위해서 평생을 바친 사람이지만, 사람을 죽일 그런 사람은 아니에요. 제발 좀... 항소심을 맡아주실 수 있나요?'},
-    {face:'player', speaker:'{name}', text:'(증거가 명백한 사건의 항소심... 쉽지 않다. 하지만 뭔가 석연치 않은 구석이 있다.)'},
-    {face:'player', speaker:'{name}', text:'피해자가 도라군 도시개발국장이라고 하셨죠?'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네, 맞아요. 뉴스에도 몇 번 나왔던 사건이에요.'},
-    {face:'player', speaker:'{name}', text:'혹시 지금 도라군수가 장현우 아닙니까?'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네. 장현우 군수가 현재 군수인데, 장현우 군수가 당선된 후에 무리한 개발사업을 계속 추진한다며 남편이 피해자와 자주 싸웠었어요.'},
-    {face:'player', speaker:'{name}', text:'(장현우... 한정민 사건에서도 얼핏 이름이 나왔었지. 이 사건에도 뭔가가 있을 것 같군..)'},
-    {face:'player', speaker:'{name}', text:'사건기록을 좀 볼까요?'},
-    {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네 여기있어요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'네, 어떤 일이신가요?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'제 남편 박정호가... 사람을 죽였다고 무기징역을 받았어요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(박정호... 어디서 많이 들어본 이름인데...)'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'도라군 도시개발국장이 산 위 정자 부근에서 살해된 사건인데...\n남편이 개발사업을 반대하는 환경운동가라 용의자로 체포되어 재판을 받았고..'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'CCTV, 지문, 통화기록... 증거가 너무 명백하다면서 1심에서 유죄 판결이 났습니다.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'들은적이 있습니다. 얼마전 상당히 떠들썩했던 사건이군요. 환경을 위해서 사람을 죽이는 게 허용될 수 있느냐.. 이런 이야기도 나왔었고.'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'남편이 환경을 위해서 평생을 바친 사람이지만, 사람을 죽일 그런 사람은 아니에요. 제발 좀... 항소심을 맡아주실 수 있나요?'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(증거가 명백한 사건의 항소심... 쉽지 않다. 하지만 뭔가 석연치 않은 구석이 있다.)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'피해자가 도라군 도시개발국장이라고 하셨죠?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네, 맞아요. 뉴스에도 몇 번 나왔던 사건이에요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'혹시 지금 도라군수가 장현우 아닙니까?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네. 장현우 군수가 현재 군수인데, 장현우 군수가 당선된 후에 무리한 개발사업을 계속 추진한다며 남편이 피해자와 자주 싸웠었어요.'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(장현우... 한정민 사건에서도 얼핏 이름이 나왔었지. 이 사건에도 뭔가가 있을 것 같군..)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'사건기록을 좀 볼까요?'},
+    {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네 여기있어요.'},
     {bg:'배경/범행현장.webp', face:'player', speaker:'{name}', text:'외진 산속 한가운데서 피해자가 사망했고, 그 주변 CCTV에 찍힌 그 시간대에 지나간 차량은 피고인의 차량뿐. 피해자의 옷과 몸에서 피고인의 지문이 발견되었고, 나중에 발견된 흉기에서도 피고인의 지문이 발견되었다.'},
-    {face:'player', speaker:'{name}', text:'피해자와 피고인은 도라고등학교 동창사이인데 장현우 군수 취임이후 개발사업 문제로 평소 자주 다퉜고, 사건 며칠 전에도 싸우는 모습이 목격되었다. 사건 당일 19시경 누군가가 정자에서 칼에 찔리는 모습을 봤다는 신고전화가 있었고..'},
-    {face:'player', speaker:'{name}', text:'출동해보니 피해자가 죽어있었고 피고인이 그 옆에 있었단 말이지..'},
+    {bg:'배경/범행현장.webp', face:'player', speaker:'{name}', text:'피해자와 피고인은 도라고등학교 동창사이인데 장현우 군수 취임이후 개발사업 문제로 평소 자주 다퉜고, 사건 며칠 전에도 싸우는 모습이 목격되었다. 사건 당일 19시경 누군가가 정자에서 칼에 찔리는 모습을 봤다는 신고전화가 있었고..'},
+    {bg:'배경/범행현장.webp', face:'player', speaker:'{name}', text:'출동해보니 피해자가 죽어있었고 피고인이 그 옆에 있었단 말이지..'},
   ],
   case3: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님, 그때 정말 감사했습니다. 덕분에 무죄를 받았습니다.'},
@@ -10641,7 +10659,7 @@ const MAIN_TRIAL_2 = [
       {face:'player', speaker:'{name}', text:'재판장님, 피고인측 증거 제출하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'어떤 증거인가요?'},
     ],
-    evidenceSteps2: [{prompt:'(여기인가.. 결정타를 날릴 곳이. 증거를 제시하자.)', correct:['rev_app'], count:1}],
+    evidenceSteps2: [{prompt:'(여기인가.. 결정타를 날릴 곳이. 증거를 제시하자.)', correct:['inv_phone','rev_app'], count:2}],
     successDialogues2: [
       {face:'player', speaker:'{name}', text:'피고인의 폰 분석결과입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'어떤 내용이죠?'},
@@ -11893,11 +11911,11 @@ function showEndingCredits(ending, gradeLabel) {
   const es = document.getElementById('ending-screen');
   const credits = [
     {bg:'졸업.webp', title:'Opening', body:'Midnight Bonus Stage'},
-    {bg:'배경/상담.webp', title:'Main BGM', body:'Midnight Bonus Stage(inst.)\nNight Urban Drive\n일과후\n로펌의 오후\nAfter Lawschool'},
-    {bg:'배경/결혼식.webp', title:'Love Theme', body:'사랑이 다가온 날\n우리 계속'},
-    {bg:'배경/유럽.webp', title:'Ending', body:'Gaming Love'},
-    {bg:'배경/의회.webp', title:'기획&제작', body:'박대영'},
-    {bg:'배경/재판.webp', title:'', body:'벼넥시트 - 변호사 생존기 -'},
+    {bg:'배경/엔딩1.png', title:'Main BGM', body:'Midnight Bonus Stage(inst.)\nNight Urban Drive\n일과후\n로펌의 오후\nAfter Lawschool'},
+    {bg:'배경/엔딩2.png', title:'Love Theme', body:'사랑이 다가온 날\n우리 계속'},
+    {bg:'배경/엔딩3.png', title:'Ending', body:'Gaming Love'},
+    {bg:'배경/엔딩4.png', title:'기획&제작', body:'박대영'},
+    {bg:'배경/엔딩5.png', title:'', body:'벼넥시트 - 변호사 생존기 -'},
   ];
 
   // 크레딧용 오버레이 생성
