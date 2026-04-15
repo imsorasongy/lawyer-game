@@ -3821,7 +3821,7 @@ function getRomanceTargets() {
   if (G.gender === 'male') {
   targets.push({
     id:'seungha', name:'최승하', title:'소꿉친구', face:'캐릭터얼굴/최승하.webp', birthday:'3-8',
-    encounters:[{action:'homeRest', prob:0.05}],
+    encounters:[{action:'homeRest', prob:0.05, condition:()=>!G.isMarried}],
     dialoguesFirst:[
       {speaker:'', text:'딩동딩동'},
       {speaker:'{name}', text:'누구지?'},
@@ -9599,18 +9599,18 @@ function openHousing() {
     html += `<div class="action-option" onclick="buyHousing('apartment')">
       <span style="font-size:1.5rem;margin-right:8px">🏢</span>
       <div style="flex:1"><div class="name">아파트로 이사</div>
-      <div class="effects">명성+50, 멘탈+100, 체력+50, 스트레스-100, 피로-100</div></div>
+      <div class="effects">명성+10, 멘탈+30, 체력+50, 스트레스-100, 피로-100</div></div>
       <div class="cost">5억원</div></div>`;
     html += `<div class="action-option" onclick="buyHousing('luxury')">
       <span style="font-size:1.5rem;margin-right:8px">🏰</span>
       <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
-      <div class="effects">명성+150, 매력+200, 체력+100, 스트레스-200, 피로-200</div></div>
+      <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
       <div class="cost">20억원</div></div>`;
   } else if (G.housing === 'apartment') {
     html += `<div class="action-option" onclick="buyHousing('luxury')">
       <span style="font-size:1.5rem;margin-right:8px">🏰</span>
       <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
-      <div class="effects">명성+150, 매력+200, 체력+100, 스트레스-200, 피로-200</div></div>
+      <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
       <div class="cost">20억원</div></div>`;
   } else {
     html += `<div style="text-align:center;color:#c9a84c;padding:20px 0">이미 최고급 아파트에 살고 있습니다.</div>`;
@@ -9999,14 +9999,14 @@ const MAIN_STORY_OFFER_DIALOGUES = {
   case1: [
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'안녕하세요. {name} 변호사님..맞으시죠? 변호사님, 저를 도와주실 수 있으신가요?'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'저기.. 진정하시고.. 일단 어떤 일이신지 말씀해 보세요.'},
-    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'저는 성진그룹 재무팀에서 일했습니다. 이만석 회장이 10년간 비자금을 조성해온 증거를 가지고 있었는데요...'},
+    {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'제 이름은 한정민입니다. 성진그룹 재무팀에서 일했습니다. 이만석 회장이 10년간 비자금을 조성해온 증거를 가지고 있었는데요...'},
     {face:'player', speaker:'{name}', text:'성진그룹이라면... 상당히 큰 사건이 되겠군요.'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'네. 저는 이걸 상부에 보고했다가.. 오히려 횡령범으로 몰려서 해고당하고 지금 재판을 받게됐습니다. 비자금의 정체가 드러날 것 같으니 비자금을 제가 횡령한거라고 뒤집어씌웠어요.'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'다른 변호사들은 다 거절했습니다. 성진그룹을 상대로 나서고 싶은 사람이 없으니까요.'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님이라면... 변호사님의 명성이라면 가능할 거라고 생각했습니다.'},
     {face:'player', speaker:'{name}', text:'증거라 하면 어떤 것을 가지고 계신 겁니까?'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'해고되기 전에 핵심 자료를 USB에 복사해 가지고 나왔습니다. 10년간의 자금 흐름 기록이에요.'},
-    {face:'player', speaker:'{name}', text:'(성진그룹... 대한민국 10대그룹이고 마찬가지로 10대 로펌인 법무법인 태산의 실체.. 법무법인 태산이 될 거다. 쉽지 않겠지만...)'},
+    {face:'player', speaker:'{name}', text:'(성진그룹... 대한민국 10대그룹.. 쉽지는 않겠지만...)'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'그래서 원하시는 게 어떤겁니까?'},
     {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'복직은 하지 못해도 좋습니다. 다만 횡령범이라는 억울한 누명을 벗고 싶고, 이 사건이 공론화되어 저와 저희 가족의 안전을 확보하고 싶습니다.'},
   ],
