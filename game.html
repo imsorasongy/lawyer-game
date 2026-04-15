@@ -817,6 +817,7 @@ const G = {
   snsFollowers: 0,
   youtubeStarted: false,
   youtubeSubscribers: 0,
+  youtubeMilestones: {}, // 구독자 마일스톤 달성 기록
   monthMarketingDone: false, // 이번달 영업 사용 여부
   monthPublicDefender: false, // 이번달 국선 사용 여부
   monthLegalAid: false,      // 이번달 소송구조 사용 여부
@@ -7628,6 +7629,7 @@ function finishMonth(){
   }
   if (G.youtubeStarted) {
     G.youtubeSubscribers += Math.max(0, Math.floor(G.stats.charm*3 + G.stats.debate - G.stats.karma*8));
+    checkYoutubeMilestones();
   }
   // 시의원 매월 수입
   ensureRomance(); // 하위호환
@@ -8687,6 +8689,7 @@ function doMarketing(type) {
     const subGain = Math.floor(G.stats.charm*10 + G.stats.debate*5 + G.stats.reputation*5);
     G.youtubeSubscribers += subGain;
     G.youtubeStarted = true;
+    checkYoutubeMilestones();
     showToast(`유튜브 영업 완료! 구독자 +${subGain.toLocaleString()}명`);
   }
   G.monthMarketingDone = true;
@@ -9624,14 +9627,14 @@ function buyHousing(type) {
   G.housing = type;
 
   if (type === 'apartment') {
-    G.stats.reputation = Math.min(999, G.stats.reputation + 50);
-    G.stats.mental = Math.min(999, G.stats.mental + 100);
+    G.stats.reputation = Math.min(999, G.stats.reputation + 10);
+    G.stats.mental = Math.min(999, G.stats.mental + 30);
     G.stats.stamina = Math.min(999, G.stats.stamina + 50);
     G.stats.stress = Math.max(0, G.stats.stress - 100);
     G.stats.fatigue = Math.max(0, G.stats.fatigue - 100);
   } else {
-    G.stats.reputation = Math.min(999, G.stats.reputation + 150);
-    G.stats.charm = Math.min(999, G.stats.charm + 200);
+    G.stats.reputation = Math.min(999, G.stats.reputation + 30);
+    G.stats.charm = Math.min(999, G.stats.charm + 50);
     G.stats.stamina = Math.min(999, G.stats.stamina + 100);
     G.stats.stress = Math.max(0, G.stats.stress - 200);
     G.stats.fatigue = Math.max(0, G.stats.fatigue - 200);
@@ -11178,34 +11181,50 @@ function processMainStoryMonthEnd(checkOffer) {
         mc.active = false;
         if (idx === 0) {
           G.mainStoryFlag.case1_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 50);
-          G.stats.morality = Math.min(999, G.stats.morality + 30);
-          G.funds += 500000000;
-          showToast('메인스토리 사건 1 클리어! 명성 +50, 도덕성 +30, 자금 +5억원');
+          G.stats.reputation = Math.min(999, G.stats.reputation + 10);
+          showToast('메인스토리 사건 1 클리어! 명성 +10');
         } else if (idx === 1) {
           G.mainStoryFlag.case2_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 80);
-          G.stats.morality = Math.min(999, G.stats.morality + 50);
-          G.stats.karma = Math.max(0, G.stats.karma - 10);
-          showToast('메인스토리 사건 2 클리어! 명성 +80, 도덕성 +50, 업보 -10');
+          G.stats.reputation = Math.min(999, G.stats.reputation + 20);
+          showToast('메인스토리 사건 2 클리어! 명성 +20');
         } else if (idx === 2) {
           G.mainStoryFlag.case3_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 100);
-          G.stats.morality = Math.min(999, G.stats.morality + 60);
-          G.funds += 300000000;
-          console.log('[MainStory] CASE3 CLEARED! trialPhase:', mc.trialPhase, 'flag:', G.mainStoryFlag.case3_cleared);
-          showToast('메인스토리 사건 3 클리어! 명성 +100, 도덕성 +60, 자금 +3억원');
+          G.stats.reputation = Math.min(999, G.stats.reputation + 30);
+          showToast('메인스토리 사건 3 클리어! 명성 +30');
         } else if (idx === 3) {
           G.mainStoryFlag.case4_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 150);
-          G.stats.morality = Math.min(999, G.stats.morality + 80);
-          G.stats.karma = Math.max(0, G.stats.karma - 20);
-          showToast('메인스토리 사건 4 클리어! 명성 +150, 도덕성 +80, 업보 -20 — 메인스토리 완결!');
+          G.stats.reputation = Math.min(999, G.stats.reputation + 40);
+          showToast('메인스토리 사건 4 클리어! 명성 +40 — 메인스토리 완결!');
         }
       }
     }
   });
   return false;
+}
+
+// ==================== 유튜브 구독자 마일스톤 ====================
+function checkYoutubeMilestones() {
+  if (!G.youtubeMilestones) {
+    // 기존 세이브 호환: 이미 달성한 구독자 수 기준으로 마일스톤 기록 (보상 없이)
+    G.youtubeMilestones = {};
+    [100000,300000,500000,1000000].forEach(t => {
+      if (G.youtubeSubscribers >= t) G.youtubeMilestones[t] = true;
+    });
+    return; // 첫 초기화 시에는 보상 지급하지 않음
+  }
+  const milestones = [
+    {threshold:100000, rep:10, label:'10만'},
+    {threshold:300000, rep:30, label:'30만'},
+    {threshold:500000, rep:50, label:'50만'},
+    {threshold:1000000, rep:100, label:'100만'},
+  ];
+  milestones.forEach(m => {
+    if (G.youtubeSubscribers >= m.threshold && !G.youtubeMilestones[m.threshold]) {
+      G.youtubeMilestones[m.threshold] = true;
+      G.stats.reputation = Math.min(999, G.stats.reputation + m.rep);
+      showToast(`유튜브 구독자 ${m.label} 돌파! 명성 +${m.rep}`);
+    }
+  });
 }
 
 // ==================== 증거 서류함 ====================
