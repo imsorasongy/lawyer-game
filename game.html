@@ -6751,13 +6751,13 @@ function buildScene(slot) {
       if (dateEvt) {
         return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
           result:'success', resultLabel:'데이트',
-          text:'오늘도 즐거운 하루였어요!',
+          skipText: true,
           changes:['자금 -20만원', `${datingName} 호감도 +5`],
           dateEvent: dateEvt};
       }
       return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
         result:'success', resultLabel:'데이트',
-        text:'오늘도 즐거운 하루였어요!',
+        text:'오늘 데이트도 즐거웠어!',
         changes:['자금 -20만원', `${datingName} 호감도 +5`]};
     }
   }
@@ -7043,6 +7043,14 @@ function showVNScene(idx) {
   // Handle legacy event type (backward compat)
   if (scene.type === 'event') {
     showVNScene(idx + 1);
+    return;
+  }
+
+  // skipText: 텍스트 씬 건너뛰고 바로 dateEvent 표시
+  if (scene.skipText && scene.dateEvent) {
+    const de = scene.dateEvent;
+    scene.dateEvent = null;
+    showDateEvent(de, () => showVNScene(idx + 1));
     return;
   }
 
