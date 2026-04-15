@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>변호사 생존기 - Lawyer Survival Simulator</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -481,9 +481,140 @@ body {
 .vn-dialog-box::-webkit-scrollbar-track { background: rgba(30,25,20,0.5); border-radius: 4px; }
 .vn-dialog-box::-webkit-scrollbar-thumb { background: #8b7355; border-radius: 4px; }
 .vn-dialog-box::-webkit-scrollbar-thumb:hover { background: #c9a84c; }
+
+/* ===== Mobile: Portrait Rotation Notice ===== */
+#rotate-notice {
+  display: none; position: fixed; inset: 0; background: #0a0a1a; z-index: 9999;
+  flex-direction: column; justify-content: center; align-items: center; gap: 20px;
+}
+#rotate-notice .rotate-icon { font-size: 60px; animation: rotateAnim 2s ease-in-out infinite; }
+#rotate-notice p { color: #c9a84c; font-size: 1.2rem; font-weight: 700; letter-spacing: 2px; }
+#rotate-notice p.sub { color: #8a7a60; font-size: 0.85rem; font-weight: 400; }
+@keyframes rotateAnim { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(90deg)} }
+
+@media (orientation: portrait) and (max-width: 768px) {
+  #rotate-notice { display: flex; }
+}
+
+/* ===== Mobile Landscape (height ≤ 500px) ===== */
+@media (max-height: 500px) and (pointer: coarse) {
+
+  /* Top Bar */
+  .top-bar { min-height: 36px; }
+  .top-bar-left { padding: 2px 10px; gap: 8px; }
+  .top-bar-center { padding: 0 14px; gap: 10px; }
+  .top-bar-right { padding: 0 10px; gap: 8px; }
+  .info-label { font-size: 0.6rem; }
+  .info-value { font-size: 0.75rem; }
+
+  /* Side Buttons */
+  .side-left { left: 6px; top: 44px; gap: 3px; }
+  .side-btn { width: 70px; padding: 5px 0; font-size: 0.65rem; letter-spacing: 1px; }
+  .side-right { right: 6px; top: 44px; gap: 3px; }
+  .item-btn { width: 52px; height: 38px; font-size: 0.55rem; }
+  .item-icon { font-size: 0.9rem; }
+
+  /* Room Character */
+  .room-character img { height: 55vh; }
+
+  /* Title Screen */
+  #title-screen { padding-bottom: 30px; }
+  .title-btn { padding: 10px 36px; font-size: 0.95rem; }
+
+  /* Gender Selection */
+  .gender-title { font-size: 1.3rem; margin-bottom: 20px; }
+  .gender-choices { gap: 24px; }
+  .gender-card { width: 180px; padding: 16px; }
+  .gender-card img { width: 140px; height: 140px; }
+  .gender-card .label { font-size: 1rem; }
+
+  /* Overlay Panels */
+  .overlay-panel { padding: 14px; max-height: 92vh; }
+  .overlay-title { font-size: 1.1rem; margin-bottom: 12px; }
+
+  /* Schedule Grid */
+  .schedule-grid { gap: 1px; }
+  .schedule-header { padding: 3px 1px; font-size: 0.6rem; }
+  .schedule-week-label { font-size: 0.55rem; padding: 3px 1px; }
+  .schedule-cell { min-height: 38px; padding: 2px; }
+  .schedule-cell .day-num { font-size: 0.55rem; }
+  .schedule-cell .slot { font-size: 0.5rem; padding: 1px 2px; }
+
+  /* Action Modal */
+  .modal-content { padding: 16px; max-height: 85vh; }
+  .modal-title { font-size: 0.95rem; margin-bottom: 10px; }
+  .action-option { padding: 6px 8px; }
+  .action-option .name { font-size: 0.78rem; }
+
+  /* VN Window */
+  .vn-window { width: 90vw; height: 85vh; max-width: 600px; }
+  .vn-face { width: 70px; height: 70px; bottom: 14px; left: 8px; }
+  .vn-face img { width: 100%; height: 100%; }
+  .vn-dialog-box { height: 130px; padding: 8px 12px 10px 90px; }
+  .vn-dialog-box.no-face { padding-left: 12px; }
+  .vn-speaker { font-size: 0.68rem; margin-bottom: 3px; }
+  .vn-text { font-size: 0.78rem; line-height: 1.5; }
+  .vn-date-badge { padding: 2px 10px; font-size: 0.65rem; }
+  .vn-prompt { font-size: 0.55rem; }
+
+  /* Stats Panel */
+  #stats-panel { width: 220px; padding: 12px; }
+  #stats-panel .panel-title { font-size: 0.9rem; margin-bottom: 10px; }
+  .stat-section-title { font-size: 0.6rem; margin: 8px 0 4px; }
+  .stat-row { font-size: 0.68rem; }
+  .stat-name { width: 56px; }
+  .stat-value { font-size: 0.65rem; }
+
+  /* Event Box */
+  .event-box { padding: 16px; max-width: 460px; }
+  .event-title { font-size: 1rem; }
+  .event-desc { font-size: 0.8rem; line-height: 1.6; margin-bottom: 14px; }
+  .event-choice { padding: 6px 10px; font-size: 0.75rem; }
+
+  /* Month Summary */
+  .summary-content { padding: 16px; max-height: 85vh; }
+  .summary-title { font-size: 1rem; margin-bottom: 10px; }
+  .summary-row { font-size: 0.72rem; }
+
+  /* Toast */
+  .toast { padding: 14px 24px; font-size: 0.9rem; }
+
+  /* Buttons */
+  .btn { padding: 7px 20px; font-size: 0.8rem; }
+
+  /* Ending */
+  #ending-screen .ending-stats-title { font-size: 1.4rem; margin-bottom: 16px; }
+  .ending-stats { gap: 6px; }
+  .ending-stat { padding: 8px; }
+  .ending-stat .label { font-size: 0.65rem; }
+  .ending-stat .value { font-size: 0.95rem; }
+  #ending-screen .ending-dialog-box { padding: 14px 18px 12px; }
+  #ending-screen .ending-dialog-title { font-size: 1rem; }
+  #ending-screen .ending-dialog-text { font-size: 0.8rem; line-height: 1.7; }
+  #ending-screen .ending-buttons button { padding: 7px 16px; font-size: 0.78rem; }
+}
+
+/* ===== Touch devices: active instead of hover ===== */
+@media (hover: none) and (pointer: coarse) {
+  .choice-btn:active, .side-btn:active, .item-btn:active,
+  .action-option:active, .event-choice:active, .title-btn:active,
+  .gender-card:active {
+    border-color: #c9a84c; background: rgba(60,50,35,0.95);
+  }
+  .schedule-cell.editable:active {
+    border-color: #c9a84c; background: #3a3225;
+  }
+}
 </style>
 </head>
 <body>
+
+<!-- Mobile Rotation Notice -->
+<div id="rotate-notice">
+  <div class="rotate-icon">📱</div>
+  <p>화면을 가로로 회전해주세요</p>
+  <p class="sub">이 게임은 가로 화면에 최적화되어 있습니다</p>
+</div>
 
 <!-- Title Screen -->
 <div id="title-screen">
@@ -783,6 +914,11 @@ body {
 </div>
 
 <script>
+// ==================== MOBILE ORIENTATION LOCK ====================
+if (screen.orientation && screen.orientation.lock) {
+  screen.orientation.lock('landscape').catch(() => {});
+}
+
 // ==================== GAME STATE ====================
 const G = {
   gender: null, name: '', birthday: '', mbti: '',
