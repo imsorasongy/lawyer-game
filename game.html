@@ -11377,7 +11377,8 @@ function showEnding(){
   if(!ending && s.lawKnowledge>=980 && s.debate>=980 && s.observation>=980 && s.sales>=980 &&
      s.reputation>=980 && s.charm>=980 && s.morality>=980 && s.sociability>=980 &&
      s.stamina>=980 && s.mental>=980 && s.karma===0 && G.phdCompleted &&
-     G.specialLawyer && G.specialLawyer.length>=3 && wr>=70) {
+     G.specialLawyer && G.specialLawyer.length>=3 && wr>=70 &&
+     G.mainStoryFlag && G.mainStoryFlag.case4_cleared) {
     ending = {title:'전설의 변호사', bg:'배경/서면.webp',
       commonText:'변호사란 무엇일까. 변호사의 길의 끝에 가면 그 답을 찾을 수 있을 거라 생각했고, 나는 그 길의 끝에 드디어 도달했다. 변호사가 다다를 수 있는 극한, 전설의 변호사, 그 경지에 도달한 것이다. 그렇다. 나는 전설이다.',
       grade:null, gradeText:''};
@@ -11601,6 +11602,174 @@ function showEndingScreen(ending) {
   }, 2000);
 }
 
+// 엔딩별 주변인물 대화 데이터
+function getEndingDialogues(title) {
+  ensureRomance();
+  const allyFace = G.gender==='male' ? '캐릭터얼굴/동료여자어쏘.webp' : '캐릭터얼굴/동료남자어쏘.webp';
+  const spouseTarget = getRomanceTargets().find(t=>t.id===G.romance.dating);
+  const spouseFace = spouseTarget ? spouseTarget.face : getPlayerFace();
+  const spouseName = spouseTarget ? spouseTarget.name : '배우자';
+  const n = G.name;
+  const map = {
+    '전설의 변호사': [
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'대한민국 법조사에 '+n+' 변호사의 이름이 영원히 남을 것입니다.'},
+      {face:'player', speaker:n, text:'과분한 말씀입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'과분하다뇨. 법조인이라면 누구나 존경하는 이름이 되었는데요. 특히 법조카르텔을 무너뜨린건, '+n+' 변호사가 아니면 거의 불가능한 일이었을 겁니다.'},
+      {face:'player', speaker:n, text:'저는 그저 제가 할 수 있는 일을 했을 뿐입니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그 한 마디가, 전설이 되는 이유입니다.'},
+    ],
+    '악덕변호사': [
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:n+', 자네... 요즘 좀 변한 것 같아.'},
+      {face:'player', speaker:n, text:'무슨 말씀이세요.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'처음 자네가 우리 로펌에 왔을 때의 그 눈빛이 없어졌다는 거야. 그때는 정의로운 눈빛이었는데.'},
+      {face:'player', speaker:n, text:'...정의가 밥 먹여주던가요. 저는 잘 먹고 잘 살 겁니다.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'그렇구만. 그래, 술이나 한 잔 더 하자고.'},
+    ],
+    '정치인': [
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:n+', 정치의 길을 택했다고 들었네.'},
+      {face:'player', speaker:n, text:'네, 교수님. 법을 만드는 쪽에 서고 싶었습니다.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'변호사로서도 훌륭했는데, 정치인으로서는 더 큰 일을 하겠군.'},
+      {face:'player', speaker:n, text:'교수님이 가르쳐주신 것들이 정치에서도 큰 힘이 됩니다.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'초심을 잃지 않는 정치인이 되게나. 자네라면 할 수 있을 거야.'},
+    ],
+    '판사': [
+      {face:'캐릭터얼굴/검사.webp', speaker:'강혁', text:'판사가 됐다고? 축하해.'},
+      {face:'player', speaker:n, text:'고마워. 이제 너랑 법정에서 만나겠네.'},
+      {face:'캐릭터얼굴/검사.webp', speaker:'강혁', text:'저한테 너무 불리한 판결은 내리지 마세요.'},
+      {face:'player', speaker:n, text:'공정하게 하겠지. 법 앞에서는 누구나 평등하니까.'},
+      {face:'캐릭터얼굴/검사.webp', speaker:'강혁', text:'그 말, '+n+'답네요. 좋은 판사가 될 거라 믿습니다.'},
+    ],
+    '고위공무원': [
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'자네가 공직에 나간다니, 아깝기도 하고 대견하기도 하고.'},
+      {face:'player', speaker:n, text:'법률 전문성을 국가를 위해 쓰고 싶었습니다.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'자네 정도 실력이면, 로펌에 있었으면 돈은 더 많이 벌었겠지만.'},
+      {face:'player', speaker:n, text:'돈보다 보람 있는 일이 있더라고요.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'그 마음 변하지 않기를 바라네. 힘내게.'},
+    ],
+    '변호사협회장': [
+      {face:'캐릭터얼굴/대한변협협회장.webp', speaker:'전임 협회장', text:'이제 이 자리는 자네 것이네, '+n+' 변호사.'},
+      {face:'player', speaker:n, text:'무거운 자리입니다. 잘 할 수 있을지...'},
+      {face:'캐릭터얼굴/대한변협협회장.webp', speaker:'전임 협회장', text:'자네만큼 동료들에게 헌신한 사람이 없어. 적임자야.'},
+      {face:'player', speaker:n, text:'변호사들이 자부심을 가질 수 있는 환경을 만들겠습니다.'},
+      {face:'캐릭터얼굴/대한변협협회장.webp', speaker:'전임 협회장', text:'그 말 잊지 말게. 기대하겠네.'},
+    ],
+    '대표변호사': [
+      {face:allyFace, speaker:'동료', text:'대표님, 저도 대표님처럼 되고 싶어요.'},
+      {face:'player', speaker:n, text:'나도 처음엔 막막했어. 하나씩 하다 보니 여기까지 왔지.'},
+      {face:allyFace, speaker:'동료', text:'비결이 뭐예요?'},
+      {face:'player', speaker:n, text:'포기하지 않는 거. 그게 전부야.'},
+      {face:allyFace, speaker:'동료', text:'대표님 밑에서 일할 수 있어서 영광이었습니다.'},
+    ],
+    '대형펌 파트너': [
+      {face:allyFace, speaker:'동료', text:n+' 변호사님, 어쏘 시절이 그리우시진 않으세요?'},
+      {face:'player', speaker:n, text:'전혀. 어쏘시절을 그리워하는 사람도 있나?'},
+      {face:allyFace, speaker:'동료', text:'월급만 받으면 되니 마음이 편해서..??'},
+      {face:'player', speaker:n, text:'아니, 변호사라면 자신의 길을 스스로 만들어 나가야지. 언젠가는 독립해야해.'},
+      {face:allyFace, speaker:'동료', text:'멋있네요. 저도 언젠가 파트너가 되고 싶어요.'},
+    ],
+    '로스쿨교수': [
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'이제 동료가 됐구만, '+n+' 교수.'},
+      {face:'player', speaker:n, text:'교수님 밑에서 배운 것들이 있어서 여기까지 올 수 있었습니다.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'자네 실무 경험이면 학생들에게 최고의 강의가 될 거야.'},
+      {face:'player', speaker:n, text:'제가 받은 만큼 돌려주고 싶습니다.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'좋은 스승이 될 거라 믿네. 함께 잘 해보세.'},
+    ],
+    '인권변호사': [
+      {face:'캐릭터얼굴/이희선.webp', speaker:'이희선', text:n+' 변호사님, 오늘도 무료 상담이에요?'},
+      {face:'player', speaker:n, text:'네. 도움이 필요한 분들이 많으니까요.'},
+      {face:'캐릭터얼굴/이희선.webp', speaker:'이희선', text:'변호사님 같은 분이 있어서 정말 든든해요.'},
+      {face:'player', speaker:n, text:'이희선 씨야말로. 사회복지사로서 항상 현장에 계시잖아요.'},
+      {face:'캐릭터얼굴/이희선.webp', speaker:'이희선', text:'우리 같이 계속 힘내요. 아직 도와야 할 사람이 많으니까.'},
+    ],
+    '대기업임원': [
+      {face:'캐릭터얼굴/기업임원.webp', speaker:'상사', text:n+' 이사, 이번 분기 실적이 좋더군.'},
+      {face:'player', speaker:n, text:'팀원들이 잘 따라줬습니다.'},
+      {face:'캐릭터얼굴/기업임원.webp', speaker:'상사', text:'겸손하기는. 법무팀이 이 정도로 강해진 건 자네 덕이야.'},
+      {face:'player', speaker:n, text:'감사합니다. 더 노력하겠습니다.'},
+      {face:'캐릭터얼굴/기업임원.webp', speaker:'상사', text:'다음 이사회에서 좋은 소식이 있을 거야. 기대하게.'},
+    ],
+    '투자의귀재': [
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:n+' 변호사님, 투자 비결이 뭔가요?'},
+      {face:'player', speaker:n, text:'분석이요. 변호사는 원래 자료 분석을 잘 하거든요.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'그래도 이 정도 수익률은 보통이 아닌데요.'},
+      {face:'player', speaker:n, text:'운도 좀 따라줬죠. 그리고 무리하지 않는 것이 중요합니다.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'다음에 투자 강연도 한번 부탁드려도 될까요?'},
+    ],
+    '너튜버변호사': [
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'구독자 100만 돌파 축하드립니다! 비결이 뭐예요?'},
+      {face:'player', speaker:n, text:'그냥 꾸준히 했을 뿐이에요. 사람들이 궁금해하는 법률 이야기를.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'변호사 업무와 병행하기 힘들지 않으세요?'},
+      {face:'player', speaker:n, text:'솔직히 힘들죠. 하지만 댓글에 \'도움 받았습니다\'라는 글을 볼 때마다 힘이 나요.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'앞으로의 계획은요?'},
+      {face:'player', speaker:n, text:'법률을 더 쉽고 재밌게 전달하는 게 목표입니다.'},
+    ],
+    '인플루언서변호사': [
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'팔로워들과의 소통 비결이 있나요?'},
+      {face:'player', speaker:n, text:'진심이요. 법률 상담도 진심으로, 일상 공유도 진심으로.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'DM으로 상담도 하신다면서요?'},
+      {face:'player', speaker:n, text:'네. 돈이 없어서 변호사를 못 만나는 분들에게 간단한 법률 조언이라도 해드리고 싶어서요.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'정말 따뜻한 변호사시네요.'},
+    ],
+    '연예인변호사': [
+      {face:'캐릭터얼굴/방송국pd.webp', speaker:'방송국PD', text:'변호사인데 연예인보다 인기가 많으시네요!'},
+      {face:'player', speaker:n, text:'과찬이세요. 저는 변호사가 본업인걸요.'},
+      {face:'캐릭터얼굴/방송국pd.webp', speaker:'방송국PD', text:'혹시 연기 제안 받으신 적 있으세요?'},
+      {face:'player', speaker:n, text:'몇 번 있었는데, 정중히 거절했어요. 법정 드라마는 제가 직접 살고 있으니까요.'},
+      {face:'캐릭터얼굴/방송국pd.webp', speaker:'방송국PD', text:'역시 .. 진짜 연예인 데뷔하시는 거 아니에요?!'},
+    ],
+    '방송변호사': [
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'오늘도 해설 감사합니다. 시청자 반응이 뜨거워요.'},
+      {face:'player', speaker:n, text:'어려운 법률 문제를 쉽게 설명하는 게 제 역할이니까요.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'비결이 뭐예요? 다른 변호사분들은 어렵게 말씀하시거든요.'},
+      {face:'player', speaker:n, text:'법정에서 배운 거예요. 판사도, 배심원도 쉬운 말을 좋아하거든요.'},
+      {face:'캐릭터얼굴/기자.webp', speaker:'기자', text:'다음 주에도 출연 가능하시죠?'},
+    ],
+    '국제기구활동가': [
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'세계를 무대로 활동하고 있다니, 자랑스럽구만.'},
+      {face:'player', speaker:n, text:'교수님 수업에서 국제인권법을 배운 게 시작이었어요.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'대한민국 변호사가 유엔에서 활동한다니, 내가 다 뿌듯하네.'},
+      {face:'player', speaker:n, text:'아직 부족한 게 많지만, 계속 노력하겠습니다.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'세상을 바꾸는 건 바로 자네 같은 사람이야.'},
+    ],
+    '동네변호사': [
+      {face:'캐릭터얼굴/의뢰인1.webp', speaker:'동네 주민', text:n+' 변호사님! 지난번 건 덕분에 잘 해결됐어요.'},
+      {face:'player', speaker:n, text:'다행이네요. 별거 아닌 일이었는데.'},
+      {face:'캐릭터얼굴/의뢰인1.webp', speaker:'동네 주민', text:'별거 아니긴요! 변호사님 아니었으면 어떡할 뻔했어요.'},
+      {face:'player', speaker:n, text:'그런 말씀 해주시면 보람차죠.'},
+      {face:'캐릭터얼굴/의뢰인1.webp', speaker:'동네 주민', text:'우리 동네 최고의 변호사예요, 진짜!'},
+    ],
+    '학원강사': [
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'강의에 소질이 있다던데? 학생들 사이에서 인기가 대단하다고 들었네.'},
+      {face:'player', speaker:n, text:'가르치는 게 생각보다 재밌더라고요.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'실무 경험이 있는 강사가 최고지. 학생들이 복 받은 거야.'},
+      {face:'player', speaker:n, text:'제 수업 들은 학생이 변호사 됐다고 연락 올 때가 제일 뿌듯해요.'},
+      {face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수', text:'그게 교육자의 보람이야. 자네도 이제 알겠지?'},
+    ],
+    '결혼/가정': [
+      {face:spouseFace, speaker:spouseName, text:'오늘 우리 몇 주년이야. 알고 있어?'},
+      {face:'player', speaker:n, text:'당연히 알지. 매년 이 날만 기다린다고.'},
+      {face:spouseFace, speaker:spouseName, text:'거짓말. 작년에는 까먹었잖아.'},
+      {face:'player', speaker:n, text:'올해는 안 까먹었으니 됐잖아.'},
+      {face:spouseFace, speaker:spouseName, text:'...고마워. 항상 곁에 있어줘서.'},
+    ],
+    '휴업변호사': [
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'자네 요즘은 일을 안 하고 쉰다고 들었는데, '+n+'.'},
+      {face:'player', speaker:n, text:'네... 좀 지쳤나 봅니다. 변호사 일 말고 다른 일을 해볼까도 생각중이에요.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'충분히 쉬고 돌아와. 자네 자리는 항상 있으니까.'},
+      {face:'player', speaker:n, text:'감사합니다. 다시 시작할 힘을 좀 충전하고 올게요.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'그래. 기다리고 있겠네.'},
+    ],
+    '평범한변호사': [
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'10년이 벌써 지났구만, '+n+'.'},
+      {face:'player', speaker:n, text:'빠르게 지나갔네요. 어제 입사한 것 같은데.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'자네는 묵묵히 자기 길을 걸어왔어. 그게 얼마나 대단한 건지 아나?'},
+      {face:'player', speaker:n, text:'대단할 것까진... 그냥 매일 최선을 다한 것 뿐이에요.'},
+      {face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'그게 대단한 거야. 앞으로 10년도 기대하겠네.'},
+    ],
+  };
+  return map[title] || [];
+}
+
 function showEndingVN(ending) {
   // 2. VN 윈도우 설정
   const vnEl = document.getElementById('ending-vn');
@@ -11616,19 +11785,55 @@ function showEndingVN(ending) {
   // 3. VN 윈도우 페이드인
   setTimeout(() => { vnEl.style.opacity = '1'; }, 500);
 
-  // 4. 클릭 흐름
-  let phase = 0;
+  // 엔딩 대화 데이터
+  const endingDialogues = getEndingDialogues(ending.title);
+  let dialogueIdx = 0;
+
+  // 4. 클릭 흐름: 공통 내레이션 → 주변인물 대화 → 등급 평가 → 크레딧
+  let phase = 0; // 0=공통, 1=대화, 2=등급, 3=크레딧
   window._endingNext = function() {
-    phase++;
+    if (phase === 0) {
+      // 공통 내레이션 끝 → 대화 시작
+      phase = 1;
+      dialogueIdx = 0;
+      if (endingDialogues.length === 0) { phase = 2; window._endingNext(); return; }
+      const d = endingDialogues[0];
+      const face = d.face === 'player' ? getPlayerFace() : d.face;
+      document.getElementById('ending-face-img').src = face;
+      document.getElementById('ending-speaker').textContent = d.speaker;
+      document.getElementById('ending-dialog-text').textContent = d.text;
+      dialogueIdx = 1;
+      return;
+    }
     if (phase === 1) {
+      // 대화 진행
+      if (dialogueIdx < endingDialogues.length) {
+        const d = endingDialogues[dialogueIdx];
+        const face = d.face === 'player' ? getPlayerFace() : d.face;
+        document.getElementById('ending-face-img').src = face;
+        document.getElementById('ending-speaker').textContent = d.speaker;
+        document.getElementById('ending-dialog-text').textContent = d.text;
+        dialogueIdx++;
+        return;
+      }
+      // 대화 끝 → 등급 평가
+      phase = 2;
+      document.getElementById('ending-face-img').src = getPlayerFace();
+      document.getElementById('ending-speaker').textContent = G.name;
       if (ending.gradeText) {
         document.getElementById('ending-dialog-text').textContent = ending.gradeText;
-      } else {
-        phase++;
+        return;
       }
+      // gradeText 없으면 바로 크레딧
+      phase = 3;
+      window._endingNext();
+      return;
     }
     if (phase === 2) {
-      // VN 윈도우 페이드아웃 + 집 배경 페이드아웃 → 크레딧 시퀀스
+      phase = 3;
+    }
+    if (phase === 3) {
+      // 크레딧으로
       vnEl.style.opacity = '0';
       const homeBg = document.getElementById('ending-home-bg');
       homeBg.style.transition = 'opacity 1.5s';
