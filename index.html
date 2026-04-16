@@ -3528,7 +3528,7 @@ function processEmployeesMonthly() {
       const card = createCaseCard();
       const feeBaseRaw = (3300000+G.stats.sales*3000+G.stats.reputation*3000)*G.caseFeeMultiplier*(0.5+Math.random());
       const feeBase = Math.floor(feeBaseRaw/10000)*10000;
-      const fee = Math.floor(feeBase * G.caseFeeRate);
+      const fee = Math.floor(feeBase * G.caseFeeRate * 0.75);
       // 주인공 사건이 60건 미만이면 주인공에게
       if (G.cases < 60) {
         G.caseCards.push(card); G.cases++; G.yearCases++;
