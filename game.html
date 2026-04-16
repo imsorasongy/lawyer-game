@@ -1038,6 +1038,9 @@ const G = {
   // 수임 시스템
   consultQuota: 0,           // 대표/개업의 상담가능 수 (누적)
   bgmOn: true,               // BGM 켜짐 여부
+  bgmVolume: 0.4,            // BGM 볼륨 (0~1)
+  autoSave: false,            // 자동 저장 on/off
+  autoSkip: false,            // 자동넘김 (이벤트 없는 일반 씬 스킵)
   firmId: 'daeyoung',        // 현재 소속 ID
   firmName: '법무법인 대영',  // 현재 소속 이름
   caseFeeMultiplier: 1,      // 수임료 배수
@@ -2071,7 +2074,7 @@ function playBGM(mode) {
   else src = BGM_NORMAL[Math.floor(Math.random()*BGM_NORMAL.length)];
   if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; }
   bgmAudio = new Audio(src);
-  bgmAudio.volume = 0.4;
+  bgmAudio.volume = G.bgmVolume;
   bgmAudio.addEventListener('ended', () => playBGM(bgmCurrentMode));
   bgmAudio.play().catch(()=>{});
 }
@@ -2084,6 +2087,48 @@ function toggleBGM() {
   } else {
     if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; }
   }
+}
+
+// ==================== SETTINGS ====================
+function openSettings() {
+  const modal = document.getElementById('storage-modal');
+  modal.style.display = 'flex';
+  document.getElementById('storage-title').textContent = '설정';
+  let html = '';
+
+  // BGM on/off + 볼륨
+  html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">BGM</span>
+      <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:60px" onclick="toggleBGM();openSettings()">
+        <span class="choice-label">${G.bgmOn?'ON':'OFF'}</span></button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;opacity:${G.bgmOn?1:0.4}">
+      <span style="color:#8a8a70;font-size:0.72rem">볼륨</span>
+      <input type="range" min="0" max="100" value="${Math.round(G.bgmVolume*100)}"
+        style="flex:1;accent-color:#c9a84c" ${G.bgmOn?'':'disabled'}
+        oninput="G.bgmVolume=this.value/100;if(bgmAudio)bgmAudio.volume=G.bgmVolume;document.getElementById('vol-label').textContent=this.value+'%'">
+      <span id="vol-label" style="color:#c09030;font-size:0.72rem;min-width:32px;text-align:right">${Math.round(G.bgmVolume*100)}%</span>
+    </div>
+  </div>`;
+
+  // 자동넘김
+  html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020;display:flex;justify-content:space-between;align-items:center">
+    <div><span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">자동넘김</span>
+    <div style="color:#8a8a70;font-size:0.68rem">이벤트 없는 일반 스케줄을 자동으로 넘깁니다</div></div>
+    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:60px" onclick="G.autoSkip=!G.autoSkip;openSettings()">
+      <span class="choice-label">${G.autoSkip?'ON':'OFF'}</span></button>
+  </div>`;
+
+  // 자동 저장
+  html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020;display:flex;justify-content:space-between;align-items:center">
+    <div><span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">자동 저장</span>
+    <div style="color:#8a8a70;font-size:0.68rem">매월 시작 시 슬롯 10에 자동 저장</div></div>
+    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:60px" onclick="G.autoSave=!G.autoSave;openSettings()">
+      <span class="choice-label">${G.autoSave?'ON':'OFF'}</span></button>
+  </div>`;
+
+  document.getElementById('storage-list').innerHTML = html;
 }
 
 function startBGMOnInteraction() {
@@ -3467,7 +3512,7 @@ function processEmployeesMonthly() {
       const won = Math.random()*100 < wr;
       if (won) {
         G.wins++;
-        const reward = Math.floor(G.stats.reputation * 3000 * G.successFeeRate);
+        const reward = Math.floor(G.stats.reputation * 3000 * (0.5 + Math.random() * 3.5) * G.successFeeRate);
         if(reward>0){G.funds+=reward; statChanges.funds+=reward; assocReward+=reward;}
         assocWins++;
       } else {
@@ -7345,8 +7390,11 @@ function showVNScene(idx) {
     changesEl.innerHTML = '';
   }
 
-  // Wait for click/key
+  // Wait for click/key (자동넘김 시 이벤트 없는 일반 씬은 자동 진행)
   vnWaiting = true;
+  if (G.autoSkip && !scene.dateEvent && !scene.milestone) {
+    setTimeout(() => { if (vnWaiting) advanceVN(); }, 80);
+  }
 }
 
 function advanceVN() {
@@ -8270,6 +8318,8 @@ function closeSummary(){
     G.yearCaseSeq = 0; // 연도별 사건번호 리셋
   }
   G.totalMonths++;
+  // 자동 저장 (슬롯 10)
+  if (G.autoSave) saveGame(SAVE_SLOT_COUNT - 1, true);
   if(G.year>10){showEnding();return;}
   // 메인스토리 하위호환 보장
   if (!G.mainStoryOffered) G.mainStoryOffered = { case1: false, case2: false, case3: false, case4: false };
@@ -8532,10 +8582,8 @@ function openMenu() {
     <div><div class="name">저장하기</div><div class="effects">게임을 저장합니다</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openLoadScreen()">
     <div><div class="name">불러오기</div><div class="effects">저장된 게임을 불러옵니다</div></div></div>`;
-  html += `<div class="action-option" onclick="toggleBGM();openMenu()">
-    <div><div class="name">BGM ${G.bgmOn?'끄기':'켜기'}</div><div class="effects">현재: ${G.bgmOn?'🔊 재생중':'🔇 꺼짐'}</div></div></div>`;
-  html += `<div class="action-option" onclick="showToast('아직 준비중입니다.');document.getElementById('menu-modal').style.display='none'">
-    <div><div class="name">설정</div><div class="effects">게임 설정</div></div></div>`;
+  html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openSettings()">
+    <div><div class="name">설정</div><div class="effects">BGM, 자동넘김, 자동저장</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openHelpModal()">
     <div><div class="name">도움말</div><div class="effects">게임 플레이 안내</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';gameConfirm('타이틀 화면으로 돌아가시겠습니까?\\n저장하지 않은 진행상황은 사라집니다.',()=>{location.reload();})">
@@ -10172,7 +10220,7 @@ function confirmSaveDelete(slot, mode) {
   document.getElementById('saveload-modal').style.display = 'none';
   gameConfirm(`슬롯 ${slot+1}을 삭제하시겠습니까?`, () => { deleteSave(slot); if(mode==='save') openSaveScreen(); else openLoadScreen(); }, () => { if(mode==='save') openSaveScreen(); else openLoadScreen(); });
 }
-function saveGame(slot) {
+function saveGame(slot, silent) {
   const saveData = {
     version: 1,
     savedAt: new Date().toISOString(),
@@ -10188,8 +10236,10 @@ function saveGame(slot) {
     state: JSON.parse(JSON.stringify(G)),
   };
   localStorage.setItem(SAVE_KEY_PREFIX + slot, JSON.stringify(saveData));
-  showToast(`슬롯 ${slot+1}에 저장되었습니다.`);
-  document.getElementById('saveload-modal').style.display = 'none';
+  if (!silent) {
+    showToast(`슬롯 ${slot+1}에 저장되었습니다.`);
+    document.getElementById('saveload-modal').style.display = 'none';
+  }
 }
 
 function loadGame(slot) {
@@ -10201,6 +10251,10 @@ function loadGame(slot) {
   G.mainStoryFlag = { case1_cleared: false, case2_cleared: false, case3_cleared: false, case4_cleared: false };
   G.mainStoryOffered = { case1: false, case2: false, case3: false, case4: false };
   for (const k in data.state) { G[k] = data.state[k]; }
+  // 설정 하위호환
+  if (G.bgmVolume === undefined) G.bgmVolume = 0.4;
+  if (G.autoSave === undefined) G.autoSave = false;
+  if (G.autoSkip === undefined) G.autoSkip = false;
   // 연애 시스템 하위호환
   ensureRomance();
   // 화면 전환
