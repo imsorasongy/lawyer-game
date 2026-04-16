@@ -7178,13 +7178,27 @@ function judgeConsult(){
 }
 
 // Apply stat and return description string
+function diminishingMult(stat){
+  if(stat<=500)return 1;
+  return Math.max(0, 1.375 - stat*0.00125);
+}
 function applyStatR(k,v){
+  // 체감 수익: 주요 능력치의 양수 상승분에만 적용 (스트레스/피로/업보 제외)
+  if(v>0 && k!=='stress' && k!=='fatigue' && k!=='karma'){
+    v=v*diminishingMult(G.stats[k]);
+  }
   G.stats[k]=Math.max(0,Math.min(999,G.stats[k]+v));
   if(statChanges[k]!==undefined)statChanges[k]+=v;
   if(Math.abs(v)>=0.1) return [`${STAT_NAMES[k]} ${v>0?'+':''}${v%1===0?v:v.toFixed(1)}`];
   return [];
 }
-function applyStat(k,v){G.stats[k]=Math.max(0,Math.min(999,G.stats[k]+v));if(statChanges[k]!==undefined)statChanges[k]+=v;}
+function applyStat(k,v){
+  if(v>0 && k!=='stress' && k!=='fatigue' && k!=='karma'){
+    v=v*diminishingMult(G.stats[k]);
+  }
+  G.stats[k]=Math.max(0,Math.min(999,G.stats[k]+v));
+  if(statChanges[k]!==undefined)statChanges[k]+=v;
+}
 
 // ==================== VN SCENE DISPLAY ====================
 function showVNScene(idx) {
@@ -8337,12 +8351,12 @@ function closeSummary(){
   const ay = 2029 + G.year;
   console.log('[MainStory] closeSummary check:', {ay, month:G.month, year:G.year, c3cleared:G.mainStoryFlag.case3_cleared, c4offered:G.mainStoryOffered.case4, mc3:!!G.mainCase3, mc4:!!G.mainCase4, mc3tp:G.mainCase3?G.mainCase3.trialPhase:'x', mc3active:G.mainCase3?G.mainCase3.active:'x', flags:JSON.stringify(G.mainStoryFlag)});
   if (!G.mainStoryOffered.case1 && !G.mainCase1 && G.month === 1 &&
-      (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 700 && G.stats.reputation > 700) {
+      (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 700 && G.stats.reputation > 550) {
     console.log('[MainStory] Triggering case 1 offer!');
     showMainStoryOffer(1); return;
   }
   if (G.mainStoryFlag.case1_cleared && !G.mainStoryOffered.case2 && !G.mainCase2 && G.month === 1 &&
-      (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 800 && G.stats.reputation > 800) {
+      (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 800 && G.stats.reputation > 550) {
     showMainStoryOffer(2); return;
   }
   // 사건3: 사건2 클리어 후 다음 해 1월
