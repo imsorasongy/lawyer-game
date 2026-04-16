@@ -4218,9 +4218,884 @@ function getActionBg(actionId) {
 }
 
 // 데이트 이벤트 체크
+// ===== 데이트 이벤트 캐릭터별 대사 =====
+const DATE_TONE_DIALOGUES = {
+  // ---------- dateWine ----------
+  dateWine:{
+    minyoung:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘 와인 한잔 어때? 내가 괜찮은 데 알거든.'}),
+        d=>({speaker:d.pName, text:'좋지. 어떤 거 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'음, 오늘 같은 날엔 피노누아 어때? 딱 좋을 것 같은데!'})
+      ],
+      reply1:d=>({speaker:d.name, text:'신대륙도 나쁘지 않지. 가성비는 좋으니까.'}),
+      reply2:d=>({speaker:d.name, text:'빌라쥬급이면 무난하네. 괜찮은 선택이야.'}),
+      reply3:d=>({speaker:d.name, text:'와, 그랑크뤼? 이건 진짜 맛있다. 역시 센스 있어!'})
+    },
+    eunkyung:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘은 와인 한잔 하고 싶은 기분이야.'}),
+        d=>({speaker:d.pName, text:'그래? 어떤 거 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'오늘 같은 날엔 피노누아가 좋을 것 같아. 가볍고 향이 좋은 걸로 골라줘.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'음, 가볍게 마시기엔 나쁘지 않아. 고마워.'}),
+      reply2:d=>({speaker:d.name, text:'빌라쥬급이면 밸런스가 좋지. 잘 골랐어.'}),
+      reply3:d=>({speaker:d.name, text:'이거 향이 정말 좋다... 어디 거야? 기억해둘래.'})
+    },
+    sarang:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘은 와인 한잔 하자. 내가 고를까?'}),
+        d=>({speaker:d.pName, text:'그래, 뭐가 끌려?'}),
+        d=>({speaker:d.name, text:'피노누아가 좋겠다. 오늘 분위기에 잘 어울릴 거야.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'신대륙도 요즘 괜찮은 게 많아. 나쁘지 않네.'}),
+      reply2:d=>({speaker:d.name, text:'빌라쥬급이면 적당하지. 좋은 선택이야.'}),
+      reply3:d=>({speaker:d.name, text:'그랑크뤼를 시키다니. 오늘 뭔가 특별한 날이야?'})
+    },
+    yeona:{
+      dialogues:[
+        d=>({speaker:d.name, text:'...오늘은 와인이 마시고 싶어.'}),
+        d=>({speaker:d.pName, text:'그래? 뭐 마시고 싶은데?'}),
+        d=>({speaker:d.name, text:'...피노누아가 마시고 싶어. 골라줘.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'...이 가격대에서는 나쁘지 않네.'}),
+      reply2:d=>({speaker:d.name, text:'...괜찮아. 무난한 선택이야.'}),
+      reply3:d=>({speaker:d.name, text:'...이건 맛있어. 잘 골랐네.'})
+    },
+    seungha:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오빠, 나 오늘 와인 마실래! 사줘!'}),
+        d=>({speaker:d.pName, text:'그래그래. 뭐 마실건데?'}),
+        d=>({speaker:d.name, text:'피노누아! 지난번에 마셨는데 맛있더라고~'})
+      ],
+      reply1:d=>({speaker:d.name, text:'어 이것도 괜찮네? 나쁘지 않다!'}),
+      reply2:d=>({speaker:d.name, text:'오 이거 맛있다! 오빠 잘 고른다~'}),
+      reply3:d=>({speaker:d.name, text:'헐 이거 대박 맛있어! 오빠 최고!'})
+    },
+    heesun:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘은 와인 한잔 해도 괜찮지?'}),
+        d=>({speaker:d.pName, text:'그럼. 어떤 거 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'피노누아. 오늘같은 날에 잘 어울릴 것 같아서.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'이것도 맛있네. 고마워.'}),
+      reply2:d=>({speaker:d.name, text:'와, 이거 정말 부드럽다. 맛있어.'}),
+      reply3:d=>({speaker:d.name, text:'이런 와인은 처음이야... 정말 맛있다.'})
+    },
+    hyemin:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘 와인 마시자! 마시고 싶어!'}),
+        d=>({speaker:d.pName, text:'하하, 그래. 뭐 마실래?'}),
+        d=>({speaker:d.name, text:'피노누아! 저번에 추천해줬잖아!'})
+      ],
+      reply1:d=>({speaker:d.name, text:'오 맛있어! 이것도 좋네!'}),
+      reply2:d=>({speaker:d.name, text:'와 이거 맛있다! 역시야!'}),
+      reply3:d=>({speaker:d.name, text:'헉 이건 뭐야?! 너무 맛있어! 이름이 뭐야?!'})
+    },
+    wonhyung:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘 와인 한잔 어때? 기분 좋은 날이니까.'}),
+        d=>({speaker:d.pName, text:'좋아. 뭐 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'피노누아가 좋겠는데. 오늘이랑 잘 맞을 것 같아.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'신대륙도 나쁘지 않네. 괜찮아.'}),
+      reply2:d=>({speaker:d.name, text:'빌라쥬급이면 무난하지. 좋은 선택이야.'}),
+      reply3:d=>({speaker:d.name, text:'그랑크뤼라니, 오늘 특별한 날이야? 하하, 맛있네.'})
+    },
+    minwoo:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘은 와인 한잔 하면서 쉬자. 고생했잖아.'}),
+        d=>({speaker:d.pName, text:'고마워. 뭐 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'피노누아 어때? 부드러운 게 오늘 딱일 것 같아서.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'가볍게 마시기 좋네. 고마워.'}),
+      reply2:d=>({speaker:d.name, text:'이 정도면 딱 좋다. 잘 골랐어.'}),
+      reply3:d=>({speaker:d.name, text:'와, 이건 정말 맛있다. 오늘 기분 최고네.'})
+    },
+    changwook:{
+      dialogues:[
+        d=>({speaker:d.name, text:'와인 한잔 할까.'}),
+        d=>({speaker:d.pName, text:'좋아. 뭐 마실래?'}),
+        d=>({speaker:d.name, text:'피노누아로 하자.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'나쁘지 않네.'}),
+      reply2:d=>({speaker:d.name, text:'괜찮은 선택이야.'}),
+      reply3:d=>({speaker:d.name, text:'이건 좋네. 맛있다.'})
+    },
+    jaseong:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오늘 같은 밤엔 와인이 딱이다. 같이 한잔 하자!'}),
+        d=>({speaker:d.pName, text:'좋지. 뭐 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'피노누아 어때? 이런 날엔 그게 제일 좋더라.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'어, 이것도 괜찮네! 나쁘지 않아.'}),
+      reply2:d=>({speaker:d.name, text:'오 이거 맛있다. 잘 골랐어!'}),
+      reply3:d=>({speaker:d.name, text:'와... 이건 진짜 다르다. 너무 맛있어.'})
+    },
+    mingyu:{
+      dialogues:[
+        d=>({speaker:d.name, text:'와인 한 잔 할까. 오늘 분위기가 좋으니까.'}),
+        d=>({speaker:d.pName, text:'뭐가 좋아?'}),
+        d=>({speaker:d.name, text:'피노누아로 하자. 여기 괜찮은 게 있을 거야.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'가격대비 나쁘지 않네. 괜찮아.'}),
+      reply2:d=>({speaker:d.name, text:'이 정도면 충분하지. 좋은 선택이야.'}),
+      reply3:d=>({speaker:d.name, text:'역시 좋은 건 다르네. 맛있다.'})
+    },
+    yosep:{
+      dialogues:[
+        d=>({speaker:d.name, text:'야, 와인이나 한잔 하자. 아, 내가 마시고 싶어서 그러는 거야.'}),
+        d=>({speaker:d.pName, text:'그래그래. 뭐 마실 건데?'}),
+        d=>({speaker:d.name, text:'피노누아. 딴 거 시키면 안 마신다.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'...뭐 이 가격에 이 정도면 나쁘진 않지.'}),
+      reply2:d=>({speaker:d.name, text:'흠, 그럭저럭이네. 마실만 해.'}),
+      reply3:d=>({speaker:d.name, text:'...오. 이건 맛있네. 뭐야, 센스 있잖아.'})
+    },
+    hyuk:{
+      dialogues:[
+        d=>({speaker:d.name, text:'혹시... 와인 한잔 괜찮겠어?'}),
+        d=>({speaker:d.pName, text:'좋아. 뭐 마시고 싶어?'}),
+        d=>({speaker:d.name, text:'피노누아가 좋겠는데. 오늘 같은 날에 어울릴 것 같아.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'나쁘지 않네. 고마워.'}),
+      reply2:d=>({speaker:d.name, text:'좋은 선택이야. 맛있네.'}),
+      reply3:d=>({speaker:d.name, text:'이건... 정말 맛있다. 고마워.'})
+    }
+  },
+  // ---------- dateJealousy ----------
+  dateJealousy:{
+    minyoung:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}, 요즘 ${c}이랑 좀 친해 보이던데... 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'그래? 좀 수상한데. 핸드폰 좀 볼 수 있을까?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'이 정도 연락이면... 좀 많지 않아? 하..'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 내가 더 의심할 수밖에 없잖아. 오늘은 좀 쉴게.'}),
+      reply3:d=>({speaker:d.name, text:'흠... 논리적이긴 하네. 일단 믿어볼게.'})
+    },
+    eunkyung:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`저기... ${d.pName}, 요즘 ${c}이랑 많이 보는 것 같은데... 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'진짜? 좀 수상해... 핸드폰 좀 보여줘.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'이렇게 연락을 많이 했어...? 좀 속상하다.'}),
+      reply2:d=>({speaker:d.name, text:'왜 화를 내... 나 그냥 물어본 건데... 오늘은 갈래.'}),
+      reply3:d=>({speaker:d.name, text:'응... 알겠어. 믿어볼게.'})
+    },
+    sarang:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}, 요즘 ${c}이랑 꽤 친해 보이던데. 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'그래? 좀 신경 쓰이는데. 핸드폰 좀 봐도 돼?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 꽤 많네. 좀 신경 쓰인다, 솔직히.'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 나도 기분이 안 좋아지잖아. 오늘은 각자 좀 쉬자.'}),
+      reply3:d=>({speaker:d.name, text:'알겠어. 네 말 믿을게.'})
+    },
+    yeona:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`...${d.pName}. 요즘 ${c}이랑 많이 보는 것 같던데.`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'...핸드폰 보여줘.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'...이 정도면 많이 했네. 하.'}),
+      reply2:d=>({speaker:d.name, text:'...화까지 내? 갈게.'}),
+      reply3:d=>({speaker:d.name, text:'...알겠어. 믿어줄게.'})
+    },
+    seungha:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`오빠! 요즘 ${c}이랑 되게 친하던데?! 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'수상해! 핸드폰 내놔!'})
+      ],
+      reply1:d=>({speaker:d.name, text:'뭐야 이거! 연락 엄청 많이 했잖아! 에잉!'}),
+      reply2:d=>({speaker:d.name, text:'나한테 화내지 마! 나도 삐졌어! 오빠 나빠!'})  ,
+      reply3:d=>({speaker:d.name, text:'흐응... 진짜지? 거짓말이면 죽는다?'})
+    },
+    heesun:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}... 요즘 ${c} 씨랑 자주 만나는 것 같은데... 혹시 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'그래도 좀 신경 쓰여서... 핸드폰 좀 봐도 될까?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 이렇게 많았어...? 좀 슬프다.'}),
+      reply2:d=>({speaker:d.name, text:'화내면... 나도 더 불안해져. 오늘은 좀 쉴게.'}),
+      reply3:d=>({speaker:d.name, text:'응... 네 말 믿을게.'})
+    },
+    hyemin:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}! 요즘 ${c} 씨랑 왜 그렇게 친해?! 무슨 사이야?!`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'진짜?! 수상해! 핸드폰 보여줘!'})
+      ],
+      reply1:d=>({speaker:d.name, text:'이렇게 연락을 많이 했어?! 너무해!'}),
+      reply2:d=>({speaker:d.name, text:'왜 나한테 화를 내! 물어본 것뿐이야! 삐졌어!'}),
+      reply3:d=>({speaker:d.name, text:'흐응... 진짜지? 믿어볼게!'})
+    },
+    wonhyung:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}, 요즘 ${c}이랑 꽤 친해 보이던데. 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'좀 신경 쓰이는데... 핸드폰 좀 봐도 될까?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 꽤 많네. 좀 씁쓸하긴 하다.'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 나도 대화하기 어려워. 오늘은 쉬자.'}),
+      reply3:d=>({speaker:d.name, text:'알겠어. 네 말 믿을게.'})
+    },
+    minwoo:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}씨, 요즘 ${c}이랑 자주 보는 것 같은데... 무슨 사이야?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'그래? 좀 걱정돼서 그래. 핸드폰 좀 봐도 될까?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 꽤 많네... 좀 속상하다, 솔직히.'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 나도 마음이 힘들어져. 오늘은 좀 쉬자.'}),
+      reply3:d=>({speaker:d.name, text:'그래, 네 말 믿을게. 걱정돼서 그랬어.'})
+    },
+    changwook:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}. 요즘 ${c}이랑 자주 보는 것 같던데.`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'핸드폰 좀 봐도 돼?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 많네. 좀 신경 쓰인다.'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 대화가 안 돼. 오늘은 그만 하자.'}),
+      reply3:d=>({speaker:d.name, text:'알겠어. 믿을게.'})
+    },
+    jaseong:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}씨, 나 요즘 좀 신경 쓰이는 게 있어. ${c}이랑 뭔가 있어?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'진짜? 좀 불안해서 그래... 핸드폰 좀 볼 수 있어?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락 꽤 많이 했네... 좀 서운하다.'}),
+      reply2:d=>({speaker:d.name, text:'화 내지 마... 나도 상처받잖아. 오늘은 쉬자.'}),
+      reply3:d=>({speaker:d.name, text:'그래, 믿을게. 내가 좀 예민했나 봐.'})
+    },
+    mingyu:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}씨, 요즘 ${c}이랑 꽤 친해 보이던데. 혹시 뭐 있어?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'그래? 좀 신경 쓰여서. 핸드폰 좀 봐도 될까.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 꽤 있네. 솔직히 좀 신경 쓰인다.'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 오히려 더 의심하게 돼. 오늘은 쉬자.'}),
+      reply3:d=>({speaker:d.name, text:'알겠어. 네 말 믿을게.'})
+    },
+    yosep:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`야, ${d.pName}. ${c}이랑 요즘 자주 보더라?`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'진짜? 핸드폰 봐도 돼?'})
+      ],
+      reply1:d=>({speaker:d.name, text:'...연락 많이 했네. 기분 별로다.'}),
+      reply2:d=>({speaker:d.name, text:'뭐? 나한테 화를 내? 나도 됐어.'}),
+      reply3:d=>({speaker:d.name, text:'...그래. 알겠다. 믿어줄게.'})
+    },
+    hyuk:{
+      dialogues:[
+        (d,c)=>({speaker:d.name, text:`${d.pName}, 한 가지 물어봐도 돼? 요즘 ${c} 씨랑 자주 만나는 것 같은데.`}),
+        d=>({speaker:d.pName, text:'무슨 사이는, 아무 사이도 아니지.'}),
+        d=>({speaker:d.name, text:'그래...? 핸드폰 좀 봐도 될까.'})
+      ],
+      reply1:d=>({speaker:d.name, text:'연락이 꽤 많네. 좀... 씁쓸하다.'}),
+      reply2:d=>({speaker:d.name, text:'화를 내면 대화가 안 돼. 오늘은 먼저 갈게.'}),
+      reply3:d=>({speaker:d.name, text:'알겠어. 네 말 믿을게.'})
+    }
+  },
+  // ---------- dateCall ----------
+  dateCall:{
+    minyoung:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}, 전화 오는 것 같은데?`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'퇴근 후인데... 지금 받아야 해?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'뭐, 변호사가 다 그렇지. 이해해.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'괜찮아? 급한 거 아니야?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응, 다녀와.'})]
+    },
+    eunkyung:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}, 전화 온다...`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'지금도 전화 받아야 해...?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'그래... 바쁘구나.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'정말? 안 받아도 괜찮아?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응, 다녀와.'})],
+    },
+    sarang:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}, 전화 온다.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'일 전화야? 지금도 받아야 해?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'뭐, 어쩔 수 없지. 빨리 끝내.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'괜찮아? 급한 거면 받아도 돼.'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'그래, 다녀와.'})]
+    },
+    yeona:{
+      dialogues:[
+        d=>({speaker:d.name, text:`...전화 온다.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'...지금?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'...그래.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'...안 받아도 돼?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'...응.'})]
+    },
+    seungha:{
+      dialogues:[
+        d=>({speaker:d.name, text:'오빠 전화 온다!'}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'에이~ 지금도 일 전화야?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'치, 맨날 바쁘기만 해.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'헤헤 진짜? 안 받아도 돼?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'빨리 갔다 와!'})],
+    },
+    heesun:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}, 전화 오는 것 같아.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'지금 받아야 해? 쉬는 시간인데...'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'아니, 괜찮아. 어쩔 수 없지.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'정말? 괜찮으면... 고마워.'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응, 다녀와.'})]
+    },
+    hyemin:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}! 전화 와!`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'에? 지금? 우리 데이트중인데!'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'으... 알겠어. 빨리 끝내!'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'진짜?! 히히, 감동이야!'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응! 빨리 와!'})]
+    },
+    wonhyung:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}, 전화 오는 것 같은데.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'지금 받아야 해? 쉬는 시간인데.'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'괜찮아. 변호사가 다 그렇지, 뭐.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'정말? 급한 거 아니야?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응, 다녀와.'})]
+    },
+    minwoo:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}씨, 전화 온다.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'쉬는 시간인데... 받아야 해?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'괜찮아. 바쁜 거 이해해.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'고마워. 근데 정말 괜찮아?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'그래, 다녀와.'})]
+    },
+    changwook:{
+      dialogues:[
+        d=>({speaker:d.name, text:'전화 오는 것 같은데.'}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'지금?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'괜찮아. 받아.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'안 받아도 돼?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응, 다녀와.'})]
+    },
+    jaseong:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}씨, 전화 온다!`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'지금도 일이야? 좀 쉬지~'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'에이, 바쁘긴. 빨리 끝내!'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'진짜? 하하, 안 받아도 돼?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'그래, 빨리 와!'})]
+    },
+    mingyu:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}씨, 전화 오는데.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'쉬는 날에도 전화가 오네. 받아야 해?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'어쩔 수 없지. 빨리 끝내.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'괜찮아? 급한 거면 받아도 돼.'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'그래, 다녀와.'})]
+    },
+    yosep:{
+      dialogues:[
+        d=>({speaker:d.name, text:'야, 전화 온다.'}) ,
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'또 일이야? 나랑 있을 때도?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'칫. 맨날 바쁘기만 하네.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'...뭐야, 안 받아도 돼?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'빨리 갔다 와.'})],
+    },
+    hyuk:{
+      dialogues:[
+        d=>({speaker:d.name, text:`${d.pName}, 전화가 오는 것 같아.`}),
+        d=>({speaker:d.pName, text:'아. 의뢰인이다.'}),
+        d=>({speaker:d.name, text:'지금 받아야 해?'})
+      ],
+      reply1:[d=>({speaker:d.pName, text:'미안.. 급한 전화라서.'}), d=>({speaker:d.name, text:'괜찮아. 일이 우선이지.'})],
+      reply2:[d=>({speaker:d.pName, text:'아니, 너와의 시간이 더 소중하지.'}), d=>({speaker:d.name, text:'정말 괜찮겠어?'})],
+      reply3:[d=>({speaker:d.pName, text:'잠깐만, 데이트중이라고 말하고 올게.'}), d=>({speaker:d.name, text:'응, 다녀와.'})]
+    }
+  },
+  // ---------- dateReview ----------
+  dateReview:{
+    minyoung: d=>({speaker:d.name, text:`오늘도 즐거웠어. ${d.pName}은 어땠어?`}),
+    eunkyung: d=>({speaker:d.name, text:`오늘 데이트 즐거웠어... ${d.pName}은 어땠어?`}),
+    sarang: d=>({speaker:d.name, text:`오늘 좋았어. ${d.pName}은 어땠어?`}),
+    yeona: d=>({speaker:d.name, text:`...오늘 나쁘지 않았어. ${d.pName}은?`}),
+    seungha: d=>({speaker:d.name, text:`오빠~ 오늘 재밌었다! 오빠는?`}),
+    heesun: d=>({speaker:d.name, text:`오늘 정말 좋았어. ${d.pName}은 어땠어?`}),
+    hyemin: d=>({speaker:d.name, text:`오늘 너무 즐거웠어! ${d.pName}은?!`}),
+    wonhyung: d=>({speaker:d.name, text:`오늘 즐거웠어. ${d.pName}은 어땠어?`}),
+    minwoo: d=>({speaker:d.name, text:`오늘 좋았어. ${d.pName}씨는 어땠어?`}),
+    changwook: d=>({speaker:d.name, text:`오늘 좋았어. 어땠어?`}),
+    jaseong: d=>({speaker:d.name, text:`오늘 진짜 좋았다! ${d.pName}씨는 어땠어?`}),
+    mingyu: d=>({speaker:d.name, text:`오늘 좋았어. ${d.pName}씨는?`}),
+    yosep: d=>({speaker:d.name, text:`뭐... 나쁘지 않았어. 너는?`}),
+    hyuk: d=>({speaker:d.name, text:`오늘 즐거웠어. ${d.pName}은 어땠어?`})
+  },
+  // ---------- dateNotice (나 뭐 변한거 없어? - 여성캐릭터만) ----------
+  dateNotice:{
+    minyoung:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'길이 좀 막혔어. 일찍 왔네?'}),
+        d=>({speaker:d.pName, text:'나야 늘 준비가 철저하지.'}),
+        d=>({speaker:d.name, text:'그런데 나 뭐 변한 거 없어?'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'오.. 제법인데?'}),
+      replyNot: d=>({speaker:d.name, text:'에이, 이 정도는 알아봐줘야지!'})
+    },
+    eunkyung:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'길이 막혀서 늦을 뻔 했어. 일찍 왔네.'}),
+        d=>({speaker:d.pName, text:'나야 늘 준비가 철저하지.'}),
+        d=>({speaker:d.name, text:'그, 그런데... 나 뭐 변한 거 없어?'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'어...! 알아봐줬어? 히히.'}),
+      replyNot: d=>({speaker:d.name, text:'으... 몰라? 좀 서운하다...'})
+    },
+    sarang:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'길이 좀 막혔어. 일찍 왔구나.'}),
+        d=>({speaker:d.pName, text:'나야 늘 준비가 철저하지.'}),
+        d=>({speaker:d.name, text:'그런데, 나 오늘 뭐 달라진 거 없어?'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'호오, 눈썰미 좋은데? 합격이야.'}),
+      replyNot: d=>({speaker:d.name, text:'이런 것도 모르면 곤란한데? 감점이야.'})
+    },
+    yeona:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'...응. 왔어.'}),
+        d=>({speaker:d.pName, text:'나야 늘 준비가 철저하지.'}),
+        d=>({speaker:d.name, text:'...나 뭐 변한 거 없어?'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'...알아봐주는구나.'}),
+      replyNot: d=>({speaker:d.name, text:'...관심 없구나.'})
+    },
+    seungha:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'오빠가 일찍 나왔네! 나 오늘 좀 달라진 거 모르겠어?'}),
+        d=>({speaker:d.pName, text:'음?'}),
+        d=>({speaker:d.name, text:'에이 빨리 맞춰봐!'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'오! 역시 오빠야! 잘 봤다!'}),
+      replyNot: d=>({speaker:d.name, text:'에잇 눈깔을 어디 달고 다니는 거야!'})
+    },
+    heesun:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'응, 늦지 않으려고 서둘렀어. 일찍 왔네?'}),
+        d=>({speaker:d.pName, text:'나야 늘 준비가 철저하지.'}),
+        d=>({speaker:d.name, text:'저기... 나 오늘 뭐 달라진 거 없어?'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'알아봐줬어? 고마워...!'}),
+      replyNot: d=>({speaker:d.name, text:'아... 아니, 아무것도 아니야.'})
+    },
+    hyemin:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아. 왔어? 딱 맞춰서 왔네.'}),
+        d=>({speaker:d.name, text:'나 오늘 뭐 달라진 거 몰라?!'}),
+        d=>({speaker:d.pName, text:'음?'}),
+        d=>({speaker:d.name, text:'빨리 맞춰봐!'})
+      ],
+      replyNoticed: d=>({speaker:d.name, text:'와! 역시! 센스 최고야!'}),
+      replyNot: d=>({speaker:d.name, text:'에에?! 몰라?! 너무해!'})
+    }
+  },
+  // ---------- dateLate (왜 이렇게 늦어? - 남성캐릭터만) ----------
+  dateLate:{
+    wonhyung:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'꽤 기다렸어. 무슨 일 있었어?'})
+      ],
+      reply1: d=>({speaker:d.name, text:'화내는 게 아니야. 그냥 궁금했을 뿐인데.'}),
+      reply2: d=>({speaker:d.name, text:'다음엔 미리 연락 줘. 걱정했잖아.'}),
+      reply3: d=>({speaker:d.name, text:'하하, 그래? 지금도 충분히 예쁜데.'})
+    },
+    minwoo:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'괜찮아. 근데 왜 좀 늦었어?'})
+      ],
+      reply1: d=>({speaker:d.name, text:'화내는 게 아니야. 걱정돼서 물어본 거야.'}),
+      reply2: d=>({speaker:d.name, text:'그래, 길이 막혔구나. 고생했어.'}),
+      reply3: d=>({speaker:d.name, text:'하하, 그래? 지금도 예쁜데 뭘.'})
+    },
+    changwook:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'왜 이렇게 늦었어.'})
+      ],
+      reply1: d=>({speaker:d.name, text:'화낸 게 아니야. 물어본 것뿐이야.'}),
+      reply2: d=>({speaker:d.name, text:'길이 막혔으면 연락을 주지. 기다렸어.'}),
+      reply3: d=>({speaker:d.name, text:'...지금도 충분해.'})
+    },
+    jaseong:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'야, 왜 이렇게 늦었어! 나 배고프다!'})
+      ],
+      reply1: d=>({speaker:d.name, text:'아 화내는 거 아니야! 그냥 물어본 거라고~'}),
+      reply2: d=>({speaker:d.name, text:'그래, 알겠어. 근데 다음엔 미리 연락해줘~'}),
+      reply3: d=>({speaker:d.name, text:'하하 진짜? 지금도 예쁜데 뭘 더 어떻게 하려고~'})
+    },
+    mingyu:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'꽤 기다렸어. 왜 늦었어?'})
+      ],
+      reply1: d=>({speaker:d.name, text:'화내는 게 아니야. 궁금했을 뿐이야.'}),
+      reply2: d=>({speaker:d.name, text:'그래, 어쩔 수 없었겠지. 괜찮아.'}),
+      reply3: d=>({speaker:d.name, text:'하하, 그래? 지금도 충분히 예쁜데.'})
+    },
+    yosep:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'야, 늦으면 연락이라도 하지.'})
+      ],
+      reply1: d=>({speaker:d.name, text:'뭐? 내가 언제 화를 냈어. 그냥 물어본 건데.'}),
+      reply2: d=>({speaker:d.name, text:'칫, 다음엔 좀 일찍 나와.'}),
+      reply3: d=>({speaker:d.name, text:'...뭐야, 그런 말 하면 화도 못 내잖아.'})
+    },
+    hyuk:{
+      dialogues:[
+        d=>({speaker:d.pName, text:'아, 미안, 좀 늦었지?'}),
+        d=>({speaker:d.name, text:'왜 이렇게 늦었어.'})
+      ],
+      reply1: d=>({speaker:d.name, text:'화내는 게 아니야. 걱정돼서 물어본 거야.'}),
+      reply2: d=>({speaker:d.name, text:'그래, 알겠어. 다음엔 미리 연락 줘.'}),
+      reply3: d=>({speaker:d.name, text:'...지금도 충분히 예뻐.'})
+    }
+  },
+  // ---------- partnerBirthday ----------
+  partnerBirthday:{
+    minyoung:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'어머, 센스 있네! 고마워!'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'정말 고마워. 오늘 최고의 생일이야!'})
+    },
+    eunkyung:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'이걸 준비했어? 어떻게 알았어... 감동이야.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'정말 고마워... 최고의 생일이야.'})
+    },
+    sarang:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'고마워. 이런 거 잘 고르네?'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'좋아하지. 고마워, 진짜.'})
+    },
+    yeona:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'...이걸 준비했어?'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'...고마워. 오늘 좋은 날이야.'})
+    },
+    seungha:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'오빠 이거 진짜?! 대박! 어떻게 알았어!'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'오빠 최고! 생일 선물 최고!'})
+    },
+    heesun:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'이런... 이걸 준비해줬어? 너무 감동이야.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'정말 고마워. 최고의 생일이야.'})
+    },
+    hyemin:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'헐! 이거 진짜야?! 감동이야!'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'최고야! 이 생일 평생 잊지 못할 거야!'})
+    },
+    wonhyung:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'이걸 준비해줬어? 고마워.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'정말 고마워. 좋은 생일이네.'})
+    },
+    minwoo:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'고마워, 정말 신경 썼구나. 감동이야.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'최고의 선물이야. 고마워, 진심으로.'})
+    },
+    changwook:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'고마워. 신경 써줬네.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'좋은 생일이야. 고마워.'})
+    },
+    jaseong:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'와 진짜?! 고마워! 나 이거 갖고 싶었어!'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'최고의 생일이다! 고마워!'})
+    },
+    mingyu:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'고마워. 센스 있네.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'좋아. 고마워, 정말.'})
+    },
+    yosep:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'뭐야, 이런 거 준비한 거야? ...고맙다.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'...오늘 좀 기분 좋네. 고마워.'})
+    },
+    hyuk:{
+      d1: d=>({speaker:d.pName, text:`${d.name}, 생일 축하해! 이거 선물이야.`}),
+      d2: d=>({speaker:d.name, text:'이런 것까지 준비해줬어? 고마워.'}),
+      d3: d=>({speaker:d.pName, text:'좋아해줘서 다행이다.'}),
+      d4: d=>({speaker:d.name, text:'정말 좋은 생일이야. 고마워.'})
+    }
+  },
+  // ---------- anniversary ----------
+  anniversary:{
+    minyoung:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 시간 참 빠르지?'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 항상 고마워.'})
+    },
+    eunkyung:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게... 시간이 정말 빠르다.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 항상 고마워.'})
+    },
+    sarang:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 시간 빠르다, 정말.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'당연하지. 앞으로도 잘 해봐.'})
+    },
+    yeona:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'...그러게.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'...나야말로. 고마워.'})
+    },
+    seungha:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게~ 오빠랑 결혼할 줄 누가 알았겠어!'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'당연하지! 오빠야말로 잘해야 돼!'})
+    },
+    heesun:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 시간이 정말 빠르다.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 늘 고마워.'})
+    },
+    hyemin:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게! 벌써 이렇게 됐네!'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'당연하지! 앞으로도 영원히!'})
+    },
+    wonhyung:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 시간이 빠르네.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 항상 고마워.'})
+    },
+    minwoo:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 참 빠르다, 시간이.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 항상 고마워.'})
+    },
+    changwook:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 시간이 빠르네.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 고마워.'})
+    },
+    jaseong:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게! 시간 진짜 빠르다!'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'당연하지! 나야말로 고마워!'})
+    },
+    mingyu:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 빠르다, 시간이.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'당연하지. 앞으로도 잘 해보자.'})
+    },
+    yosep:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'...벌써 그렇게 됐어?'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'...뭐, 나도. 앞으로도 잘해.'})
+    },
+    hyuk:{
+      d1: d=>({speaker:d.pName, text:'우리 결혼한 지 벌써 오래됐네.'}),
+      d2: d=>({speaker:d.name, text:'그러게. 시간이 참 빠르네.'}),
+      d3: d=>({speaker:d.pName, text:'앞으로도 잘 부탁해.'}),
+      d4: d=>({speaker:d.name, text:'나야말로. 항상 고마워.'})
+    }
+  },
+  // ---------- surpriseGift ----------
+  surpriseGift:{
+    minyoung:{
+      d1: d=>({speaker:d.name, text:`${d.pName}, 오늘 깜짝 선물이 있어!`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔! 이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    eunkyung:{
+      d1: d=>({speaker:d.name, text:`${d.pName}... 오늘 깜짝 선물이 있어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔... 이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    sarang:{
+      d1: d=>({speaker:d.name, text:`${d.pName}, 오늘 선물이 하나 있어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'이거. 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    yeona:{
+      d1: d=>({speaker:d.name, text:`...${d.pName}. 이거.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'...선물이야. 갖고 싶어하던 거잖아.'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    seungha:{
+      d1: d=>({speaker:d.name, text:'오빠오빠! 깜짝 선물이야!'}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔! 이거 갖고 싶어 하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    heesun:{
+      d1: d=>({speaker:d.name, text:`${d.pName}, 오늘 깜짝 선물을 준비했어!`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔! 이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    hyemin:{
+      d1: d=>({speaker:d.name, text:`${d.pName}! 깜짝 선물이야!!`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔! 이거 갖고 싶어하던 거 맞지?!'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    wonhyung:{
+      d1: d=>({speaker:d.name, text:`${d.pName}, 오늘 선물을 준비했어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    minwoo:{
+      d1: d=>({speaker:d.name, text:`${d.pName}씨, 오늘 깜짝 선물이 있어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔. 이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    changwook:{
+      d1: d=>({speaker:d.name, text:'이거, 선물이야.'}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'갖고 싶어하던 거 아니야.'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    jaseong:{
+      d1: d=>({speaker:d.name, text:`${d.pName}씨! 오늘 깜짝 선물이 있다!`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'짜잔! 이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    mingyu:{
+      d1: d=>({speaker:d.name, text:`${d.pName}씨, 선물 하나 준비했어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'이거 갖고 싶어하던 거 아니야?'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    yosep:{
+      d1: d=>({speaker:d.name, text:`야 ${d.pName}. 이거 줄려고 가져왔어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'갖고 싶어하던 거잖아. 그냥... 사온 거야.'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    },
+    hyuk:{
+      d1: d=>({speaker:d.name, text:`${d.pName}, 선물을 하나 준비했어.`}),
+      d2: d=>({speaker:d.pName, text:'뭔데?'}),
+      d3: d=>({speaker:d.name, text:'이거, 갖고 싶어하던 거 아니야.'}),
+      d4: d=>({speaker:d.pName, text:'와, 이걸 어떻게 알았어?'})
+    }
+  },
+  // ---------- defaultDate (이벤트 없을 때 기본 대사) ----------
+  defaultDate:{
+    minyoung: d=>`오늘도 즐거웠어, ${d.pName}!`,
+    eunkyung: d=>'오늘 데이트 즐거웠어...',
+    sarang: d=>'오늘 좋았어. 다음에 또 보자.',
+    yeona: d=>'...오늘 나쁘지 않았어.',
+    seungha: d=>'오빠! 오늘 완전 재밌었다!',
+    heesun: d=>'오늘 정말 좋았어.',
+    hyemin: d=>'오늘 너무 즐거웠어!',
+    wonhyung: d=>'오늘 즐거웠어. 다음에 또 보자.',
+    minwoo: d=>'오늘 좋았어. 다음에도 만나자.',
+    changwook: d=>'오늘 좋았어.',
+    jaseong: d=>'오늘 진짜 좋았다! 다음에 또 보자!',
+    mingyu: d=>'오늘 좋았어. 또 보자.',
+    yosep: d=>'...뭐, 나쁘지 않았어.',
+    hyuk: d=>'오늘 즐거웠어. 고마워.'
+  }
+};
+
+// 캐릭터별 대사 조회 헬퍼
+function getDateTone(eventId, charId) {
+  const evtData = DATE_TONE_DIALOGUES[eventId];
+  if (!evtData) return null;
+  return evtData[charId] || null;
+}
+
 function checkDateEvent(datingId, datingName, datingFace) {
   ensureRomance();
   const targets = getRomanceTargets();
+  const d = {name:datingName, pName:G.name}; // d.name=연인, d.pName=플레이어
 
   // 0. 연인/배우자 생일 이벤트 (생일 달에 데이트하면 100% 발생, 월 1회)
   const datingTarget = targets.find(t=>t.id===datingId);
@@ -4231,9 +5106,10 @@ function checkDateEvent(datingId, datingName, datingFace) {
       G.funds -= 1000000; statChanges.funds -= 1000000;
       if (!G.romance.affection[datingId]) G.romance.affection[datingId] = 0;
       G.romance.affection[datingId] = Math.min(100, G.romance.affection[datingId] + 10);
+      const td = getDateTone('partnerBirthday', datingId);
       return {
         id:'partnerBirthday', bg:'배경/생일.webp', face:datingFace,
-        dialogues:[
+        dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
           {speaker:G.name, text:`${datingName}, 생일 축하해! 이거 선물이야.`},
           {speaker:datingName, text:'어머, 이걸 준비했어? 너무 감동이야!'},
           {speaker:G.name, text:'좋아해줘서 다행이다.'},
@@ -4249,6 +5125,19 @@ function checkDateEvent(datingId, datingName, datingFace) {
   // 1. 썸녀/썸남에 대한 질문 (5%) - 연인 외 호감도 80+ 이성이 있을 때
   const otherCrush = targets.find(t => t.id !== datingId && (G.romance.affection[t.id]||0) >= 80);
   if (otherCrush && Math.random() < 0.05) {
+    const td = getDateTone('dateJealousy', datingId);
+    if (td) {
+      return {
+        id:'dateJealousy', bg:'배경/식당.webp', face:datingFace,
+        dialogues: td.dialogues.map(fn=>fn(d, otherCrush.name)),
+        prompt:'어떡하지?',
+        choices:[
+          {text:'핸드폰을 준다', affDelta:-10, effects:{stress:10}, replyDialogues:[td.reply1(d)]},
+          {text:'화를 내며 거절한다', affDelta:-20, effects:{stress:20}, replyDialogues:[td.reply2(d)]},
+          {text:'논리적으로 설명한다', affDelta:0, effects:{}, replyDialogues:[td.reply3(d)]}
+        ]
+      };
+    }
     return {
       id:'dateJealousy', bg:'배경/식당.webp', face:datingFace,
       dialogues:[
@@ -4272,6 +5161,19 @@ function checkDateEvent(datingId, datingName, datingFace) {
   }
   // 2. 의뢰인의 전화 (5%)
   if (Math.random() < 0.05) {
+    const td = getDateTone('dateCall', datingId);
+    if (td) {
+      return {
+        id:'dateCall', bg:'배경/식당.webp', face:datingFace,
+        dialogues: td.dialogues.map(fn=>fn(d)),
+        prompt:'어떡하지?',
+        choices:[
+          {text:'전화를 받는다', affDelta:-5, effects:{stress:5}, replyDialogues: td.reply1.map(fn=>fn(d))},
+          {text:'무시한다', affDelta:5, effects:{reputation:-1}, replyDialogues: td.reply2.map(fn=>fn(d))},
+          {text:'양해를 구하고 짧게 받는다', affDelta:1, effects:{}, replyDialogues: td.reply3.map(fn=>fn(d))}
+        ]
+      };
+    }
     return {
       id:'dateCall', bg:'배경/식당.webp', face:datingFace,
       dialogues:[
@@ -4298,6 +5200,19 @@ function checkDateEvent(datingId, datingName, datingFace) {
   }
   // 3. 맛있는 와인 (20%, 임신중 제외)
   if (!G.isPregnant && Math.random() < 0.20) {
+    const td = getDateTone('dateWine', datingId);
+    if (td) {
+      return {
+        id:'dateWine', bg:'배경/식당.webp', face:datingFace,
+        dialogues: td.dialogues.map(fn=>fn(d)),
+        prompt:'어떤 와인을 고를까?',
+        choices:[
+          {text:'신대륙 피노누아', affDelta:1, effects:{funds:-200000}, replyDialogues:[td.reply1(d)]},
+          {text:'부르고뉴 빌라쥬급 피노누아', affDelta:2, effects:{funds:-300000}, replyDialogues:[td.reply2(d)]},
+          {text:'부르고뉴 그랑크뤼', affDelta:5, effects:{stress:-5,funds:-1000000}, replyDialogues:[td.reply3(d)]}
+        ]
+      };
+    }
     return {
       id:'dateWine', bg:'배경/식당.webp', face:datingFace,
       dialogues:[
@@ -4321,11 +5236,11 @@ function checkDateEvent(datingId, datingName, datingFace) {
   }
   // 4. 데이트 어땠어? (10%)
   if (Math.random() < 0.10) {
+    const td = getDateTone('dateReview', datingId);
+    const dlg = td ? td(d) : {speaker:datingName, text:`오늘도 즐거운 데이트였다. ${G.name}은 어땠어?`};
     return {
       id:'dateReview', bg:'배경/식당.webp', face:datingFace,
-      dialogues:[
-        {speaker:datingName, text:`오늘도 즐거운 데이트였다. ${G.name}은 어땠어?`}
-      ],
+      dialogues:[dlg],
       prompt:'어떡하지?',
       choices:[
         {text:'정말 좋았어', affDelta:1, effects:{}, replyDialogues:[]},
@@ -4337,6 +5252,24 @@ function checkDateEvent(datingId, datingName, datingFace) {
   // 5. 나 뭐 변한거 없어? (남자 5%) / 왜 이렇게 늦어? (여자 5%)
   if (G.gender === 'male' && Math.random() < 0.05) {
     const noticed = G.stats.observation > 500;
+    const td = getDateTone('dateNotice', datingId);
+    if (td) {
+      return {
+        id:'dateNotice', bg:'배경/식당.webp', face:datingFace,
+        dialogues: td.dialogues.map(fn=>fn(d)),
+        autoResolve: true,
+        noticed: noticed,
+        replyIfNoticed:[
+          {speaker:G.name, text:'앞머리 잘랐네~ 목걸이도 새로 샀고, 파운데이션 톤도 바꿨나?'},
+          td.replyNoticed(d)
+        ],
+        replyIfNot:[
+          {speaker:G.name, text:'음... 잘 모르겠는데'},
+          td.replyNot(d)
+        ],
+        affIfNoticed: 5, affIfNot: -3
+      };
+    }
     return {
       id:'dateNotice', bg:'배경/식당.webp', face:datingFace,
       dialogues:[
@@ -4359,6 +5292,19 @@ function checkDateEvent(datingId, datingName, datingFace) {
     };
   }
   if (G.gender === 'female' && Math.random() < 0.05) {
+    const td = getDateTone('dateLate', datingId);
+    if (td) {
+      return {
+        id:'dateLate', bg:'배경/식당.webp', face:datingFace,
+        dialogues: td.dialogues.map(fn=>fn(d)),
+        prompt:'',
+        choices:[
+          {text:'지금 나한테 화내는 거야?', affDelta:-5, effects:{}, replyDialogues:[td.reply1(d)]},
+          {text:'미안, 길이 많이 막혔어', affDelta:-3, effects:{}, replyDialogues:[td.reply2(d)]},
+          {text:'자기한테 예뻐보이려고 화장하다가 좀 늦었네!', affDelta:5, effects:{}, replyDialogues:[td.reply3(d)]}
+        ]
+      };
+    }
     return {
       id:'dateLate', bg:'배경/식당.webp', face:datingFace,
       dialogues:[
@@ -4381,11 +5327,12 @@ function checkDateEvent(datingId, datingName, datingFace) {
   }
   // 6. 기념일 이벤트 (결혼 기념일, 100% 발생, 월 1회)
   ensureRomance();
-  if (G.marriageMonth > 0 && G.month === G.marriageMonth && G.isMarried && !G.anniversaryDone) {
+  if (G.marriageMonth > 0 && G.month === G.marriageMonth && G.isMarried && !G.anniversaryDone && G.year !== G.marriageYear) {
     G.anniversaryDone = true;
+    const td = getDateTone('anniversary', datingId);
     return {
       id:'anniversary', bg:'배경/식당.webp', face:datingFace,
-      dialogues:[
+      dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
         {speaker:G.name, text:'우리 결혼한지 벌써 오래됐네.'},
         {speaker:datingName, text:'그러게. 시간이 정말 빠르다.'},
         {speaker:G.name, text:'앞으로도 잘 부탁해.'},
@@ -4411,9 +5358,10 @@ function checkDateEvent(datingId, datingName, datingFace) {
       giftItem = unownedItems[Math.floor(Math.random()*unownedItems.length)];
     }
     if (giftItem) {
+      const td = getDateTone('surpriseGift', datingId);
       return {
         id:'surpriseGift', bg:'배경/식당.webp', face:datingFace,
-        dialogues:[
+        dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
           {speaker:datingName, text:G.name+', 오늘 깜짝 선물이 있어!'},
           {speaker:G.name, text:'뭔데?'},
           {speaker:datingName, text:'짜잔! 이거 갖고 싶어 하던 거 아니야?'},
@@ -7030,6 +7978,7 @@ function buildScene(slot) {
     // 결혼 확정
     G.isMarried = true;
     G.marriageMonth = G.month;
+    G.marriageYear = G.year;
     G.fixedExpense = calcFixedExpense();
     G._pendingWedding = false;
     return {type:'wedding', bg:'배경/결혼식.webp', charFace, wName, wFace, date:dateStr,
@@ -7068,9 +8017,11 @@ function buildScene(slot) {
           changes:['자금 -20만원', `${datingName} 호감도 +5`],
           dateEvent: dateEvt};
       }
+      const defaultTd = getDateTone('defaultDate', datingId);
+      const defaultText = defaultTd ? defaultTd({name:datingName, pName:G.name}) : '오늘 데이트도 즐거웠어!';
       return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
         result:'success', resultLabel:'데이트',
-        text:'오늘 데이트도 즐거웠어!',
+        text:defaultText,
         changes:['자금 -20만원', `${datingName} 호감도 +5`]};
     }
   }
@@ -7111,12 +8062,13 @@ function buildScene(slot) {
     if (!G._japanTripDone) {
       // 첫 날: 효과 적용
       G._japanTripDone = true; G._japanTripDay = 1;
-      applyStatR('stress',-100); G.stats.observation=Math.min(999,G.stats.observation+10); if(statChanges.observation!==undefined)statChanges.observation+=10;
+      const ch=[]; ch.push(...applyStatR('stress',-100)); ch.push(...applyStatR('observation',10));
       G.funds -= 1000000; statChanges.funds -= 1000000;
       G.overseas_count++;
+      ch.push('자금 -100만원');
       return {bg:'배경/일본.webp', face:getPlayerFace(), speaker:n, date:dateStr,
         result:'info', resultLabel:'일본여행', text:'일본에 도착했다!',
-        changes:['스트레스 -100','관찰력 +10','자금 -100만원']};
+        changes:ch};
     }
     G._japanTripDay = (G._japanTripDay||1) + 1;
     if (G._japanTripDay >= 3) {
@@ -7130,12 +8082,13 @@ function buildScene(slot) {
   if (slot.action === 'seaTrip') {
     if (!G._seaTripDone) {
       G._seaTripDone = true; G._seaTripDay = 1;
-      applyStatR('stress',-150); G.stats.observation=Math.min(999,G.stats.observation+15); if(statChanges.observation!==undefined)statChanges.observation+=15;
+      const ch=[]; ch.push(...applyStatR('stress',-150)); ch.push(...applyStatR('observation',15));
       G.funds -= 1000000; statChanges.funds -= 1000000;
       G.overseas_count++;
+      ch.push('자금 -100만원');
       return {bg:'배경/동남아.webp', face:getPlayerFace(), speaker:n, date:dateStr,
         result:'info', resultLabel:'동남아여행', text:'동남아에 도착했다!',
-        changes:['스트레스 -150','관찰력 +15','자금 -100만원']};
+        changes:ch};
     }
     G._seaTripDay = (G._seaTripDay||1) + 1;
     if (G._seaTripDay >= 4) {
@@ -7148,12 +8101,13 @@ function buildScene(slot) {
   if (slot.action === 'europeTrip') {
     if (!G._europeTripDone) {
       G._europeTripDone = true; G._europeTripDay = 1;
-      applyStatR('stress',-200); G.stats.observation=Math.min(999,G.stats.observation+40); if(statChanges.observation!==undefined)statChanges.observation+=40;
+      const ch=[]; ch.push(...applyStatR('stress',-200)); ch.push(...applyStatR('observation',40));
       G.funds -= 2000000; statChanges.funds -= 2000000;
       G.overseas_count++;
+      ch.push('자금 -200만원');
       return {bg:'배경/유럽.webp', face:getPlayerFace(), speaker:n, date:dateStr,
         result:'info', resultLabel:'유럽여행', text:'유럽에 도착했다!',
-        changes:['스트레스 -200','관찰력 +40','자금 -200만원']};
+        changes:ch};
     }
     G._europeTripDay = (G._europeTripDay||1) + 1;
     if (G._europeTripDay >= 5) {
@@ -8698,10 +9652,6 @@ function openChangeMenu() {
     html += `<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmDivorce()">
       <div><div class="name" style="color:#cc6666">이혼</div>
       <div class="effects">${divorceName}와(과) 이혼합니다</div></div></div>`;
-  } else {
-    html += `<div class="action-option" style="opacity:0.4;cursor:default">
-      <div><div class="name" style="color:#888">이혼</div>
-      <div class="effects">${G.isMarried ? '' : '결혼하지 않은 상태입니다'}</div></div></div>`;
   }
 
   document.getElementById('storage-list').innerHTML = html;
