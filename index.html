@@ -717,7 +717,10 @@ body {
     </div>
     <div style="margin-bottom:14px">
       <div style="font-size:0.8rem;color:#8899bb;margin-bottom:6px">생일</div>
-      <input type="date" id="birthday-input" class="name-input" style="letter-spacing:1px" value="2000-01-01">
+      <div style="display:flex;gap:6px;justify-content:center">
+        <select id="birthday-month" class="name-input" style="width:100px"></select>
+        <select id="birthday-day" class="name-input" style="width:100px"></select>
+      </div>
     </div>
     <div style="margin-bottom:14px">
       <div style="font-size:0.8rem;color:#8899bb;margin-bottom:6px">MBTI</div>
@@ -2259,7 +2262,7 @@ function showCharCreateOnOpening() {
   html += '<div class="gender-card" style="width:160px;padding:14px;cursor:pointer" onclick="selectOpeningGender(\'female\')" id="og-female"><img src="여주인공.webp" style="width:120px;height:120px;object-fit:contain"><div class="label" style="font-size:0.95rem;margin-top:6px">여자 변호사</div></div>';
   html += '</div>';
   html += '<div style="margin-bottom:10px"><input type="text" id="op-name" class="name-input" placeholder="변호사 이름" maxlength="8" style="width:220px"></div>';
-  html += '<div style="margin-bottom:10px"><div style="font-size:0.75rem;color:#8899bb;margin-bottom:4px">생일</div><input type="date" id="op-birthday" class="name-input" style="letter-spacing:1px;width:220px" value="2000-01-01"></div>';
+  html += '<div style="margin-bottom:10px"><div style="font-size:0.75rem;color:#8899bb;margin-bottom:4px">생일</div><div style="display:flex;gap:6px;justify-content:center"><select id="op-birthday-month" class="name-input" style="width:100px"></select><select id="op-birthday-day" class="name-input" style="width:100px"></select></div></div>';
   html += '<div style="margin-bottom:10px"><div style="font-size:0.75rem;color:#8899bb;margin-bottom:4px">MBTI</div><select id="op-mbti" class="name-input" style="letter-spacing:2px;width:220px"><option value="">선택하세요</option>';
   html += '<option>ISTJ</option><option>ISFJ</option><option>INFJ</option><option>INTJ</option>';
   html += '<option>ISTP</option><option>ISFP</option><option>INFP</option><option>INTP</option>';
@@ -2275,6 +2278,19 @@ function showCharCreateOnOpening() {
   createDiv.innerHTML = html;
   screen.appendChild(createDiv);
   setTimeout(() => { createDiv.style.opacity = '1'; }, 100);
+  // 오프닝 생일 셀렉트 초기화
+  const opM = document.getElementById('op-birthday-month');
+  const opD = document.getElementById('op-birthday-day');
+  for(let m=1;m<=12;m++) opM.innerHTML+=`<option value="${m}">${m}월</option>`;
+  function opUpdateDays(){
+    const m=parseInt(opM.value);
+    const maxD=[0,31,29,31,30,31,30,31,31,30,31,30,31][m];
+    const cur=parseInt(opD.value)||1;
+    opD.innerHTML='';
+    for(let d=1;d<=maxD;d++) opD.innerHTML+=`<option value="${d}"${d===cur?' selected':''}>${d}일</option>`;
+  }
+  opM.addEventListener('change',opUpdateDays);
+  opUpdateDays();
 }
 
 let openingGender = null;
@@ -2290,12 +2306,12 @@ function confirmOpeningCreate() {
   if (!name) { showToast('이름을 입력해주세요.'); return; }
   const mbti = document.getElementById('op-mbti').value;
   if (!mbti) { showToast('MBTI를 선택해주세요.'); return; }
-  const birthday = document.getElementById('op-birthday').value;
-  if (!birthday) { showToast('생일을 입력해주세요.'); return; }
+  const opBdMonth = document.getElementById('op-birthday-month').value;
+  const opBdDay = document.getElementById('op-birthday-day').value;
 
   G.gender = openingGender;
   G.name = name;
-  G.birthday = birthday;
+  G.birthday = `0-${opBdMonth}-${opBdDay}`;
   G.mbti = mbti;
   initStats();
   applyMBTIBonus(mbti);
@@ -2340,10 +2356,10 @@ function confirmName() {
   if (!name) { document.getElementById('name-input').focus(); return; }
   const mbti = document.getElementById('mbti-input').value;
   if (!mbti) { showToast('MBTI를 선택해주세요.'); return; }
-  const birthday = document.getElementById('birthday-input').value;
-  if (!birthday) { showToast('생일을 입력해주세요.'); return; }
+  const bdMonth = document.getElementById('birthday-month').value;
+  const bdDay = document.getElementById('birthday-day').value;
   G.name = name;
-  G.birthday = birthday;
+  G.birthday = `0-${bdMonth}-${bdDay}`;
   G.mbti = mbti;
   initStats();
   applyMBTIBonus(mbti);
@@ -2412,6 +2428,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('name-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') confirmName();
   });
+  // 생일 월/일 셀렉트 초기화
+  const mSel = document.getElementById('birthday-month');
+  const dSel = document.getElementById('birthday-day');
+  for(let m=1;m<=12;m++) mSel.innerHTML+=`<option value="${m}">${m}월</option>`;
+  function updateDays(){
+    const m=parseInt(mSel.value);
+    const maxD=[0,31,29,31,30,31,30,31,31,30,31,30,31][m];
+    const cur=parseInt(dSel.value)||1;
+    dSel.innerHTML='';
+    for(let d=1;d<=maxD;d++) dSel.innerHTML+=`<option value="${d}"${d===cur?' selected':''}>${d}일</option>`;
+  }
+  mSel.addEventListener('change',updateDays);
+  updateDays();
 });
 
 function initStats() {
@@ -2491,7 +2520,7 @@ function updateStatsPanel() {
   }
   // 기본 정보
   html += `<div class="stat-section-title">기본 정보</div>`;
-  html += `<div class="stat-row"><span class="stat-name">생일</span><span class="stat-value" style="flex:1;text-align:right">${G.birthday||'-'}</span></div>`;
+  html += `<div class="stat-row"><span class="stat-name">생일</span><span class="stat-value" style="flex:1;text-align:right">${G.birthday?G.birthday.split('-').slice(1).map((v,i)=>v+(i===0?'월':'일')).join(' '):'-'}</span></div>`;
   html += `<div class="stat-row"><span class="stat-name">MBTI</span><span class="stat-value" style="flex:1;text-align:right;color:#c9a84c">${G.mbti||'-'}</span></div>`;
   html += `<div class="stat-section-title">신분/경제</div>`;
   html += `<div class="stat-row"><span class="stat-name">신분</span><span class="stat-value" style="flex:1;text-align:right;color:#c9a84c">${STATUS_NAMES[G.status]}</span></div>`;
