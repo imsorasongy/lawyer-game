@@ -8728,6 +8728,7 @@ function resignAndSolo() {
   document.getElementById('status-event-modal').style.display = 'none';
   G.status = 'solo'; G.salary = 0; G.caseFeeRate = 1; G.successFeeRate = 1;
   G.statusMonths = 0; G.firmId = 'solo'; G.firmName = '';
+  G.caseFeeMultiplier = 1;
   // 사무실 선택 → 이름 입력
   showOfficeSelection();
 }
@@ -9695,6 +9696,7 @@ function handleOfficeClick() {
 function resignAndSoloFromSuspended() {
   G.status = 'solo'; G.salary = 0; G.caseFeeRate = 1; G.successFeeRate = 1;
   G.statusMonths = 0; G.firmId = 'solo'; G.firmName = '';
+  G.caseFeeMultiplier = 1;
   showOfficeSelection();
 }
 
