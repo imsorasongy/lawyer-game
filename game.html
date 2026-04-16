@@ -66,6 +66,7 @@ body {
   text-align: center; letter-spacing: 4px; outline: none;
 }
 .name-input:focus { border-color: #c9a84c; }
+.birthday-sel.name-input { width:0; min-width:0; flex:1; }
 .name-input::placeholder { color: #555577; letter-spacing: 2px; }
 .name-confirm-btn {
   display: block; margin: 24px auto 0; padding: 12px 50px; font-size: 1rem; font-weight: 700;
@@ -717,9 +718,9 @@ body {
     </div>
     <div style="margin-bottom:14px">
       <div style="font-size:0.8rem;color:#8899bb;margin-bottom:6px">생일</div>
-      <div style="display:flex;gap:6px;justify-content:center">
-        <select id="birthday-month" class="name-input" style="width:100px"></select>
-        <select id="birthday-day" class="name-input" style="width:100px"></select>
+      <div style="display:inline-flex;gap:6px;width:260px">
+        <select id="birthday-month" class="name-input birthday-sel"></select>
+        <select id="birthday-day" class="name-input birthday-sel"></select>
       </div>
     </div>
     <div style="margin-bottom:14px">
@@ -2262,7 +2263,7 @@ function showCharCreateOnOpening() {
   html += '<div class="gender-card" style="width:160px;padding:14px;cursor:pointer" onclick="selectOpeningGender(\'female\')" id="og-female"><img src="여주인공.webp" style="width:120px;height:120px;object-fit:contain"><div class="label" style="font-size:0.95rem;margin-top:6px">여자 변호사</div></div>';
   html += '</div>';
   html += '<div style="margin-bottom:10px"><input type="text" id="op-name" class="name-input" placeholder="변호사 이름" maxlength="8" style="width:220px"></div>';
-  html += '<div style="margin-bottom:10px"><div style="font-size:0.75rem;color:#8899bb;margin-bottom:4px">생일</div><div style="display:flex;gap:6px;justify-content:center"><select id="op-birthday-month" class="name-input" style="width:100px"></select><select id="op-birthday-day" class="name-input" style="width:100px"></select></div></div>';
+  html += '<div style="margin-bottom:10px"><div style="font-size:0.75rem;color:#8899bb;margin-bottom:4px">생일</div><div style="display:inline-flex;gap:6px;width:220px"><select id="op-birthday-month" class="name-input birthday-sel"></select><select id="op-birthday-day" class="name-input birthday-sel"></select></div></div>';
   html += '<div style="margin-bottom:10px"><div style="font-size:0.75rem;color:#8899bb;margin-bottom:4px">MBTI</div><select id="op-mbti" class="name-input" style="letter-spacing:2px;width:220px"><option value="">선택하세요</option>';
   html += '<option>ISTJ</option><option>ISFJ</option><option>INFJ</option><option>INTJ</option>';
   html += '<option>ISTP</option><option>ISFP</option><option>INFP</option><option>INTP</option>';
