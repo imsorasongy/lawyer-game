@@ -582,6 +582,67 @@ body {
   /* Buttons */
   .btn { padding: 7px 20px; font-size: 0.8rem; }
 
+  /* Opening Text */
+  .opening-text-box {
+    font-size: 0.85rem !important;
+    line-height: 1.6 !important;
+    padding: 10px 16px !important;
+    bottom: 16px !important;
+    max-width: 85vw !important;
+  }
+  .opening-skip {
+    font-size: 0.8rem !important;
+    padding: 4px 12px !important;
+    top: 6px !important;
+    right: 8px !important;
+  }
+
+  /* Character Create on Opening */
+  #opening-create {
+    padding: 14px 16px !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    max-width: 92vw !important;
+  }
+  #opening-create h2 {
+    font-size: 0.95rem !important;
+    margin-bottom: 8px !important;
+  }
+  #opening-create .gender-card {
+    width: 100px !important;
+    padding: 8px !important;
+  }
+  #opening-create .gender-card img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+  #opening-create .gender-card .label {
+    font-size: 0.72rem !important;
+  }
+  #opening-create .name-input {
+    width: 180px !important;
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+  }
+  #opening-create .name-confirm-btn {
+    padding: 8px 30px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Gender Screen (standalone) */
+  .gender-title { font-size: 1.3rem; margin-bottom: 20px; }
+  .gender-choices { gap: 24px; }
+  .gender-card { width: 140px; padding: 12px; }
+  .gender-card img { width: 100px; height: 100px; }
+  .gender-card .label { font-size: 0.85rem; }
+
+  /* Name Screen */
+  .name-box { padding: 16px 24px; }
+  .name-box h2 { font-size: 1.1rem; margin-bottom: 14px; }
+  .name-box .char-preview { width: 80px; height: 80px; margin-bottom: 10px; }
+  .name-input { width: 200px; padding: 8px 14px; font-size: 0.9rem; }
+  .name-confirm-btn { padding: 8px 30px; font-size: 0.85rem; margin-top: 12px; }
+
   /* Ending */
   #ending-screen .ending-stats-title { font-size: 1.4rem; margin-bottom: 16px; }
   .ending-stats { gap: 6px; }
@@ -627,8 +688,8 @@ body {
 <!-- Opening Scene -->
 <div id="opening-screen" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:300;cursor:pointer">
   <img id="opening-bg" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 2.5s">
-  <div id="opening-text" style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:90%;max-width:750px;background:rgba(20,18,12,0.88);border:2px solid #8b7355;border-radius:10px;padding:18px 32px;color:#e8d5b5;font-size:1.4rem;line-height:2;text-align:left;opacity:0;transition:opacity 1.5s"></div>
-  <button id="opening-skip-btn" onclick="skipOpening()" style="position:absolute;top:12px;right:16px;z-index:10;background:rgba(20,18,12,0.7);border:1px solid #8b7355;border-radius:6px;color:#c0b090;font-size:1.08rem;padding:6px 18px;cursor:pointer;opacity:0.7;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">스킵 ▶▶</button>
+  <div id="opening-text" style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:90%;max-width:750px;background:rgba(20,18,12,0.88);border:2px solid #8b7355;border-radius:10px;padding:18px 32px;color:#e8d5b5;font-size:1.4rem;line-height:2;text-align:left;opacity:0;transition:opacity 1.5s" class="opening-text-box"></div>
+  <button id="opening-skip-btn" onclick="skipOpening()" style="position:absolute;top:12px;right:16px;z-index:10;background:rgba(20,18,12,0.7);border:1px solid #8b7355;border-radius:6px;color:#c0b090;font-size:1.08rem;padding:6px 18px;cursor:pointer;opacity:0.7;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" class="opening-skip">스킵 ▶▶</button>
 </div>
 
 <!-- Gender Selection -->
@@ -2165,7 +2226,7 @@ function showCharCreateOnOpening() {
 
   const createDiv = document.createElement('div');
   createDiv.id = 'opening-create';
-  createDiv.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,18,14,0.92);border:2px solid #8b7355;border-radius:12px;padding:24px 32px;z-index:10;opacity:0;transition:opacity 0.8s';
+  createDiv.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,18,14,0.92);border:2px solid #8b7355;border-radius:12px;padding:24px 32px;z-index:10;opacity:0;transition:opacity 0.8s;max-height:90vh;overflow-y:auto;max-width:95vw';
   createDiv.innerHTML = html;
   screen.appendChild(createDiv);
   setTimeout(() => { createDiv.style.opacity = '1'; }, 100);
