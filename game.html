@@ -2618,9 +2618,11 @@ function openScheduleOverlay() {
   // 이미 이번 달 스케줄이 빌드되어 있으면 재빌드하지 않음 (강제배치 스케줄 보존)
   const scheduleKey = G.year + '-' + G.month + '-' + G.status + '-' + G.firmId + '-' + (G.isLecturer?'L':'');
   if (!G.schedule || G.schedule.length === 0 || G._scheduleBuiltFor !== scheduleKey) {
-    // 기존 이벤트 강제배치(forced) 슬롯 보존 (와인대회/미술관/결혼식 등)
+    // 기존 이벤트 강제배치(forced) 슬롯 보존 — 같은 달 내 리빌드일 때만
+    // (월이 바뀌면 이전 달의 forced 슬롯을 day 번호로 복원하면 엉뚱한 날에 배치됨)
+    const oldMonth = G._scheduleBuiltFor ? G._scheduleBuiltFor.split('-')[1] : null;
     const forcedSlots = [];
-    if (G.schedule && G.schedule.length > 0) {
+    if (oldMonth === String(G.month) && G.schedule && G.schedule.length > 0) {
       G.schedule.forEach(ds => {
         ds.slots.forEach(slot => {
           if (slot.forced && !/^mainTrial\d$/.test(slot.action)) forcedSlots.push({day:ds.day, time:slot.time, action:slot.action, label:slot.label, slotClass:slot.slotClass});
@@ -2628,7 +2630,7 @@ function openScheduleOverlay() {
       });
     }
     buildSchedule();
-    // 보존된 강제배치 슬롯 복원
+    // 보존된 강제배치 슬롯 복원 (같은 달 리빌드 시에만 존재)
     forcedSlots.forEach(fs => {
       const ds = G.schedule.find(d => d.day === fs.day);
       if (ds) {
@@ -10526,7 +10528,7 @@ function acceptMainStory(caseNum) {
     1: [
       {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(성진그룹 비자금 사건... 우선 증거를 모아야겠군.)'},
       {face:'player', speaker:'{name}', text:'(업무 중 \'사건 조사\'를 하면 현장에서 물증이나 기록 같은 증거를 찾을 수 있고, \'사건 검토\'를 하면 판례나 문서를 분석해서 법리적 근거를 확보할 수 있다.)'},
-      {face:'player', speaker:'{name}', text:'(조사와 검토, 두 가지를 균형 있게 진행해서 충분한 증거를 확보한 뒤 재판에 임해야 한다. 재판 날짜가 정해지면 그때까지 준비해야 하니까 서두르자.)'},
+      {face:'player', speaker:'{name}', text:'(조사와 검토, 두 가지를 균형 있게 진행해서 충분한 증거를 확보한 뒤 재판에 임해야 한다. 재판은 3, 6, 9, 12월 첫번째 평일에 진행되니 미리 준비해둬야 한다.)'},
       {face:'player', speaker:'{name}', text:'(찾은 증거들은 \'증거함\'에서 언제든 확인할 수 있다. 수시로 체크하면서 빠진 게 없는지 확인하자.)'},
     ],
     3: [
