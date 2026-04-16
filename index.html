@@ -3454,7 +3454,8 @@ function createRandomStaff() {
 
 // 매월 어쏘 재판 처리 + 직원 수임 처리
 function processEmployeesMonthly() {
-  let reports = [];
+  let assocWins = 0, assocLosses = 0, assocReward = 0;
+  let staffCases = 0, staffFees = 0;
   // 어쏘 재판
   G.hiredAssocs.forEach(assoc => {
     const trialsThisMonth = Math.min(3, assoc.cases.length);
@@ -3467,11 +3468,11 @@ function processEmployeesMonthly() {
       if (won) {
         G.wins++;
         const reward = Math.floor(G.stats.reputation * 3000 * G.successFeeRate);
-        if(reward>0){G.funds+=reward; statChanges.funds+=reward;}
-        reports.push({text:`${assoc.name} 변호사: ${c.id} ${c.typeName}[${c.diffName}] 승소!${reward>0?' +'+Math.floor(reward/10000)+'만원':''}`,cls:'log-great'});
+        if(reward>0){G.funds+=reward; statChanges.funds+=reward; assocReward+=reward;}
+        assocWins++;
       } else {
         G.losses++;
-        reports.push({text:`${assoc.name} 변호사: ${c.id} ${c.typeName}[${c.diffName}] 패소`,cls:'log-fail'});
+        assocLosses++;
       }
     }
   });
@@ -3486,20 +3487,20 @@ function processEmployeesMonthly() {
       // 주인공 사건이 60건 미만이면 주인공에게
       if (G.cases < 60) {
         G.caseCards.push(card); G.cases++; G.yearCases++;
-        if(fee>0){G.funds+=fee;statChanges.funds+=fee;}
-        reports.push({text:`직원 ${staff.name}: ${card.id} ${card.typeName}[${card.diffName}] 수임${fee>0?' +'+Math.floor(fee/10000)+'만원':''}`,cls:'log-success'});
+        if(fee>0){G.funds+=fee;statChanges.funds+=fee; staffFees+=fee;}
+        staffCases++;
       } else {
         // 어쏘에게 배정
         const avail = G.hiredAssocs.find(a=>a.cases.length<20);
         if (avail) {
           avail.cases.push(card);
-          if(fee>0){G.funds+=fee;statChanges.funds+=fee;}
-          reports.push({text:`직원 ${staff.name}: ${card.id} → ${avail.name} 변호사에게 배정${fee>0?' +'+Math.floor(fee/10000)+'만원':''}`,cls:'log-info'});
+          if(fee>0){G.funds+=fee;statChanges.funds+=fee; staffFees+=fee;}
+          staffCases++;
         }
       }
     }
   });
-  return reports;
+  return { assocWins, assocLosses, assocReward, staffCases, staffFees };
 }
 
 // ==================== HOLIDAYS ====================
@@ -8241,10 +8242,19 @@ function showMonthSummary(empReports){
   if(statChanges.funds){const cls=statChanges.funds>0?'spos':'sneg';
     html+=`<div class="summary-row" style="border-top:1px solid #3a3020;padding-top:4px"><span class="sname" style="font-weight:700">자금 합계</span><span class="schange ${cls}" style="font-weight:700">${statChanges.funds>0?'+':''}${statChanges.funds.toLocaleString()}원</span></div>`;}
   if(statChanges.preparation){html+=`<div class="summary-row"><span class="sname">준비도</span><span class="schange spos">+${statChanges.preparation.toFixed(1)}</span></div>`;}
-  // 직원 리포트
-  if (empReports && empReports.length) {
-    html += `<div style="border-top:1px solid #3a3020;margin-top:8px;padding-top:6px;font-size:0.72rem;font-weight:700;color:#a09060;margin-bottom:4px">어쏘/직원 활동</div>`;
-    empReports.forEach(r => { html += `<div class="summary-row"><span class="sname ${r.cls}" style="font-size:0.72rem">${r.text}</span></div>`; });
+  // 어쏘/직원 요약 리포트
+  if (empReports) {
+    const {assocWins, assocLosses, assocReward, staffCases, staffFees} = empReports;
+    if (assocWins + assocLosses > 0) {
+      html += `<div style="border-top:1px solid #3a3020;margin-top:8px;padding-top:6px;font-size:0.72rem;font-weight:700;color:#a09060;margin-bottom:4px">어쏘 재판 결과</div>`;
+      html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">승소 ${assocWins}건 / 패소 ${assocLosses}건</span></div>`;
+      if (assocReward > 0) html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">성공보수</span><span class="schange spos" style="font-size:0.72rem">+${assocReward.toLocaleString()}원</span></div>`;
+    }
+    if (staffCases > 0) {
+      html += `<div style="border-top:1px solid #3a3020;margin-top:8px;padding-top:6px;font-size:0.72rem;font-weight:700;color:#a09060;margin-bottom:4px">직원 수임 결과</div>`;
+      html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">수임 ${staffCases}건</span></div>`;
+      if (staffFees > 0) html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">수임료</span><span class="schange spos" style="font-size:0.72rem">+${staffFees.toLocaleString()}원</span></div>`;
+    }
   }
   document.getElementById('summary-changes').innerHTML=html;
 }
