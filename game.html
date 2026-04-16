@@ -518,7 +518,7 @@ body {
   .room-character img { height: 55vh; }
 
   /* Title Screen */
-  #title-screen { padding-bottom: 30px; }
+  #title-screen { padding-bottom: 16px; justify-content: center; }
   .title-btn { padding: 10px 36px; font-size: 0.95rem; }
 
   /* Gender Selection */
@@ -914,10 +914,24 @@ body {
 </div>
 
 <script>
-// ==================== MOBILE ORIENTATION LOCK ====================
-if (screen.orientation && screen.orientation.lock) {
-  screen.orientation.lock('landscape').catch(() => {});
+// ==================== MOBILE FULLSCREEN & ORIENTATION LOCK ====================
+let mobileFullscreenDone = false;
+function enterMobileFullscreen() {
+  if (mobileFullscreenDone) return;
+  if (!'ontouchstart' in window && !navigator.maxTouchPoints) return;
+  const el = document.documentElement;
+  const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if (rfs) {
+    rfs.call(el).then(() => {
+      mobileFullscreenDone = true;
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }).catch(() => {});
+  }
 }
+document.addEventListener('click', enterMobileFullscreen, { once: false });
+document.addEventListener('touchstart', enterMobileFullscreen, { once: false });
 
 // ==================== GAME STATE ====================
 const G = {
