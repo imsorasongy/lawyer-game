@@ -7111,7 +7111,7 @@ function buildScene(slot) {
     if (!G._japanTripDone) {
       // 첫 날: 효과 적용
       G._japanTripDone = true; G._japanTripDay = 1;
-      applyStatR('stress',-100); applyStatR('observation',10);
+      applyStatR('stress',-100); G.stats.observation=Math.min(999,G.stats.observation+10); if(statChanges.observation!==undefined)statChanges.observation+=10;
       G.funds -= 1000000; statChanges.funds -= 1000000;
       G.overseas_count++;
       return {bg:'배경/일본.webp', face:getPlayerFace(), speaker:n, date:dateStr,
@@ -7130,7 +7130,7 @@ function buildScene(slot) {
   if (slot.action === 'seaTrip') {
     if (!G._seaTripDone) {
       G._seaTripDone = true; G._seaTripDay = 1;
-      applyStatR('stress',-150); applyStatR('observation',15);
+      applyStatR('stress',-150); G.stats.observation=Math.min(999,G.stats.observation+15); if(statChanges.observation!==undefined)statChanges.observation+=15;
       G.funds -= 1000000; statChanges.funds -= 1000000;
       G.overseas_count++;
       return {bg:'배경/동남아.webp', face:getPlayerFace(), speaker:n, date:dateStr,
@@ -7148,7 +7148,7 @@ function buildScene(slot) {
   if (slot.action === 'europeTrip') {
     if (!G._europeTripDone) {
       G._europeTripDone = true; G._europeTripDay = 1;
-      applyStatR('stress',-200); applyStatR('observation',40);
+      applyStatR('stress',-200); G.stats.observation=Math.min(999,G.stats.observation+40); if(statChanges.observation!==undefined)statChanges.observation+=40;
       G.funds -= 2000000; statChanges.funds -= 2000000;
       G.overseas_count++;
       return {bg:'배경/유럽.webp', face:getPlayerFace(), speaker:n, date:dateStr,
