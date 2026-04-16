@@ -10413,7 +10413,7 @@ const MAIN_STORY_OFFER_DIALOGUES = {
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네, 맞아요. 뉴스에도 몇 번 나왔던 사건이에요.'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'혹시 지금 도라군수가 장현우 아닙니까?'},
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네. 장현우 군수가 현재 군수인데, 장현우 군수가 당선된 후에 무리한 개발사업을 계속 추진한다며 남편이 피해자와 자주 싸웠었어요.'},
-    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(장현우... 한정민 사건에서도 얼핏 이름이 나왔었지. 이 사건에도 뭔가가 있을 것 같군..)'},
+    {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'(장현우... 한정민 사건 재판을 보러왔다가 나와 마주쳤었지. 이 사건에도 뭔가가 있을 것 같군..)'},
     {bg:'배경/상담.webp', face:'player', speaker:'{name}', text:'사건기록을 좀 볼까요?'},
     {bg:'배경/상담.webp', face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'네 여기있어요.'},
     {bg:'배경/범행현장.webp', face:'player', speaker:'{name}', text:'외진 산속 한가운데서 피해자가 사망했고, 그 주변 CCTV에 찍힌 그 시간대에 지나간 차량은 피고인의 차량뿐. 피해자의 옷과 몸에서 피고인의 지문이 발견되었고, 나중에 발견된 흉기에서도 피고인의 지문이 발견되었다.'},
@@ -10829,7 +10829,7 @@ const MAIN_TRIAL_1 = [
       {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'이만석', text:'전혀 그렇지 않습니다.'},
       {face:'player', speaker:'{name}', text:'그래요? 이 자료들을 한 번 보시죠.'},
     ],
-    evidenceSteps: [{prompt:'이만석의 비자금을 증명할 결정적 증거 2개를 제시하세요.', correct:['inv_paper_company','rev_fund_flow'], count:2}],
+    evidenceSteps: [{prompt:'이만석의 비자금을 증명할 결정적 증거 3개를 제시하세요.', correct:['inv_usb','inv_paper_company','rev_fund_flow'], count:3}],
     successDialogues: [
       {face:'player', speaker:'{name}', text:'이 사건의 핵심은 단순합니다. 증거가 말하고 있습니다.\n\nUSB 자료에서 확인된 비자금 흐름. 홍콩, 싱가포르, 케이맨 제도 3개국에 걸친 페이퍼컴퍼니 네트워크. 모두 이만석 회장의 차명 계좌와 연결되어 있습니다.\n\n공식 재무제표에 기재되지 않은 3,000억 원 규모의 자금 흐름이 존재합니다.'},
       {face:'player', speaker:'{name}', text:'그리고 김서연 증인의 진술. 이 모든 것이 하나의 사실을 가리키고 있습니다.\n\n이만석 회장은 10년간 조직적으로 비자금을 조성했습니다. 진실은 아무리 감추려 해도 결국 드러나게 되어 있습니다.'},
