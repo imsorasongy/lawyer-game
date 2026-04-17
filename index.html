@@ -4253,7 +4253,7 @@ function getActionBg(actionId) {
     gradSchool:'배경/대학원.webp', wineMeet:'배경/와인모임.webp', document:'배경/서면.webp',
     consult:'배경/상담.webp', homeRest: G.gender==='male'?'배경/방.webp':'배경/방2.webp',
     publicService:'배경/공익활동.webp', pt:'배경/pt.webp', travel:'배경/저녁외출.webp',
-    lectureLaw:'배경/법학공부.webp', broadcast:'배경/방송국.webp',
+    lectureLaw:G.gender==='female'?'배경/법학강의2.webp':'배경/법학공부.webp', broadcast:'배경/방송국.webp',
     date:'배경/식당.webp',
   };
   return gBg(bgMap[actionId] || '배경/상담.webp');
@@ -8008,7 +8008,8 @@ function buildScene(slot) {
     changes.push(...applyStatR('reputation', 0.2));
     changes.push(...applyStatR('stress', 2));
     changes.push(...applyStatR('fatigue', 2));
-    return {bg:'배경/법학공부.webp', face:'캐릭터얼굴/법학강사.webp', speaker:'법학강사', date:dateStr,
+    const lectureBg = G.gender==='female' ? '배경/법학강의2.webp' : '배경/법학공부.webp';
+    return {bg:lectureBg, face:'캐릭터얼굴/법학강사.webp', speaker:'법학강사', date:dateStr,
       result:'success', resultLabel:'강의', text:`${G.name} 변호사님, 오늘도 강의 감사합니다. 수강생들 반응이 좋았어요.`, changes};
   }
 
