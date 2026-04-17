@@ -1716,7 +1716,7 @@ function getActionEvents(actionId) {
     case 'trial':
       return [
         // 9. 복장 자율화 (재판 씬)
-        { id:'dressCode', prob:0.02,
+        { id:'dressCode', prob:(G.currentOutfit==='casualWear'||G.currentOutfit==='partyDress')?0.30:0.02,
           bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp',
           dialogues: [
             {speaker:'판사', text:'{name} 변호사. 오늘 복장이 좀... 법정에 어울리지 않는 것 같은데요?'}
@@ -3728,9 +3728,33 @@ function randomClientFace() {
   return `캐릭터얼굴/의뢰인${n}.webp`;
 }
 
+// ==================== OUTFIT GRAPHICS ====================
+const OUTFIT_GRAPHICS = {
+  male: { default:'남주인공.webp', premiumSuit:'남주인공2.webp', luxurySuit:'남주인공3.webp' },
+  female: { default:'여주인공.webp', premiumDress:'여주인공2.webp', luxuryDress:'여주인공3.webp', casualWear:'여주인공4.webp', partyDress:'여주인공5.webp' },
+};
+
+function getCharImg() {
+  const map = G.gender === 'male' ? OUTFIT_GRAPHICS.male : OUTFIT_GRAPHICS.female;
+  return map[G.currentOutfit] || map['default'];
+}
+
 function getPlayerFace() {
   return G.gender === 'male' ? '캐릭터얼굴/남주인공.webp' : '캐릭터얼굴/여주인공.webp';
 }
+
+// 여주인공일 때 별도 배경 사용
+const FEMALE_BG_MAP = {
+  '배경/업계모임.webp':'배경/업계모임2.webp',
+  '배경/와인모임.webp':'배경/와인모임2.webp',
+  '배경/야근.webp':'배경/야근2.webp',
+  '배경/운동모임.webp':'배경/운동모임2.webp',
+  '배경/공익활동.webp':'배경/공익활동2.webp',
+  '배경/스터디.webp':'배경/스터디2.webp',
+  '배경/저녁외출.webp':'배경/저녁외출2.webp',
+  '배경/법학공부.webp':'배경/법학공부2.webp'
+};
+function gBg(bg) { return (G.gender==='female' && FEMALE_BG_MAP[bg]) ? FEMALE_BG_MAP[bg] : bg; }
 
 function getBossFace() {
   if (G.status==='inhouse') return '캐릭터얼굴/기업임원.webp';
@@ -4232,7 +4256,7 @@ function getActionBg(actionId) {
     lectureLaw:'배경/법학공부.webp', broadcast:'배경/방송국.webp',
     date:'배경/식당.webp',
   };
-  return bgMap[actionId] || '배경/상담.webp';
+  return gBg(bgMap[actionId] || '배경/상담.webp');
 }
 
 // 데이트 이벤트 체크
@@ -5414,7 +5438,7 @@ function showDateEvent(evt, cb) {
   const modal = document.getElementById('status-event-modal');
   resetModalStyle(true);
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = `url('${evt.bg}')`;
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(evt.bg)}')`;
   advanceDateEvent();
 }
 
@@ -7136,7 +7160,7 @@ function showMaleRomanceEvent(evtData, cb) {
   const modal = document.getElementById('status-event-modal');
   resetModalStyle(true);
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = `url('${evtData.bg}')`;
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(evtData.bg)}')`;
 
   if (evtData.face) {
     document.getElementById('se-face').style.display = 'block';
@@ -7354,7 +7378,7 @@ function showRomanceScene(romanceData, cb) {
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
   resetModalStyle(true);
-  document.getElementById('se-bg').style.backgroundImage = `url('${currentRomanceBg}')`;
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(currentRomanceBg)}')`;
 
   if (target.face) {
     document.getElementById('se-face').style.display = 'block';
@@ -7584,6 +7608,7 @@ function continueExecution() {
     sceneMilestone = null;
     const scene = buildScene(slot);
     if (scene) {
+      if (scene.bg) scene.bg = gBg(scene.bg);
       if (sceneMilestone) { scene.milestone = sceneMilestone; sceneMilestone = null; }
       vnScenes.push(scene);
     }
@@ -8364,7 +8389,7 @@ function showVNScene(idx) {
   }
 
   // Background
-  document.getElementById('vn-bg').style.backgroundImage = `url('${scene.bg}')`;
+  document.getElementById('vn-bg').style.backgroundImage = `url('${gBg(scene.bg)}')`;
 
   // Date
   document.getElementById('vn-date').textContent = scene.date;
@@ -8447,7 +8472,7 @@ function advanceVN() {
 function showMilestonePopup(ms, callback) {
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = `url('${ms.bg}')`;
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(ms.bg)}')`;
   if(ms.face){
     document.getElementById('se-face').style.display = 'block';
     document.getElementById('se-face-img').src = ms.face;
@@ -8492,7 +8517,7 @@ function showContextEvent(eventDef, cb) {
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
   resetModalStyle(true);
-  document.getElementById('se-bg').style.backgroundImage = `url('${eventDef.bg}')`;
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(eventDef.bg)}')`;
 
   if (face) {
     document.getElementById('se-face').style.display = 'block';
@@ -9870,6 +9895,10 @@ const SHOP_ITEMS = [
     effects:{sales:30}},
   {id:'luxAccessory',name:'명품 악세사리',icon:'💎',desc:'변호사에게 악세사리는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'female',
     effects:{sales:30}},
+  {id:'casualWear',name:'캐주얼복',icon:'👚',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'female',
+    effects:{stamina:5}},
+  {id:'partyDress',name:'파티드레스',icon:'✨',desc:'화려한 파티용 드레스. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'female',
+    effects:{charm:50,sales:50}},
   {id:'proBook',name:'전문서적',icon:'📚',desc:'전문분야의 실력을 높여줄 수 있는 전문서적.',price:50000,max:10,category:'book',
     effects:{},isProBook:true},
   {id:'historyBook',name:'역사책',icon:'📖',desc:'역사를 알면 세상을 보는 눈이 달라진다.',price:50000,max:10,category:'book',
@@ -9941,7 +9970,7 @@ function openDonation() {
   // 이희선 대사 표시
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = "url('배경/공익활동.webp')";
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/공익활동.webp')}')`;
   document.getElementById('se-face').style.display = 'block';
   document.getElementById('se-face-img').src = '캐릭터얼굴/이희선.webp';
   document.getElementById('se-dialog').classList.remove('no-face');
@@ -10101,12 +10130,14 @@ function openShopping() {
     {key:'drink',label:'음료 (냉장고)'},
     {key:'clothes',label:'옷/가방 (옷장)'},
   ];
+  const clothesOrder = ['casualWear','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
   categories.forEach(cat => {
-    const items = SHOP_ITEMS.filter(i => {
+    let items = SHOP_ITEMS.filter(i => {
       if (i.category !== cat.key) return false;
       if (i.gender && i.gender !== G.gender) return false;
       return true;
     });
+    if (cat.key==='clothes') items.sort((a,b)=>{const ai=clothesOrder.indexOf(a.id);const bi=clothesOrder.indexOf(b.id);return (ai===-1?99:ai)-(bi===-1?99:bi);});
     if (!items.length) return;
     html += `<div class="action-category"><div class="action-category-title">${cat.label}</div>`;
     items.forEach(item => {
@@ -10257,8 +10288,10 @@ function openBookshelf() {
 
 // 옷장
 function openCloset() {
-  const wearableIds = ['premiumSuit','luxurySuit','premiumDress','luxuryDress'];
-  const owned = SHOP_ITEMS.filter(i=>i.category==='clothes'&&getItemCount(i.id)>0);
+  const wearableIds = ['premiumSuit','luxurySuit','premiumDress','luxuryDress','casualWear','partyDress'];
+  const clothesOrder = ['casualWear','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
+  const owned = SHOP_ITEMS.filter(i=>i.category==='clothes'&&getItemCount(i.id)>0)
+    .sort((a,b)=>{const ai=clothesOrder.indexOf(a.id);const bi=clothesOrder.indexOf(b.id);return (ai===-1?99:ai)-(bi===-1?99:bi);});
   if (!owned.length && G.currentOutfit === 'default') { showToast('옷장이 비어있습니다.'); return; }
 
   document.getElementById('storage-modal').style.display = 'flex';
@@ -10483,16 +10516,6 @@ function acceptScout(firmId) {
 }
 
 // ==================== OUTFIT ====================
-const OUTFIT_GRAPHICS = {
-  male: { default:'남주인공.webp', premiumSuit:'남주인공2.webp', luxurySuit:'남주인공3.webp' },
-  female: { default:'여주인공.webp', premiumDress:'여주인공2.webp', luxuryDress:'여주인공3.webp' },
-};
-
-function getCharImg() {
-  const map = G.gender === 'male' ? OUTFIT_GRAPHICS.male : OUTFIT_GRAPHICS.female;
-  return map[G.currentOutfit] || map['default'];
-}
-
 function updateCharGraphic() {
   const img = getCharImg();
   document.getElementById('room-char-img').src = img;
@@ -10510,23 +10533,18 @@ function equipOutfit(itemId) {
   }
 
   // 새 옷 착용
-  if (itemId === 'default') {
-    G.currentOutfit = 'default';
-  } else {
-    const item = SHOP_ITEMS.find(i=>i.id===itemId);
-    if (!item) return;
-    G.currentOutfit = itemId;
-    // 새 옷 효과 적용
-    if (item.effects) {
-      for (const k in item.effects) {
-        if (G.stats[k] !== undefined) G.stats[k] = Math.min(999, G.stats[k] + item.effects[k]);
-      }
+  const newItem = itemId === 'default' ? null : SHOP_ITEMS.find(i=>i.id===itemId);
+  if (itemId !== 'default' && !newItem) return;
+  G.currentOutfit = itemId;
+  if (newItem && newItem.effects) {
+    for (const k in newItem.effects) {
+      if (G.stats[k] !== undefined) G.stats[k] = Math.min(999, G.stats[k] + newItem.effects[k]);
     }
   }
 
   updateCharGraphic();
   updateUI();
-  showToast(itemId === 'default' ? '일반 복장으로 갈아입었습니다.' : `${item.name}(으)로 갈아입었습니다!`);
+  showToast(itemId === 'default' ? '일반 복장으로 갈아입었습니다.' : `${newItem.name}(으)로 갈아입었습니다!`);
   openCloset();
 }
 
@@ -11270,6 +11288,7 @@ function loadGame(slot) {
   if (G.bgmVolume === undefined) G.bgmVolume = 0.4;
   if (G.autoSave === undefined) G.autoSave = false;
   if (G.autoSkip === undefined) G.autoSkip = false;
+  if (!G.currentOutfit) G.currentOutfit = 'default';
   // 연애 시스템 하위호환
   ensureRomance();
   // 화면 전환
@@ -11603,7 +11622,7 @@ function showMainTrialDialogue(d, callback) {
   // bg가 없으면 현재 진행 중인 사건에 맞는 기본 배경 사용
   const cn = window._currentTrialCaseNum || getMainCaseNum();
   const defaultBg = (cn >= 4) ? '배경/경찰서.webp' : '배경/재판.webp';
-  document.getElementById('se-bg').style.backgroundImage = `url('${d.bg || defaultBg}')`;
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(d.bg || defaultBg)}')`;
   if (d.face) {
     document.getElementById('se-face').style.display = 'block';
     document.getElementById('se-face-img').src = d.face === 'player' ? getPlayerFace() : d.face;
@@ -13175,7 +13194,7 @@ function getEndingDialogues(title) {
 function showEndingVN(ending) {
   // 2. VN 윈도우 설정
   const vnEl = document.getElementById('ending-vn');
-  document.getElementById('ending-bg').style.backgroundImage = `url('${ending.bg}')`;
+  document.getElementById('ending-bg').style.backgroundImage = `url('${gBg(ending.bg)}')`;
   document.getElementById('ending-face').style.display = 'block';
   document.getElementById('ending-face-img').src = getPlayerFace();
   document.getElementById('ending-speaker').textContent = G.name;
@@ -13286,7 +13305,7 @@ function showEndingCredits(ending, gradeLabel) {
       return;
     }
     const c = credits[idx];
-    creditBg.style.backgroundImage = `url('${c.bg}')`;
+    creditBg.style.backgroundImage = `url('${gBg(c.bg)}')`;
     renderCreditText(c);
     creditPhase = 1;
     setTimeout(() => { creditBg.style.opacity = '1'; creditText.style.opacity = '1'; }, 100);
@@ -13392,7 +13411,7 @@ function showHospitalScene(scene, cb) {
   let dlgIdx = 0;
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = "url('"+scene.bg+"')";
+  document.getElementById('se-bg').style.backgroundImage = "url('"+gBg(scene.bg)+"')";
 
   function showHospDlg() {
     if (dlgIdx >= scene.dialogues.length) {
