@@ -548,7 +548,7 @@ body {
   .action-option .name { font-size: 0.88rem; }
 
   /* VN Window */
-  .vn-window { width: 90vw; height: 85vh; max-width: 600px; }
+  .vn-window { width: 300px; height: 300px; }
   .vn-face { width: 54px; height: 54px; bottom: 8px; left: 6px; }
   .vn-face img { width: 100%; height: 100%; }
   .vn-dialog-box { height: 100px; padding: 6px 10px 8px 68px; }
@@ -806,7 +806,8 @@ body {
     <button class="item-btn" onclick="openFridge()"><span class="item-icon">&#127861;</span>냉장고</button>
     <button class="item-btn" id="office-btn" onclick="handleOfficeClick()"><span class="item-icon">&#127970;</span>사무실</button>
     <button class="item-btn" onclick="openInvestMenu()"><span class="item-icon">&#128176;</span>재테크</button>
-    <button class="item-btn" id="evidence-case-btn" style="display:none" onclick="openEvidenceCase()"><span class="item-icon">&#128270;</span>증거함</button>
+    <button class="item-btn" onclick="openEvidenceCase()"><span class="item-icon">&#128270;</span>증거함</button>
+    <button class="item-btn" onclick="openShopping()"><span class="item-icon">&#128722;</span>쇼핑</button>
   </div>
 
   <!-- Stats Panel (slide from left) -->
@@ -2510,12 +2511,7 @@ function updateUI() {
     offBtn.style.opacity = canUseOffice ? '1' : '0.4';
     offBtn.style.pointerEvents = canUseOffice ? 'auto' : 'auto'; // 항상 클릭 가능 (handleOfficeClick에서 분기)
   }
-  // 증거 서류함 버튼 표시/숨김
-  const evBtn = document.getElementById('evidence-case-btn');
-  if (evBtn) {
-    const mcn = getMainCaseNum();
-    evBtn.style.display = (mcn > 0 || [G.mainCase1,G.mainCase2,G.mainCase3,G.mainCase4].some(mc=>mc&&mc.cleared)) ? 'flex' : 'none';
-  }
+  // 증거 서류함 버튼: 항상 표시 (사이드 메뉴에서 id 제거됨)
   // 고정지출 동적 갱신
   G.fixedExpense = calcFixedExpense();
   updateStatsPanel();
@@ -9925,7 +9921,6 @@ function renderComputer() {
   const laDone = G.monthLegalAid || isInhouseStatus;
   html += `<div class="action-option" onclick="${laDone?'':`confirmLegalAid()`}" style="${laDone?'opacity:0.4;cursor:default':''}">
     <div><div class="name">소송구조 대리인 신청</div><div class="effects">${isInhouseStatus?'사내변호사는 신청 불가':laDone?'이번 달 이미 신청함':'민사/가사/행정 사건 1건 추가 (수임료 100만원)'}</div></div></div>`;
-  html += `<div class="action-option" onclick="openShopping()"><div><div class="name">쇼핑</div><div class="effects">물건을 구매합니다</div></div></div>`;
   html += `<div class="action-option" onclick="openDonation()"><div><div class="name">기부하기</div><div class="effects">좋은 곳에 기부합니다</div></div></div>`;
   html += `<div class="action-option" onclick="openSpecialLawyerMenu()"><div><div class="name">전문변호사 등록</div><div class="effects">전문분야 등록/해제 (최대 3개)</div></div></div>`;
 
@@ -10096,7 +10091,10 @@ function applyLegalAid() {
 
 // ==================== SHOPPING ====================
 function openShopping() {
-  let html = '<div class="modal-title">쇼핑</div>';
+  const modal = document.getElementById('storage-modal');
+  modal.style.display = 'flex';
+  document.getElementById('storage-title').textContent = '쇼핑';
+  let html = '';
   const categories = [
     {key:'etc',label:'기타'},
     {key:'book',label:'책 (책장)'},
@@ -10139,8 +10137,7 @@ function openShopping() {
     });
     html += '</div>';
   }
-  html += `<div class="action-option" onclick="renderComputer()"><div><div class="name" style="color:#888">뒤로</div></div></div>`;
-  document.getElementById('computer-list').innerHTML = html;
+  document.getElementById('storage-list').innerHTML = html;
 }
 
 function buyItem(itemId) {
@@ -12630,7 +12627,19 @@ function openEvidenceCase() {
     // 클리어된 사건 중 가장 높은 번호
     for (let i=4; i>=1; i--) { const mc = getMainCaseObj(i); if (mc && mc.cleared) { caseNum = i; break; } }
   }
-  if (!caseNum) { document.getElementById('evidence-case-body').innerHTML = '<div style="text-align:center;color:#8a7a60;padding:30px 0">진행 중인 메인사건이 없습니다.</div>'; return; }
+  if (!caseNum) {
+    document.getElementById('evidence-case-title').textContent = '증거 서류함';
+    let emptyHtml = '';
+    const caseNames = {1:'사건1', 2:'사건2', 3:'사건3', 4:'사건4'};
+    for (let i=1; i<=4; i++) {
+      emptyHtml += `<div style="padding:12px;margin-bottom:6px;background:#1a1810;border:1px solid #2a2520;border-radius:6px;text-align:center">
+        <div style="color:#4a4030;font-size:0.82rem;font-weight:700">${caseNames[i]}</div>
+        <div style="color:#3a3020;font-size:0.72rem;margin-top:4px">— 아직 발생하지 않은 사건입니다 —</div>
+      </div>`;
+    }
+    document.getElementById('evidence-case-body').innerHTML = emptyHtml;
+    return;
+  }
   renderEvidenceCase(caseNum);
 }
 
