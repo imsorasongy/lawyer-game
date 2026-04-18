@@ -1716,7 +1716,7 @@ function getActionEvents(actionId) {
     case 'trial':
       return [
         // 9. 복장 자율화 (재판 씬)
-        { id:'dressCode', prob:(G.currentOutfit==='casualWear'||G.currentOutfit==='partyDress')?0.30:0.02,
+        { id:'dressCode', prob:(['casualWear','partyDress','casualWearM','tailcoat'].includes(G.currentOutfit))?0.30:0.02,
           bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp',
           dialogues: [
             {speaker:'판사', text:'{name} 변호사. 오늘 복장이 좀... 법정에 어울리지 않는 것 같은데요?'}
@@ -3730,7 +3730,7 @@ function randomClientFace() {
 
 // ==================== OUTFIT GRAPHICS ====================
 const OUTFIT_GRAPHICS = {
-  male: { default:'남주인공.webp', premiumSuit:'남주인공2.webp', luxurySuit:'남주인공3.webp' },
+  male: { default:'남주인공.webp', premiumSuit:'남주인공2.webp', luxurySuit:'남주인공3.webp', casualWearM:'남주인공4.webp', tailcoat:'남주인공5.webp' },
   female: { default:'여주인공.webp', premiumDress:'여주인공2.webp', luxuryDress:'여주인공3.webp', casualWear:'여주인공4.webp', partyDress:'여주인공5.webp' },
 };
 
@@ -3919,7 +3919,7 @@ const SCENE_DATA = {
     fail:'자네 실수한 만큼 일당에서 까겠네.'
   },
   drive: {
-    bgMale:'배경/여행.webp', bgFemale:'배경/드라이브2.webp', face:'player', speaker:'주인공',
+    bgMale:'배경/드라이브.webp', bgFemale:'배경/드라이브2.webp', face:'player', speaker:'주인공',
     text:'역시 스트레스 푸는데는 드라이브가 최고야'
   },
   councilWork: {
@@ -9907,6 +9907,10 @@ const SHOP_ITEMS = [
     effects:{stamina:5}},
   {id:'partyDress',name:'파티드레스',icon:'✨',desc:'화려한 파티용 드레스. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'female',
     effects:{charm:50,sales:50}},
+  {id:'casualWearM',name:'캐주얼복',icon:'👕',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'male',
+    effects:{stamina:5}},
+  {id:'tailcoat',name:'연미복',icon:'🎩',desc:'화려한 연미복. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'male',
+    effects:{charm:50,sales:50}},
   {id:'proBook',name:'전문서적',icon:'📚',desc:'전문분야의 실력을 높여줄 수 있는 전문서적.',price:50000,max:10,category:'book',
     effects:{},isProBook:true},
   {id:'historyBook',name:'역사책',icon:'📖',desc:'역사를 알면 세상을 보는 눈이 달라진다.',price:50000,max:10,category:'book',
@@ -10138,7 +10142,7 @@ function openShopping() {
     {key:'drink',label:'음료 (냉장고)'},
     {key:'clothes',label:'옷/가방 (옷장)'},
   ];
-  const clothesOrder = ['casualWear','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
+  const clothesOrder = ['casualWear','casualWearM','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','tailcoat','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
   categories.forEach(cat => {
     let items = SHOP_ITEMS.filter(i => {
       if (i.category !== cat.key) return false;
@@ -10296,8 +10300,8 @@ function openBookshelf() {
 
 // 옷장
 function openCloset() {
-  const wearableIds = ['premiumSuit','luxurySuit','premiumDress','luxuryDress','casualWear','partyDress'];
-  const clothesOrder = ['casualWear','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
+  const wearableIds = ['premiumSuit','luxurySuit','premiumDress','luxuryDress','casualWear','partyDress','casualWearM','tailcoat'];
+  const clothesOrder = ['casualWear','casualWearM','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','tailcoat','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
   const owned = SHOP_ITEMS.filter(i=>i.category==='clothes'&&getItemCount(i.id)>0)
     .sort((a,b)=>{const ai=clothesOrder.indexOf(a.id);const bi=clothesOrder.indexOf(b.id);return (ai===-1?99:ai)-(bi===-1?99:bi);});
   if (!owned.length && G.currentOutfit === 'default') { showToast('옷장이 비어있습니다.'); return; }
