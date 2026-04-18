@@ -3756,7 +3756,6 @@ const FEMALE_BG_MAP = {
   '배경/방송국.webp':'배경/방송국2.webp',
   '배경/골프.webp':'배경/골프2.webp',
   '배경/pt.webp':'배경/pt2.webp',
-  '배경/드라이브.webp':'배경/드라이브2.webp',
   '배경/웅변.webp':'배경/웅변2.webp',
   '배경/대학원.webp':'배경/대학원2.webp'
 };
@@ -3919,7 +3918,7 @@ const SCENE_DATA = {
     fail:'자네 실수한 만큼 일당에서 까겠네.'
   },
   drive: {
-    bg:'배경/여행.webp', face:'player', speaker:'주인공',
+    bgMale:'배경/여행.webp', bgFemale:'배경/드라이브2.webp', face:'player', speaker:'주인공',
     text:'역시 스트레스 푸는데는 드라이브가 최고야'
   },
   councilWork: {
@@ -7971,7 +7970,8 @@ function buildScene(slot) {
     changes.push(...applyStatR('stress',-10));
     G.funds-=100000;statChanges.funds-=100000;
     const sd=SCENE_DATA.drive;
-    return {bg:sd.bg,face:getPlayerFace(),speaker:G.name,date:dateStr,result:'info',resultLabel:'드라이브',
+    const driveBg = G.gender==='male' ? sd.bgMale : sd.bgFemale;
+    return {bg:driveBg,face:getPlayerFace(),speaker:G.name,date:dateStr,result:'info',resultLabel:'드라이브',
       text:t(sd.text),changes};
   }
 
