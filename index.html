@@ -10664,15 +10664,21 @@ function investInput(type){
   else{title={deposit:'예금',fund:'펀드',coin:'코인',domesticStock:'국내주식',foreignStock:'해외주식',commodity:'현물',venture:'벤처캐피탈',ip:'지식재산권'}[type]+' - 투자금액 입력';minV=10000000;maxV=1000000000;}
   let html=`<div class="modal-title">${title}</div>
     <div style="text-align:center;font-size:0.78rem;color:#a09080;margin-bottom:10px">최소 ${f(minV)} ~ 최대 ${f(maxV)}</div>
-    <input type="number" id="invest-amount" class="name-input" style="width:100%;margin-bottom:12px;letter-spacing:1px" min="${minV}" max="${maxV}" step="1000000" value="${minV}">
+    <input type="text" id="invest-amount" class="name-input" style="width:100%;margin-bottom:12px;letter-spacing:1px" value="${minV.toLocaleString()}" oninput="formatInvestInput(this)">
     <div style="display:flex;gap:8px;justify-content:center">
       <button class="btn btn-primary" style="padding:8px 24px" onclick="confirmInvest('${type}')">확인</button>
       <button class="btn btn-secondary" style="padding:8px 24px" onclick="openInvestMenu()">취소</button></div>`;
   document.getElementById('storage-list').innerHTML=html;
 }
 
+function formatInvestInput(el){
+  const raw = el.value.replace(/[^0-9]/g,'');
+  if(!raw){el.value='';return;}
+  el.value = parseInt(raw).toLocaleString();
+}
+
 function confirmInvest(type){
-  const amt=parseInt(document.getElementById('invest-amount').value);
+  const amt=parseInt(document.getElementById('invest-amount').value.replace(/[^0-9]/g,''));
   let minV=type==='savings'?300000:10000000;
   let maxV=type==='savings'?10000000:1000000000;
   if(!amt||amt<minV||amt>maxV){showToast(`${f(minV)}~${f(maxV)} 사이로 입력하세요.`);return;}
