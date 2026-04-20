@@ -4262,7 +4262,8 @@ function updateStatsPanel() {
   html += `<div class="stat-section-title">신분/경제</div>`;
   html += `<div class="stat-row"><span class="stat-name">신분</span><span class="stat-value" style="flex:1;text-align:right;color:#c9a84c">${STATUS_NAMES[G.status]}</span></div>`;
   html += `<div class="stat-row"><span class="stat-name">소속</span><span class="stat-value" style="flex:1;text-align:right">${G.status==='solo'?(G.officeName||'개인'):G.firmName}</span></div>`;
-  if(G.officeName) html += `<div class="stat-row"><span class="stat-name">사무소</span><span class="stat-value" style="flex:1;text-align:right">${G.officeName}</span></div>`;
+  const __office = getOffice();
+  if(__office) html += `<div class="stat-row"><span class="stat-name">사무실 규모</span><span class="stat-value" style="flex:1;text-align:right">${__office.name}</span></div>`;
   html += `<div class="stat-row"><span class="stat-name">월급</span><span class="stat-value" style="flex:1;text-align:right">${(G.salary/10000).toLocaleString()}만원</span></div>`;
   html += `<div class="stat-row"><span class="stat-name">고정지출</span><span class="stat-value" style="flex:1;text-align:right;color:#cc6666">${(G.fixedExpense/10000).toLocaleString()}만원</span></div>`;
   html += `<div class="stat-row"><span class="stat-name">수임료율</span><span class="stat-value" style="flex:1;text-align:right">${G.caseFeeRate*100}%</span></div>`;
@@ -13526,6 +13527,49 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
+const GAME_VERSION = 2;
+
+// 저장 파일 버전별 마이그레이션 함수.
+// key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
+const MIGRATIONS = {
+  // v1 → v2 : 그동안 loadGame 내부에 흩어져 있던 기본값 보강을 통합
+  2: function(state) {
+    if (state.bgmVolume === undefined) state.bgmVolume = 0.4;
+    if (state.autoSave === undefined) state.autoSave = false;
+    if (state.autoSkip === undefined) state.autoSkip = false;
+    if (!state.currentOutfit) state.currentOutfit = 'default';
+    if (state.subCase1 === undefined) state.subCase1 = null;
+    if (state.subCase2 === undefined) state.subCase2 = null;
+    if (state.subCase3 === undefined) state.subCase3 = null;
+    if (state.subCase4 === undefined) state.subCase4 = null;
+    if (state.subCase5 === undefined) state.subCase5 = null;
+    return state;
+  },
+  // 향후 업데이트: v3, v4 ... 형태로 추가
+};
+
+function migrateSave(saveData) {
+  if (!saveData || !saveData.state) {
+    return { ok: false, reason: 'corrupt' };
+  }
+  const from = saveData.version || 0;
+  if (from > GAME_VERSION) {
+    return { ok: false, reason: 'future', from };
+  }
+  let state = saveData.state;
+  for (let v = from + 1; v <= GAME_VERSION; v++) {
+    if (MIGRATIONS[v]) {
+      try {
+        state = MIGRATIONS[v](state);
+      } catch (e) {
+        return { ok: false, reason: 'migration_error', from, at: v, error: String(e) };
+      }
+    }
+  }
+  saveData.state = state;
+  saveData.version = GAME_VERSION;
+  return { ok: true, saveData, from };
+}
 
 function getSaveInfo(slot) {
   const raw = localStorage.getItem(SAVE_KEY_PREFIX + slot);
@@ -13543,7 +13587,7 @@ function confirmSaveDelete(slot, mode) {
 }
 function saveGame(slot, silent) {
   const saveData = {
-    version: 1,
+    version: GAME_VERSION,
     savedAt: new Date().toISOString(),
     meta: {
       name: G.name,
@@ -13566,20 +13610,23 @@ function saveGame(slot, silent) {
 function loadGame(slot) {
   const data = getSaveInfo(slot);
   if (!data || !data.state) { showToast('저장 데이터가 없습니다.'); return; }
+  // 저장 파일 버전 마이그레이션
+  const result = migrateSave(data);
+  if (!result.ok) {
+    if (result.reason === 'future') {
+      showToast('이 저장 파일은 현재 게임보다 최신 버전이라 불러올 수 없습니다.');
+    } else if (result.reason === 'migration_error') {
+      showToast(`저장 파일 마이그레이션 오류 (v${result.at}): ${result.error}`);
+    } else {
+      showToast('저장 파일이 손상되어 불러올 수 없습니다.');
+    }
+    return;
+  }
+  const migrated = result.saveData;
   // G 객체 복원 — 기존 G의 모든 키를 제거하고 저장 데이터로 완전 교체
   for (const k in G) { if (G.hasOwnProperty(k)) delete G[k]; }
-  for (const k in data.state) { G[k] = data.state[k]; }
-  // 설정 하위호환
-  if (G.bgmVolume === undefined) G.bgmVolume = 0.4;
-  if (G.autoSave === undefined) G.autoSave = false;
-  if (G.autoSkip === undefined) G.autoSkip = false;
-  if (!G.currentOutfit) G.currentOutfit = 'default';
-  if (G.subCase1 === undefined) G.subCase1 = null;
-  if (G.subCase2 === undefined) G.subCase2 = null;
-  if (G.subCase3 === undefined) G.subCase3 = null;
-  if (G.subCase4 === undefined) G.subCase4 = null;
-  if (G.subCase5 === undefined) G.subCase5 = null;
-  // 연애 시스템 하위호환
+  for (const k in migrated.state) { G[k] = migrated.state[k]; }
+  // 연애/결혼/정치 하위호환 (ensureRomance는 게임 곳곳에서 방어적으로 호출되므로 유지)
   ensureRomance();
   // 화면 전환
   document.getElementById('title-screen').style.display = 'none';
