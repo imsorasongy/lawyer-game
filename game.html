@@ -956,10 +956,10 @@ body {
 
 <!-- Evidence Case Modal -->
 <div id="evidence-case-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:150;align-items:center;justify-content:center" onclick="this.style.display='none'">
-  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:85vh;overflow-y:auto">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;height:75vh;display:flex;flex-direction:column">
     <button class="modal-close" onclick="document.getElementById('evidence-case-modal').style.display='none'">&times;</button>
     <div class="modal-title" id="evidence-case-title">증거 서류함</div>
-    <div id="evidence-case-body"></div>
+    <div id="evidence-case-body" style="flex:1;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -2832,7 +2832,8 @@ const SUB_TRIAL_1 = [
     ],
     evidenceSteps:[{prompt:'(소멸시효 주장을 반박할 증거를 제출해야 한다. 어떤 증거를 제시할까?)', correct:['sc1_account2','sc1_lawbook'], count:2}],
     successDialogues:[
-      {face:'player', speaker:'{name}', text:'재판장님, 피고는 2020. 10. 1. 원고에게 채무 일부를 변제하였습니다. 그런데 우리 민법 및 판례에 따르면 이러한 일부 변제는 채무승인으로서의 효력이 있어 시효중단의 효과가 발생합니다. 즉, 소멸시효는 2020. 10. 1. 에 중단됐다가 다시 진행된바, 원고가 소를 제기한 2030. 1. 1. 에는 아직 10년이 지나지 않은 상황이었습니다.'},
+      {face:'player', speaker:'{name}', text:'재판장님, 피고는 2020. 10. 1. 원고에게 채무 일부를 변제하였습니다. 그런데 우리 민법 및 판례에 따르면 이러한 일부 변제는 채무승인으로서의 효력이 있어 시효중단의 효과가 발생합니다.'},
+      {face:'player', speaker:'{name}', text:'즉, 소멸시효는 2020. 10. 1. 에 중단됐다가 다시 진행된바, 원고가 소를 제기한 2030. 1. 1. 에는 아직 10년이 지나지 않은 상황이었습니다.'},
       {face:'캐릭터얼굴/의뢰인1.webp', speaker:'피고', text:'!!!'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'음. 확실히 그렇군요. 원고측, 날카로운 변론이었습니다.'},
       {face:'캐릭터얼굴/의뢰인1.webp', speaker:'피고', text:'잠.. 잠깐만요.'},
@@ -3157,7 +3158,8 @@ const SUB_TRIAL_2 = [
     ],
     evidenceSteps:[{prompt:'(과실비율 주장을 반박할 증거를 제출해야 한다. 어떤 증거를 제시할까?)', correct:['sc2_cctv','sc2_traffic'], count:2}],
     successDialogues:[
-      {face:'player', speaker:'{name}', text:'재판장님, 피고는 2030. 11. 1. 인도를 자전거로 달리다가 천천히 걸어가던 원고에게 부상을 입혔습니다. 그런데 도로교통법 및 판례에 따르면 자전거는 인도로 통행해서는 안 되고, 자전거가 인도로 통행하다가 보행자를 충격하는 사고를 발생시킨 경우 특별한 사정이 없는 한 자전거운행자측에 100% 과실이 인정된다고 보고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'재판장님, 피고는 2030. 11. 1. 인도를 자전거로 달리다가 천천히 걸어가던 원고에게 부상을 입혔습니다.'},
+      {face:'player', speaker:'{name}', text:'그런데 도로교통법 및 판례에 따르면 자전거는 인도로 통행해서는 안 되고, 자전거가 인도로 통행하다가 보행자를 충격하는 사고를 발생시킨 경우 특별한 사정이 없는 한 자전거운행자측에 100% 과실이 인정된다고 보고 있습니다.'},
       {face:'캐릭터얼굴/의뢰인1.webp', speaker:'피고', text:'!!!'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'음. 확실히 그렇군요. 원고측, 날카로운 변론이었습니다.'},
       {face:'캐릭터얼굴/의뢰인1.webp', speaker:'피고', text:'잠.. 잠깐만요.'},
@@ -3281,7 +3283,8 @@ const SUB_TRIAL_3 = [
     evidenceSteps:[{prompt:'(특유재산도 재산분할 대상이 된다는 증거를 제출해야 한다. 어떤 증거를 제시할까?)', correct:['sc3_report','sc3_familylaw'], count:2}],
     successDialogues:[
       {face:'player', speaker:'{name}', text:'재판장님, 상대방이 혼인 전 증여 혹은 상속받은 재산을 통해 취득한 부동산이라고 하더라도 이를 유지하거나 증식하는데 기여를 했다면 이는 재산분할의 대상이 된다는 것이 우리 법원의 입장입니다.'},
-      {face:'player', speaker:'{name}', text:'피고측은 성실히 가사에 임하며 가계를 꼼꼼히 운영하여, 이 사건 원, 피고가 같이 거주하던 부동산 유지 등에 이바지를 했을 뿐만 아니라, 이 사건 부동산의 리모델링에 본인의 재산을 투여하여 증식에도 기여했습니다. 따라서 부동산 역시 재산분할의 대상이 됩니다.'},
+      {face:'player', speaker:'{name}', text:'피고측은 성실히 가사에 임하며 가계를 꼼꼼히 운영하여, 이 사건 원, 피고가 같이 거주하던 부동산 유지 등에 이바지를 했을 뿐만 아니라, 이 사건 부동산의 리모델링에 본인의 재산을 투여하여 증식에도 기여했습니다.'},
+      {face:'player', speaker:'{name}', text:'따라서 부동산 역시 재산분할의 대상이 됩니다.'},
       {face:'캐릭터얼굴/동료남자어쏘.webp', speaker:'안수철 변호사', text:'!!!'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'음. 확실히 그렇군요. 피고측, 날카로운 변론이었습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고하겠습니다. 주문, 1. 원고(반소피고)와 피고(반소원고)는 이혼한다. 2. 원고는 피고에게 재산분할로 7억5천만원을 지급하라. 3. 원고는 피고에게 위자료로 3000만원을 지급하라. 4. 사건본인의 친권 및 양육권자로 피고를 지정한다.'},
@@ -3589,7 +3592,8 @@ const SUB_TRIAL_4 = [
     ],
     evidenceSteps:[{prompt:'(5인이상 사업장임을 입증할 증거를 제출하자.)', correct:['sc4_attendance'], count:1}],
     successDialogues:[
-      {face:'player', speaker:'{name}', text:'보시다시피 피고 보조참가인의 학원에는 매일 10명 이상의 근로자가 상시근로하고 있습니다. 실제로 5인이상 근로사업장인지 판단하기 위해서는 1개월간 사용한 근로자 연인원을 1개월간 가동일수로 나누면 되는데, 피고보조참가인 학원은 이 수치가 10이 넘습니다.'},
+      {face:'player', speaker:'{name}', text:'보시다시피 피고 보조참가인의 학원에는 매일 10명 이상의 근로자가 상시근로하고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'실제로 5인이상 근로사업장인지 판단하기 위해서는 1개월간 사용한 근로자 연인원을 1개월간 가동일수로 나누면 되는데, 피고보조참가인 학원은 이 수치가 10이 넘습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'음. 과연 그렇군요. 피고 보조참가인?'},
       {face:'캐릭터얼굴/동료남자어쏘.webp', speaker:'안수철', text:'음.. 처음 듣는 내용이라, 한 번만 더 기회를 주십시오.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'네, 그러면 피고보조참가인측의 답변을 위해 속행하고 다음 재판은 12월 첫째주에 진행하도록 하겠습니다. 다음 기일에 재판은 종결하겠습니다.'},
@@ -3624,7 +3628,8 @@ const SUB_TRIAL_4 = [
     evidenceSteps2:[{prompt:'(해고가 부당하다는 결정적 증거를 제출하자.)', correct:['sc4_protest','sc4_witness','sc4_laborlaw'], count:3}],
     successDialogues2:[
       {face:'player', speaker:'{name}', text:'원고측은 피고보조참가인의 부당한 지시에 대해, 학생들을 고려하지 않고 돈만 보는 것은 부당하다 항의를 한 것 뿐입니다. 그런데 이후 학원장은 그 메일에 화가났는지 원고를 잘라버려야겠다고 말하고는 원고를 해고하였습니다.'},
-      {face:'player', speaker:'{name}', text:'물론 취업규칙에는 상급자 지시 불복종이 해고사유로 기재되어있습니다만... 우리 법원은 취업규칙 등의 징계해고사유에 해당하는 경우라 하더라도 해고처분이 당연히 정당한 것으로 되는 것이 아니라 사회통념상 고용관계를 계속할 수 없을 정도로 근로자에게 책임 있는 사유가 있는 경우여야 정당한 해고라고 보고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'물론 취업규칙에는 상급자 지시 불복종이 해고사유로 기재되어있습니다만... 우리 법원은 취업규칙 등의 징계해고사유에 해당하는 경우라 하더라도 해고처분이 당연히 정당한 것으로 되는 것이 아닙니다.'},
+      {face:'player', speaker:'{name}', text:'사회통념상 고용관계를 계속할 수 없을 정도로 근로자에게 책임 있는 사유가 있는 경우여야 정당한 해고라고 보고 있습니다.'},
       {face:'player', speaker:'{name}', text:'본 건의 경우, 근로자에게 책임있는 사유라고 볼 수 있을까요? 피고 보조참가인의 사리사욕을 채우기 위해 학생들이 희생되면 안 된다는 말 한 마디가, 가장 성실한 선생님을 해고할 사유가 된다는 말입니까?'},
       {face:'캐릭터얼굴/동료남자어쏘.webp', speaker:'안수철', text:'!!!'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'음. 확실히 그렇군요. 원고측, 날카로운 변론이었습니다.'},
@@ -3902,7 +3907,9 @@ const SUB_TRIAL_5 = [
     successDialogues:[
       {face:'player', speaker:'{name}', text:'여기 업무매뉴얼과 카카오톡 대화내용을 봐주시기 바랍니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'이게 뭔가요?'},
-      {face:'player', speaker:'{name}', text:'피고인이 제공받은 업무매뉴얼입니다. 실제 조선신용정보회사의 매뉴얼과 거의 같고, 범죄와 관련된 내용은 전혀 기재되어있지 않습니다. 본인이 하는 업무가 정상적인 업무라고 볼 가능성이 높습니다. 그리고 카카오톡 대화내용을 보십시오. 피고인이 자신의 아들에게 보낸 내용입니다. 아버지 돌아가시고 걱정이 많을텐데, 일자리를 구했으니 걱정하지 말라는 내용입니다. 본인이 보이스피싱수거책으로 일한다고 생각했으면 이렇게 이야기하기 힘들었을 것입니다.'},
+      {face:'player', speaker:'{name}', text:'피고인이 제공받은 업무매뉴얼입니다. 실제 조선신용정보회사의 매뉴얼과 거의 같고, 범죄와 관련된 내용은 전혀 기재되어있지 않습니다. 본인이 하는 업무가 정상적인 업무라고 볼 가능성이 높습니다.'},
+      {face:'player', speaker:'{name}', text:'그리고 카카오톡 대화내용을 보십시오. 피고인이 자신의 아들에게 보낸 내용입니다. 아버지 돌아가시고 걱정이 많을텐데, 일자리를 구했으니 걱정하지 말라는 내용입니다.'},
+      {face:'player', speaker:'{name}', text:'본인이 보이스피싱수거책으로 일한다고 생각했으면 이렇게 이야기하기 힘들었을 것입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'하긴 그렇습니다.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'하. 그런 카카오톡 대화내용 같은거야, 찔리니까 거짓말을 한 것이겠지요.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'흠... 강선검사, 법정에서는 언행을 좀 주의해주기 바랍니다. 일단 다음 9월 기일에 이만년에 대한 증인신문절차를 진행하면서 사건을 좀 더 정리해보겠습니다.'},
@@ -3972,7 +3979,8 @@ const SUB_TRIAL_5 = [
     ],
     evidenceSteps2:[{prompt:'(피고인이 범죄와 관련있다는 점을 몰랐다고 볼만한 정황증거를 제시하시오.)', correct:['sc5_report','sc5_cctv'], count:2}],
     successDialogues2:[
-      {face:'player', speaker:'{name}', text:'재판장님, CCTV를 다시 한 번 봐주십시오. 피고인은 평생 집에서 일을 하다가 범죄에 가담하는 사람이라고 볼 수 없을정도로 태연하게 행동하고 있습니다. 게다가, 경찰 수사보고서를 보더라도 피고인은 경찰의 출석요구에 대해 바로 출석해서 적극 수사에 협조했습니다. 과연 본인이 범죄자라고 생각했다면 이렇게 행동할 수 있었을까요?'},
+      {face:'player', speaker:'{name}', text:'재판장님, CCTV를 다시 한 번 봐주십시오. 피고인은 평생 집에서 일을 하다가 범죄에 가담하는 사람이라고 볼 수 없을정도로 태연하게 행동하고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'게다가, 경찰 수사보고서를 보더라도 피고인은 경찰의 출석요구에 대해 바로 출석해서 적극 수사에 협조했습니다. 과연 본인이 범죄자라고 생각했다면 이렇게 행동할 수 있었을까요?'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'재판장님! 하지만 피고인이 이 사건에서 더 큰 역할을 맡을정도로 범죄에 익숙한 자여서 그럴 수도 있습니다...!'},
       {face:'player', speaker:'{name}', text:'검사님, 끝까지 억지를 부리시는 군요. 이걸 보십시오.'},
     ],
@@ -14048,7 +14056,8 @@ const MAIN_TRIAL_1 = [
     successDialogues: [
       {face:'player', speaker:'{name}', text:'재판장님, 이 판례를 봐 주십시오.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이게 무슨 의미가 있습니까?'},
-      {face:'player', speaker:'{name}', text:'대법원 2023도27590 판결을 보시면, 재판과정에서 소송상 필요한 주장의 증명이나 범죄혐의에 대한 방어권 행사를 위하여 개인정보가 포함된 소송서류나 증거를 법원에 제출하는 경우, 사회상규에 위배되지 않는 행위에 해당하여 형법 제20조에 따라 위법성이 조각된다고 보면서 그 요건을 설시하고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'대법원 2023도27590 판결을 보시면, 재판과정에서 소송상 필요한 주장의 증명이나 범죄혐의에 대한 방어권 행사를 위하여 개인정보가 포함된 소송서류나 증거를 법원에 제출하는 경우,'},
+      {face:'player', speaker:'{name}', text:'사회상규에 위배되지 않는 행위에 해당하여 형법 제20조에 따라 위법성이 조각된다고 보면서 그 요건을 설시하고 있습니다.'},
       {face:'player', speaker:'{name}', text:'본 건에서도 소송상 피고인의 방어권 행사를 위해 그 증거를 법원에 제출한 것인 바, 이는 위법성이 조각됩니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그렇군요. 알겠습니다. 일단 피고인측 주장을 받아들이도록 하겠습니다. 다음 기일에서 본격적인 심리를 진행하겠습니다.'},
       {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님... 감사합니다. 첫 번째 고비를 넘겼네요.'},
@@ -14069,7 +14078,8 @@ const MAIN_TRIAL_1 = [
     successDialogues: [
       {face:'player', speaker:'{name}', text:'재판장님, 이 최종 감사 보고서를 증거로 제출하겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이것이 어떻다는 겁니까?'},
-      {face:'player', speaker:'{name}', text:'먼저, 검사가 제출한 것은 중간보고서입니다. 최종 감사 보고서를 보면, 한정민 씨 명의 계좌로의 이체는 업무상 정당한 경비 처리였다고 나왔습니다. 검찰은 결론이 나지 않은 중간 보고서만을 제출한 후, 본인들에게 불리한 최종 감사보고서는 제출하지 않은 것입니다.'},
+      {face:'player', speaker:'{name}', text:'먼저, 검사가 제출한 것은 중간보고서입니다. 최종 감사 보고서를 보면, 한정민 씨 명의 계좌로의 이체는 업무상 정당한 경비 처리였다고 나왔습니다.'},
+      {face:'player', speaker:'{name}', text:'검찰은 결론이 나지 않은 중간 보고서만을 제출한 후, 본인들에게 불리한 최종 감사보고서는 제출하지 않은 것입니다.'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'그 문서는... 어디서 구한 겁니까?'},
       {face:'player', speaker:'{name}', text:'검찰 측이 감사 보고서를 제출했으니, 저도 같은 감사의 최종 보고서를 제출하는 것이 당연합니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'검찰측, 왜 중간 보고서만 제출했습니까?'},
@@ -14148,7 +14158,8 @@ const MAIN_TRIAL_1 = [
     ],
     evidenceSteps2: [{prompt:'(이만석이 비자금을 만든적이 있다는 증거를 제시하자.)', correct:['inv_paper_company','rev_fund_flow'], count:2}],
     successDialogues2: [
-      {face:'player', speaker:'{name}', text:'이 사건의 핵심은 단순합니다. 증거가 말하고 있습니다. 홍콩, 싱가포르, 케이맨 제도 3개국에 걸친 페이퍼컴퍼니 네트워크. 모두 이만석 회장의 차명 계좌와 연결되어 있습니다. 공식 재무제표에 기재되지 않은 3,000억 원 규모의 자금 흐름이 존재합니다.'},
+      {face:'player', speaker:'{name}', text:'이 사건의 핵심은 단순합니다. 증거가 말하고 있습니다. 홍콩, 싱가포르, 케이맨 제도 3개국에 걸친 페이퍼컴퍼니 네트워크. 모두 이만석 회장의 차명 계좌와 연결되어 있습니다.'},
+      {face:'player', speaker:'{name}', text:'공식 재무제표에 기재되지 않은 3,000억 원 규모의 자금 흐름이 존재합니다.'},
       {face:'player', speaker:'{name}', text:'이러한 비자금 흐름을 한정민이 알게 되자, 한정민에게 이를 뒤집어 씌우기 위해 한정민 계좌로 돈을 이체한 후 이를 인출하여 도라군 개발사업에 투입하고, 한정민은 횡령범으로 신고한 것이 아닙니까?'},
       {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'이만석', text:'소설입니다! 제가 한정민에게 왜 죄를 뒤집어 씌웁니까? 한정민이 이런 비자금에 대해 알고 있었다는 증거라도 있소?'},
       {face:'player', speaker:'{name}', text:'당연히 있지요.'},
@@ -14156,7 +14167,8 @@ const MAIN_TRIAL_1 = [
     evidenceSteps3: [{prompt:'(한정민이 비자금에 대해 알고 있었다는 증거를 제시하자.)', correct:['rev_report'], count:1}],
     successDialogues3: [
       {face:'player', speaker:'{name}', text:'이걸 보시죠. 한정민이 비자금에 대해 알게 된 후 상급자에게 보낸 메일입니다.'},
-      {face:'player', speaker:'{name}', text:'성진그룹은 발칵 뒤집혔겠죠. 이게 세상에 알려지면 큰일이다. 그러다 누군가 묘수를 냈을 겁니다. 비자금을 한정민을 통해 처리하고, 한정민이 횡령한 것으로 만들자. 그리고 그 돈은 찾지 못한 것으로. 그러면 깔끔하다. 이렇게 말이죠. 어떻습니까 증인?'},
+      {face:'player', speaker:'{name}', text:'성진그룹은 발칵 뒤집혔겠죠. 이게 세상에 알려지면 큰일이다. 그러다 누군가 묘수를 냈을 겁니다.'},
+      {face:'player', speaker:'{name}', text:'비자금을 한정민을 통해 처리하고, 한정민이 횡령한 것으로 만들자. 그리고 그 돈은 찾지 못한 것으로. 그러면 깔끔하다. 이렇게 말이죠. 어떻습니까 증인?'},
       {face:'캐릭터얼굴/대표변호사더블랙.webp', speaker:'이만석', text:'증언하지 않겠습니다.'},
       {face:'player', speaker:'{name}', text:'상관없습니다. 어차피 이 사건에서 당신의 증언은 필요하지 않아요.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그럼 증인신문을 마치고.. 검찰측 최종의견 진술하세요.'},
@@ -14198,7 +14210,8 @@ const MAIN_TRIAL_2 = [
     successDialogues: [
       {face:'player', speaker:'{name}', text:'신고기록을 봐 주십시오.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'신고기록이 어떻다는 겁니까? 범죄현장을 목격했으면 신고를 하는게 당연하지요.'},
-      {face:'player', speaker:'{name}', text:'바로 그 부분입니다. 신고를 하려면 범죄현장을 봐야하지요. 게다가 검사가 말한것처럼 범행 시간은 밤, 멀리서는 누군가가 칼에 찔린다는 것을 알 수 없을 시간대입니다.\n\n즉, 신고기록 자체가 현장에 피해자와 피고인 외에 제3자가 있었다는 반증입니다.'},
+      {face:'player', speaker:'{name}', text:'바로 그 부분입니다. 신고를 하려면 범죄현장을 봐야하지요. 게다가 검사가 말한것처럼 범행 시간은 밤, 멀리서는 누군가가 칼에 찔린다는 것을 알 수 없을 시간대입니다.'},
+      {face:'player', speaker:'{name}', text:'즉, 신고기록 자체가 현장에 피해자와 피고인 외에 제3자가 있었다는 반증입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'아.. 그.. 그렇네요. 맞습니다. 확실히 수상한 부분이 있네요.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'하지만 이 사건에서 피해자를 범행현장으로 유도해내서 죽일 수 있었던 사람은 피고인 뿐입니다. 피해자와 피고인의 통화기록을 보면, 그 날 피해자와 피고인은 서로하고만 통화를 했어요.'},
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'즉 피고인이 피해자를 죽이려고 마음을 먹고 전화를 해서 피해자를 불러낸 후 살해한 것이 명백합니다.'},
@@ -14473,7 +14486,8 @@ const MAIN_TRIAL_3 = [
     successDialogues3: [
       {face:'player', speaker:'{name}', text:'이것을 봐 주십시오. 장현우 군수의 차명계좌 거래내역입니다.\n이 계좌로 주식회사 전우에서 거액의 자금이 입금되고 있습니다.\n이래도, 부부끼리는 각자의 영역에서 일한다고만 하시겠습니까?'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'!!!'},
-      {face:'player', speaker:'{name}', text:'정리하겠습니다.\n장현우 군수의 부인이 대표이사인 주식회사 전우가 이 개발사업에 참여하고 있고...\n그 회사에서 장현우 군수의 차명계좌로 거액이 흘러들어가고 있습니다.\n이 개발사업은 공익을 위한 것이 아닙니다. 장현우 군수가 자신과 가족의 사적 이익을 위해 추진하고 있는 것입니다.'},
+      {face:'player', speaker:'{name}', text:'정리하겠습니다. 장현우 군수의 부인이 대표이사인 주식회사 전우가 이 개발사업에 참여하고 있고, 그 회사에서 장현우 군수의 차명계좌로 거액이 흘러들어가고 있습니다.'},
+      {face:'player', speaker:'{name}', text:'이 개발사업은 공익을 위한 것이 아닙니다. 장현우 군수가 자신과 가족의 사적 이익을 위해 추진하고 있는 것입니다.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'그... 이건...'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'이것은 매우 심각한 문제로 보이는군요.\n이 처분의 공정성 자체에 의문이 생깁니다.\n피고 측은 이에 대해 반드시 소명하십시오.\n다음 변론기일은 12월 첫째 주로 지정하겠습니다. 특별한 사정이 없으면 그 날 결심하겠습니다.'},
       {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 장현우가 자기 잇속을 챙기려고 이 짓을 한 거였군요.'},
@@ -14488,7 +14502,8 @@ const MAIN_TRIAL_3 = [
       {bg:'배경/재판.webp', face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'제4회 변론기일을 시작하겠습니다. 오늘 결심할 예정이니 양측 최종 주장을 하십시오.\n피고 측, 지난번 지적에 대한 소명은?'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'저의 차명계좌 건은 현재 조사 중이며, 개발사업 자체와는 별개의 문제입니다.\n설령 저 개인에게 문제가 있다 하더라도, 적법한 절차를 거친 행정처분의 효력에는 영향이 없습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'원고 측, 최종 주장하십시오.'},
-      {face:'player', speaker:'{name}', text:'재판장님, 원고 측은 지금까지 이 개발사업의 환경영향평가가 절차적으로도, 내용적으로도 하자가 있다는 것을 증명했습니다.\n그리고 장현우 군수가 이 사업의 직접적 이해관계자라는 것도 밝혔습니다.\n오늘은... 이 모든 것의 배후에 있는 진실을 밝히겠습니다.'},
+      {face:'player', speaker:'{name}', text:'재판장님, 원고 측은 지금까지 이 개발사업의 환경영향평가가 절차적으로도, 내용적으로도 하자가 있다는 것을 증명했습니다. 그리고 장현우 군수가 이 사업의 직접적 이해관계자라는 것도 밝혔습니다.'},
+      {face:'player', speaker:'{name}', text:'오늘은... 이 모든 것의 배후에 있는 진실을 밝히겠습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'진실이요?'},
       {face:'player', speaker:'{name}', text:'장현우 군수는 단순히 개발사업으로 이익만을 취한 것이 아닙니다.\n이 사업의 비밀을 지키기 위해... 사람까지 죽였습니다.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'무슨 소리를 하는 겁니까! 이건 행정소송입니다. 갑자기 저에 대한 인신공격을!!'},
@@ -14501,14 +14516,16 @@ const MAIN_TRIAL_3 = [
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'김철민? 그게 누군데요?'},
       {face:'player', speaker:'{name}', text:'이 사건신고서를 봐 주십시오.\n작년에 있었던 이태준 국장 살인사건... 기억하시겠지요? 제가 피고인 박정호의 무죄를 밝혀낸 그 사건입니다.\n그 살인사건을 경찰에 신고한 사람... 바로 \'김철민\'입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'!!!'},
-      {face:'player', speaker:'{name}', text:'장현우 군수가 거액을 보낸 바로 그 사람이, 살인사건의 신고자입니다.\n인적 없는 외진 산속에서 일어난 살인을 어떻게 목격할 수 있었을까요?\n답은 하나입니다. 김철민은 장현우가 고용한 사람이고, 현장에 있었기 때문에 신고할 수 있었던 것입니다.'},
+      {face:'player', speaker:'{name}', text:'장현우 군수가 거액을 보낸 바로 그 사람이, 살인사건의 신고자입니다. 인적 없는 외진 산속에서 일어난 살인을 어떻게 목격할 수 있었을까요?'},
+      {face:'player', speaker:'{name}', text:'답은 하나입니다. 김철민은 장현우가 고용한 사람이고, 현장에 있었기 때문에 신고할 수 있었던 것입니다.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'이... 이건 추측에 불과합니다! 제가 어떻게 박정호랑 이태준이 만나는 것을 알 수 있었겠습니까?'},
       {face:'player', speaker:'{name}', text:'추측이 아닙니다. 더 있습니다.\n재판장님, 장현우는 박정호와 이태준이 만나는 것을 알고 있었습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'어떻게 알고 있었다는 것이지요?'},
     ],
     evidenceSteps2: [{prompt:'장현우가 박정호의 동선을 알고 있었다는 증거를 제시하세요.', correct:['inv3_phone_data'], count:1}],
     successDialogues2: [
-      {face:'player', speaker:'{name}', text:'박정호 씨의 핸드폰 분석자료를 봐 주십시오.\n박정호 씨의 핸드폰에는 도청앱이 설치되어 있었습니다. 위치추적 기능이 포함된.\n이 도청앱은 장현우가 보낸 문자메시지의 링크를 통해 설치된 것입니다.\n장현우는 박정호 씨의 위치를 실시간으로 파악하고 있었습니다.'},
+      {face:'player', speaker:'{name}', text:'박정호 씨의 핸드폰 분석자료를 봐 주십시오. 박정호 씨의 핸드폰에는 도청앱이 설치되어 있었습니다. 위치추적 기능이 포함된.'},
+      {face:'player', speaker:'{name}', text:'이 도청앱은 장현우가 보낸 문자메시지의 링크를 통해 설치된 것입니다. 장현우는 박정호 씨의 위치를 실시간으로 파악하고 있었습니다.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'무슨 말입니까. 저는 김철민이라는 사람은 알지도 못합니다. 게다가 제가 왜 이태준 국장을... 제게는 살인의 동기가 없습니다.'},
       {face:'player', speaker:'{name}', text:'존경하는 재판장님, 피고의 말은 완전히 사실과 다릅니다. 제가 장현우 군수의 살인동기를 밝히겠습니다.'},
     ],
@@ -14516,7 +14533,8 @@ const MAIN_TRIAL_3 = [
     successDialogues3: [
       {face:'player', speaker:'{name}', text:'이 환경영향평가서 원본을 봐 주십시오.\n원래 환경영향평가 결과는 \'개발 불가\' 판정이었습니다.\n이태준 국장은 이 사실을 알고 있었고, 양심의 가책을 느껴 이 원본을 박정호 씨에게 전달하려 했습니다.\n그래서 그날 밤 둘이 만난 것입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그렇다면...'},
-      {face:'player', speaker:'{name}', text:'장현우는 도청앱으로 박정호 씨의 위치를 추적하고 있었고, 이태준 국장과 만나는 것도 알았습니다. 그리고 이태준이 환경영향평가서 원본을 박정호에게 주려 한다는 사실도요.\n환경영향평가서 원본이 넘어가면 개발사업의 비밀이 탄로 날 것을 두려워한 장현우는...\n김철민을 시켜 이태준 국장을 살해하고, 그 죄를 박정호 씨에게 뒤집어씌운 것입니다.'},
+      {face:'player', speaker:'{name}', text:'장현우는 도청앱으로 박정호 씨의 위치를 추적하고 있었고, 이태준 국장과 만나는 것도 알았습니다. 그리고 이태준이 환경영향평가서 원본을 박정호에게 주려 한다는 사실도요.'},
+      {face:'player', speaker:'{name}', text:'환경영향평가서 원본이 넘어가면 개발사업의 비밀이 탄로 날 것을 두려워한 장현우는... 김철민을 시켜 이태준 국장을 살해하고, 그 죄를 박정호 씨에게 뒤집어씌운 것입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'............'},
       {face:'player', speaker:'{name}', text:'장현우 군수는 위법한 개발사업으로 사적 이익을 취했을 뿐만 아니라...\n그 비밀을 지키기 위해 살인까지 저질렀습니다.\n이러한 개발사업시행승인처분이 유효할 수 있겠습니까?'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'............'},
@@ -14785,7 +14803,8 @@ const MAIN_TRIAL_4 = [
       {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'목을 매달아 자살로 위장했습니다.\nCCTV 영상도 조작하고, 출입카드의 지문도 다 지워버렸기에 지문도 없었죠.'},
       {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'그런데 그 과정에서 하나의 실수가 있었습니다.'},
       {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'바로 이 족적입니다. 장현우는 수면제에 취해 쓰러지면서 자신이 마시던 커피와 책상위에 있던 비리장부를 바닥에 떨어뜨렸지요.'},
-      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'살인 후 급하게 자신의 비리의 증거를 챙기려던 박진서는, 본인의 발에 묻은 커피를 눈치채지 못했습니다. 아무리 찾아도 책상위에 있던 비리장부가 보이지 않자 급히 여기저기 뒤지며 비리장부를 찾다가, 바닥에 떨어져있던 장부를 밟아버리고 만 것입니다. 그 결과 이렇게 족적이 남았지요.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'살인 후 급하게 자신의 비리의 증거를 챙기려던 박진서는, 본인의 발에 묻은 커피를 눈치채지 못했습니다.'},
+      {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'아무리 찾아도 책상위에 있던 비리장부가 보이지 않자 급히 여기저기 뒤지며 비리장부를 찾다가, 바닥에 떨어져있던 장부를 밟아버리고 만 것입니다. 그 결과 이렇게 족적이 남았지요.'},
       {bg:'배경/장부족적.webp', face:'player', speaker:'{name}', text:'이 족적은, 박진서씨가 그 날 신었던 신발, CCTV에 찍힌 바로 그 신발의 무늬와 일치합니다. 아마 아직도 집에 가지고 계실지도 모르지요.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'............'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'...후. 거기까지 알아낸건가.'},
@@ -15012,36 +15031,30 @@ function openEvidenceCase() {
 }
 
 function renderEvidenceCaseTabs(active) {
-  // active: 'sub1', 1~4, 'none'
-  let html = `<div style="display:flex;gap:4px;justify-content:center;margin-bottom:12px;flex-wrap:wrap">`;
-  // 서브스토리 탭
-  if (G.subCase1) {
-    const isSub = active === 'sub1';
-    html += `<button onclick="renderSubCaseEvidence(1)" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isSub?'#c9a84c':'#3a3020'};background:${isSub?'rgba(201,168,76,0.2)':'#1a1810'};color:${isSub?'#f0c850':'#8a7a60'};font-weight:${isSub?'700':'400'}">대여금</button>`;
+  // active: 'sub1'~'sub5', 1~4, 'none'
+  const btnStyle = (isActive) => `padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#3a3020'};background:${isActive?'rgba(201,168,76,0.2)':'#1a1810'};color:${isActive?'#f0c850':'#8a7a60'};font-weight:${isActive?'700':'400'}`;
+  let html = '';
+  // 서브스토리 줄
+  const subCases = [{key:'sub1',obj:G.subCase1,label:'대여금',num:1},{key:'sub2',obj:G.subCase2,label:'손해배상',num:2},{key:'sub3',obj:G.subCase3,label:'이혼',num:3},{key:'sub4',obj:G.subCase4,label:'부당해고',num:4},{key:'sub5',obj:G.subCase5,label:'보이스피싱',num:5}];
+  const hasSub = subCases.some(s=>s.obj);
+  if (hasSub) {
+    html += `<div style="display:flex;gap:4px;justify-content:center;margin-bottom:4px">`;
+    subCases.forEach(s => {
+      if (s.obj) html += `<button onclick="renderSubCaseEvidence(${s.num})" style="${btnStyle(active===s.key)}">${s.label}</button>`;
+    });
+    html += `</div>`;
   }
-  if (G.subCase2) {
-    const isSub = active === 'sub2';
-    html += `<button onclick="renderSubCaseEvidence(2)" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isSub?'#c9a84c':'#3a3020'};background:${isSub?'rgba(201,168,76,0.2)':'#1a1810'};color:${isSub?'#f0c850':'#8a7a60'};font-weight:${isSub?'700':'400'}">손해배상</button>`;
-  }
-  if (G.subCase3) {
-    const isSub = active === 'sub3';
-    html += `<button onclick="renderSubCaseEvidence(3)" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isSub?'#c9a84c':'#3a3020'};background:${isSub?'rgba(201,168,76,0.2)':'#1a1810'};color:${isSub?'#f0c850':'#8a7a60'};font-weight:${isSub?'700':'400'}">이혼</button>`;
-  }
-  if (G.subCase4) {
-    const isSub = active === 'sub4';
-    html += `<button onclick="renderSubCaseEvidence(4)" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isSub?'#c9a84c':'#3a3020'};background:${isSub?'rgba(201,168,76,0.2)':'#1a1810'};color:${isSub?'#f0c850':'#8a7a60'};font-weight:${isSub?'700':'400'}">부당해고</button>`;
-  }
-  if (G.subCase5) {
-    const isSub = active === 'sub5';
-    html += `<button onclick="renderSubCaseEvidence(5)" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isSub?'#c9a84c':'#3a3020'};background:${isSub?'rgba(201,168,76,0.2)':'#1a1810'};color:${isSub?'#f0c850':'#8a7a60'};font-weight:${isSub?'700':'400'}">보이스피싱</button>`;
-  }
-  // 메인스토리 탭
+  // 메인스토리 줄
   const allCases = [1,2,3,4].filter(n => getMainCaseObj(n));
-  allCases.forEach(n => {
-    const isActive = active === n;
-    html += `<button onclick="renderEvidenceCase(${n})" style="padding:3px 10px;font-size:0.72rem;border-radius:3px;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#3a3020'};background:${isActive?'rgba(201,168,76,0.2)':'#1a1810'};color:${isActive?'#f0c850':'#8a7a60'};font-weight:${isActive?'700':'400'}">사건${n}</button>`;
-  });
-  html += `</div>`;
+  if (allCases.length > 0) {
+    html += `<div style="display:flex;gap:4px;justify-content:center;margin-bottom:12px">`;
+    allCases.forEach(n => {
+      html += `<button onclick="renderEvidenceCase(${n})" style="${btnStyle(active===n)}">사건${n}</button>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="margin-bottom:12px"></div>`;
+  }
   return html;
 }
 
@@ -16004,7 +16017,7 @@ function openHelpModal() {
         <div id="help-title" style="font-size:1.1rem;font-weight:700;color:#c9a84c;letter-spacing:2px"></div>
         <div id="help-page-num" style="font-size:0.75rem;color:#8a7a60"></div>
       </div>
-      <div id="help-content" style="color:#d0c0a0;font-size:0.88rem;line-height:1.8;white-space:pre-line;margin-bottom:18px;min-height:200px"></div>
+      <div id="help-content" style="color:#d0c0a0;font-size:0.88rem;line-height:1.8;white-space:pre-line;margin-bottom:18px;height:320px;overflow-y:auto"></div>
       <div id="help-dots" style="text-align:center;margin-bottom:12px"></div>
       <div style="display:flex;gap:8px;justify-content:center">
         <button id="help-prev" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="changeHelpPage(-1)">◀ 이전</button>
