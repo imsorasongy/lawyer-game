@@ -10454,6 +10454,7 @@ function applyStat(k,v){
   }
   G.stats[k]=Math.max(0,Math.min(999,G.stats[k]+v));
   if(statChanges[k]!==undefined)statChanges[k]+=v;
+  return v;
 }
 
 // ==================== VN SCENE DISPLAY ====================
@@ -10865,9 +10866,12 @@ function applyEventChoice(choiceIdx) {
       changeList.push({name:'자금', value:display, positive: v>0});
     }
     else if (STAT_NAMES[k]) {
-      applyStat(k, choice.effects[k]);
-      const v = choice.effects[k];
-      changeList.push({name:STAT_NAMES[k], value:(v>0?'+':'')+v, positive: (k==='stress'||k==='fatigue'||k==='karma') ? v<0 : v>0});
+      const actualV = applyStat(k, choice.effects[k]);
+      const rounded = Math.round(actualV * 10) / 10;
+      if (rounded !== 0) {
+        const displayV = rounded % 1 === 0 ? rounded : rounded.toFixed(1);
+        changeList.push({name:STAT_NAMES[k], value:(rounded>0?'+':'')+displayV, positive: (k==='stress'||k==='fatigue'||k==='karma') ? rounded<0 : rounded>0});
+      }
     }
   }
 

@@ -982,6 +982,23 @@ body {
 </div>
 
 <script>
+// ================================================================
+// 📖 TABLE OF CONTENTS — 섹션 찾기: Ctrl+F 로 "==================== 섹션명"
+// ----------------------------------------------------------------
+// [CORE]     MOBILE FULLSCREEN & ORIENTATION LOCK · GAME STATE · SETTINGS · OPENING
+// [DATA]     MAIN STORY DATA · MBTI · BGM · SCENE CONFIG · ITEM/SHOP DATA · OUTFIT GRAPHICS
+// [SCREENS]  UI UPDATE · TOAST · SCREENS · MENU · 신규 게임 튜토리얼
+// [SCHEDULE] SCHEDULE · EXECUTION · VN SCENE DISPLAY · MONTH END · HOLIDAYS
+// [CASE]     CASE SYSTEM · BRIEFCASE · 증거 서류함 · MAIN STORY · 서브스토리 사건1
+// [CAREER]   JOB SYSTEM · STATUS SYSTEM · JOB SEARCH UI · OFFICE & STAFF · OFFICE MENU · HIRE MENU · STAFF PANEL
+// [ROMANCE]  ROMANCE SYSTEM · 데이트 이벤트 캐릭터별 대사 · 남주인공 연애이벤트 · 여주인공 연애이벤트 · 호감도 이벤트
+// [EVENTS]   NEW EVENT SYSTEM · CONTEXT EVENT SYSTEM · TAX AUDIT EVENT · POLITICS SYSTEM · LECTURER SYSTEM
+// [SHOP]     COMPUTER SYSTEM · SHOPPING · OUTFIT
+// [ECONOMY]  INVEST · HOUSING
+// [SYSTEM]   SAVE / LOAD
+// [SPECIAL]  유튜브 구독자 마일스톤 · ENDING · 도움말
+// ================================================================
+
 // ==================== MOBILE FULLSCREEN & ORIENTATION LOCK ====================
 let mobileFullscreenDone = false;
 function enterMobileFullscreen() {
@@ -5103,8 +5120,6 @@ function applyAutoFill(type) {
   // 지난달 복사 모드
   if (type === 'last' && G._lastSchedulePattern) {
     const pat = G._lastSchedulePattern;
-    console.log('[DEBUG] 복사 시 pat.daytime:', JSON.stringify(pat.daytime));
-    console.log('[DEBUG] 복사 시 isDaytime 빈 슬롯:', G.schedule.reduce((c,ds)=>c+ds.slots.filter(s=>!s.locked&&!s.forced&&!s.action&&s.isDaytime).length,0));
     let evIdx = 0, wkIdx = 0, dtIdx = 0;
     G.schedule.forEach(ds => {
       ds.slots.forEach(slot => {
@@ -6143,7 +6158,7 @@ function getActionBg(actionId) {
 }
 
 // 데이트 이벤트 체크
-// ===== 데이트 이벤트 캐릭터별 대사 =====
+// ==================== 데이트 이벤트 캐릭터별 대사 ====================
 const DATE_TONE_DIALOGUES = {
   // ---------- dateWine ----------
   dateWine:{
@@ -8313,7 +8328,7 @@ function checkMaleRomanceEvents(slot, vnScenes) {
   }
 }
 
-// ============ 여주인공 연애이벤트 데이터 ============
+// ==================== 여주인공 연애이벤트 ====================
 function getFemaleRomanceEvents() {
   if (G.gender !== 'female') return [];
   ensureRomance();
@@ -9690,9 +9705,6 @@ function doStartExecution() {
     });
   });
   G._lastSchedulePattern = { evening: eveningPattern, weekend: weekendPattern, daytime: daytimePattern, status: G.status, firmId: G.firmId };
-  console.log('[DEBUG] 저장된 daytimePattern:', JSON.stringify(daytimePattern));
-  console.log('[DEBUG] 저장된 eveningPattern:', JSON.stringify(eveningPattern));
-  console.log('[DEBUG] isDaytime 슬롯 수:', G.schedule.reduce((c,ds)=>c+ds.slots.filter(s=>s.isDaytime).length,0));
   continueExecution();
 }
 
@@ -10454,6 +10466,7 @@ function applyStat(k,v){
   }
   G.stats[k]=Math.max(0,Math.min(999,G.stats[k]+v));
   if(statChanges[k]!==undefined)statChanges[k]+=v;
+  return v;
 }
 
 // ==================== VN SCENE DISPLAY ====================
@@ -10865,9 +10878,12 @@ function applyEventChoice(choiceIdx) {
       changeList.push({name:'자금', value:display, positive: v>0});
     }
     else if (STAT_NAMES[k]) {
-      applyStat(k, choice.effects[k]);
-      const v = choice.effects[k];
-      changeList.push({name:STAT_NAMES[k], value:(v>0?'+':'')+v, positive: (k==='stress'||k==='fatigue'||k==='karma') ? v<0 : v>0});
+      const actualV = applyStat(k, choice.effects[k]);
+      const rounded = Math.round(actualV * 10) / 10;
+      if (rounded !== 0) {
+        const displayV = rounded % 1 === 0 ? rounded : rounded.toFixed(1);
+        changeList.push({name:STAT_NAMES[k], value:(rounded>0?'+':'')+displayV, positive: (k==='stress'||k==='fatigue'||k==='karma') ? rounded<0 : rounded>0});
+      }
     }
   }
 
@@ -11636,7 +11652,6 @@ function closeSummary(){
   });
   // 메인스토리 수임 제안 체크
   const ay = 2029 + G.year;
-  console.log('[MainStory] closeSummary check:', {ay, month:G.month, year:G.year, c3cleared:G.mainStoryFlag.case3_cleared, c4offered:G.mainStoryOffered.case4, mc3:!!G.mainCase3, mc4:!!G.mainCase4, mc3tp:G.mainCase3?G.mainCase3.trialPhase:'x', mc3active:G.mainCase3?G.mainCase3.active:'x', flags:JSON.stringify(G.mainStoryFlag)});
   // 서브스토리 사건5 수임 (5년차 1월)
   if (G.year === 5 && G.month === 1 && !G.subCase5) {
     showSubCase5Intro(); return;
@@ -11655,7 +11670,6 @@ function closeSummary(){
   }
   if (!G.mainStoryOffered.case1 && !G.mainCase1 && G.month === 1 &&
       (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 700 && G.stats.reputation > 550) {
-    console.log('[MainStory] Triggering case 1 offer!');
     showMainStoryOffer(1); return;
   }
   if (G.mainStoryFlag.case1_cleared && !G.mainStoryOffered.case2 && !G.mainCase2 && G.month === 1 &&
@@ -11668,7 +11682,6 @@ function closeSummary(){
     showMainStoryOffer(3); return;
   }
   // 사건4: 사건3 클리어 후 2039년 1월
-  console.log('[MainStory] case4 check:', {ay, month:G.month, c3cleared:G.mainStoryFlag.case3_cleared, c4offered:G.mainStoryOffered.case4, mc4:G.mainCase4, mc3tp:G.mainCase3&&G.mainCase3.trialPhase, mc3active:G.mainCase3&&G.mainCase3.active});
   if (G.mainStoryFlag.case3_cleared && !G.mainStoryOffered.case4 && !G.mainCase4 && G.month === 1 && ay === 2039) {
     showMainStoryOffer(4); return;
   }
@@ -12776,11 +12789,70 @@ function checkScoutOffer() {
   const sal = `${(firm.partnerSalary/10000).toLocaleString()}만원`;
   const fee = `${firm.partnerFeeRate*100}%`;
   document.getElementById('se-text').textContent =
-    `${G.name} 변호사님, ${firm.name}입니다. 변호사님의 명성을 듣고 연락드렸습니다. 저희 로펌에서 파트너 변호사로 모시고 싶습니다. 월급 ${sal}, 수임료/성공보수 ${fee} 조건입니다.`;
+    `${G.name} 변호사님, ${firm.name}입니다. 변호사님의 명성을 듣고 연락드렸습니다. 저희 로펌에서 파트너 변호사로 모시고 싶습니다.`;
+
+  window._scoutFirmId = firm.id;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="showScoutCompare()">▼ 계속</button>`;
+}
+
+function showScoutCompare() {
+  const firmId = window._scoutFirmId;
+  const firm = LAW_FIRMS.find(f=>f.id===firmId);
+  if (!firm) return;
+
+  // 현재 조건
+  const curFirm = LAW_FIRMS.find(f=>f.id===G.firmId);
+  const curName = G.firmName || (curFirm ? curFirm.name : '-');
+  const curStatus = STATUS_NAMES[G.status] || G.status;
+  const curSalary = `${(G.salary/10000).toLocaleString()}만원`;
+  const curCaseFee = `${(G.caseFeeRate*100).toFixed(0)}%`;
+  const curSuccessFee = `${(G.successFeeRate*100).toFixed(0)}%`;
+
+  // 제안 조건
+  const newSalary = `${(firm.partnerSalary/10000).toLocaleString()}만원`;
+  const newFee = `${(firm.partnerFeeRate*100).toFixed(0)}%`;
+
+  document.getElementById('se-face').style.display = 'none';
+  document.getElementById('se-dialog').classList.add('no-face');
+  document.getElementById('se-speaker').textContent = '';
+  document.getElementById('se-text').innerHTML = `
+    <div style="font-size:0.82rem;color:#c9a84c;font-weight:700;text-align:center;margin-bottom:8px">근무조건 비교</div>
+    <table style="width:100%;border-collapse:collapse;font-size:0.78rem;color:#d0c0a0">
+      <tr style="border-bottom:1px solid #3a3020">
+        <td style="padding:4px 6px;color:#8a7a60"></td>
+        <td style="padding:4px 6px;text-align:center;font-weight:700;color:#88aadd">현재</td>
+        <td style="padding:4px 6px;text-align:center;font-weight:700;color:#ddaa66">제안</td>
+      </tr>
+      <tr style="border-bottom:1px solid #2a2520">
+        <td style="padding:4px 6px;color:#8a7a60">소속</td>
+        <td style="padding:4px 6px;text-align:center">${curName}</td>
+        <td style="padding:4px 6px;text-align:center">${firm.name}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #2a2520">
+        <td style="padding:4px 6px;color:#8a7a60">직급</td>
+        <td style="padding:4px 6px;text-align:center">${curStatus}</td>
+        <td style="padding:4px 6px;text-align:center">파트너변호사</td>
+      </tr>
+      <tr style="border-bottom:1px solid #2a2520">
+        <td style="padding:4px 6px;color:#8a7a60">월급</td>
+        <td style="padding:4px 6px;text-align:center">${curSalary}</td>
+        <td style="padding:4px 6px;text-align:center">${newSalary}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #2a2520">
+        <td style="padding:4px 6px;color:#8a7a60">수임료</td>
+        <td style="padding:4px 6px;text-align:center">${curCaseFee}</td>
+        <td style="padding:4px 6px;text-align:center">${newFee}</td>
+      </tr>
+      <tr>
+        <td style="padding:4px 6px;color:#8a7a60">성공보수</td>
+        <td style="padding:4px 6px;text-align:center">${curSuccessFee}</td>
+        <td style="padding:4px 6px;text-align:center">${newFee}</td>
+      </tr>
+    </table>`;
 
   document.getElementById('se-choices').innerHTML = `
     <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-      <button class="event-choice" style="flex:1" onclick="acceptScout('${firm.id}')"><span class="choice-label">수락</span></button>
+      <button class="event-choice" style="flex:1" onclick="acceptScout('${firmId}')"><span class="choice-label">수락</span></button>
       <button class="event-choice" style="flex:1" onclick="document.getElementById('status-event-modal').style.display='none'"><span class="choice-label">거절</span></button>
     </div>`;
 }
@@ -15190,21 +15262,6 @@ function renderEvidenceCaseNew(caseNum, mc) {
 
   return html;
 }
-
-// ==================== 임시 디버그 (배포 전 삭제) ====================
-function debugClearCase3() {
-  if (!G.mainCase3) {
-    G.mainCase3 = {active:false, month:12, trialPhase:4, preparation:0, phase:2, foundEvidence:[], reviewedEvidence:[], cleared:true, failed:false, wrongCount:0, startYear:G.year-1, startMonth:1, trialScheduledPhase:3, pressurePassed:false};
-  } else {
-    G.mainCase3.trialPhase = 4; G.mainCase3.cleared = true; G.mainCase3.active = false;
-  }
-  G.mainStoryFlag.case3_cleared = true;
-  G.mainStoryOffered.case3 = true;
-  showToast('DEBUG: 사건3 강제 클리어! case3_cleared=' + G.mainStoryFlag.case3_cleared);
-  console.log('[DEBUG] case3 forced clear:', G.mainStoryFlag, G.mainCase3);
-  updateUI();
-}
-// 콘솔에서 debugClearCase3() 호출하거나, 게임 화면에서 아래 버튼 사용
 
 // ==================== ENDING ====================
 function showEnding(){
