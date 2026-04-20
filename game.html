@@ -2425,7 +2425,7 @@ function openSettings() {
   html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">BGM</span>
-      <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:60px" onclick="toggleBGM();openSettings()">
+      <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;width:100px" onclick="toggleBGM();openSettings()">
         <span class="choice-label">${G.bgmOn?'ON':'OFF'}</span></button>
     </div>
     <div style="display:flex;align-items:center;gap:8px;opacity:${G.bgmOn?1:0.4}">
@@ -2441,7 +2441,7 @@ function openSettings() {
   html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020;display:flex;justify-content:space-between;align-items:center">
     <div><span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">자동넘김</span>
     <div style="color:#8a8a70;font-size:0.68rem">이벤트 없는 일반 스케줄을 자동으로 넘깁니다</div></div>
-    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:60px" onclick="G.autoSkip=!G.autoSkip;openSettings()">
+    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;width:100px" onclick="G.autoSkip=!G.autoSkip;openSettings()">
       <span class="choice-label">${G.autoSkip?'ON':'OFF'}</span></button>
   </div>`;
 
@@ -2449,7 +2449,7 @@ function openSettings() {
   html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020;display:flex;justify-content:space-between;align-items:center">
     <div><span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">자동 저장</span>
     <div style="color:#8a8a70;font-size:0.68rem">매월 시작 시 슬롯 10에 자동 저장</div></div>
-    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:60px" onclick="G.autoSave=!G.autoSave;openSettings()">
+    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;width:100px" onclick="G.autoSave=!G.autoSave;openSettings()">
       <span class="choice-label">${G.autoSave?'ON':'OFF'}</span></button>
   </div>`;
 
@@ -2458,8 +2458,64 @@ function openSettings() {
   html += `<div style="padding:8px 12px;border-bottom:1px solid #3a3020;display:flex;justify-content:space-between;align-items:center">
     <div><span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">화면 모드</span>
     <div style="color:#8a8a70;font-size:0.68rem">전체화면 또는 창모드로 전환합니다</div></div>
-    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;min-width:80px" onclick="toggleFullscreen()">
+    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;width:100px" onclick="toggleFullscreen()">
       <span class="choice-label">${isFullscreen?'전체화면':'창모드'}</span></button>
+  </div>`;
+
+  // 세이브 파일 관리
+  html += `<div style="padding:8px 12px;display:flex;justify-content:space-between;align-items:center">
+    <div><span style="color:#e8d5b5;font-size:0.85rem;font-weight:700">세이브 파일 관리</span>
+    <div style="color:#8a8a70;font-size:0.68rem">다른 기기로 옮기거나 백업할 때 사용합니다</div></div>
+    <button class="event-choice" style="padding:4px 16px;font-size:0.78rem;width:100px" onclick="openSaveFileManager()">
+      <span class="choice-label">열기</span></button>
+  </div>`;
+
+  document.getElementById('storage-list').innerHTML = html;
+}
+
+// 세이브 파일 관리 화면 — 슬롯별 내보내기/가져오기 전용
+function openSaveFileManager() {
+  const modal = document.getElementById('storage-modal');
+  modal.style.display = 'flex';
+  document.getElementById('storage-title').textContent = '세이브 파일 관리';
+  let html = `<div style="padding:8px 12px;color:#a09080;font-size:0.72rem;border-bottom:1px solid #3a3020;line-height:1.5">
+    <div>⬇ <b>내보내기</b> — 슬롯의 세이브를 JSON 파일로 다운로드</div>
+    <div>⬆ <b>가져오기</b> — JSON 파일을 슬롯에 덮어쓰기</div>
+  </div>`;
+
+  for (let i = 0; i < SAVE_SLOT_COUNT; i++) {
+    const data = getSaveInfo(i);
+    if (data && data.meta) {
+      const m = data.meta;
+      const dateStr = formatSaveDate(data.savedAt);
+      html += `<div class="action-option" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="min-width:0;flex:1">
+            <div class="name" style="font-size:0.88rem">슬롯 ${i+1} · ${m.name} (${m.status})</div>
+            <div class="effects" style="margin-top:2px">${m.year}년 ${m.month}월 · 자금 ${m.funds.toLocaleString()}원</div>
+            <div class="effects" style="font-size:0.65rem;color:#807060;margin-top:1px">${dateStr}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-secondary" style="padding:6px 10px;font-size:0.72rem;color:#88b0c0;border-color:#446677" onclick="event.stopPropagation();exportSave(${i})">⬇ 내보내기</button>
+            <button class="btn btn-secondary" style="padding:6px 10px;font-size:0.72rem;color:#c0a870;border-color:#775533" onclick="event.stopPropagation();importSave(${i}, openSaveFileManager, 'storage-modal')">⬆ 가져오기</button>
+          </div>
+        </div></div>`;
+    } else {
+      html += `<div class="action-option" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="min-width:0;flex:1">
+            <div class="name" style="color:#666;font-size:0.88rem">슬롯 ${i+1} · 비어있음</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-secondary" style="padding:6px 10px;font-size:0.72rem;color:#c0a870;border-color:#775533" onclick="event.stopPropagation();importSave(${i}, openSaveFileManager, 'storage-modal')">⬆ 가져오기</button>
+          </div>
+        </div></div>`;
+    }
+  }
+
+  // 설정으로 돌아가기
+  html += `<div style="padding:10px 12px;text-align:center;border-top:1px solid #3a3020;margin-top:4px">
+    <button class="event-choice" style="padding:6px 20px;font-size:0.78rem" onclick="openSettings()"><span class="choice-label">← 설정으로 돌아가기</span></button>
   </div>`;
 
   document.getElementById('storage-list').innerHTML = html;
@@ -13717,6 +13773,95 @@ function loadGame(slot) {
 function deleteSave(slot) {
   localStorage.removeItem(SAVE_KEY_PREFIX + slot);
   showToast(`슬롯 ${slot+1} 삭제 완료`);
+}
+
+// 저장 데이터를 JSON 파일로 내보내기 (다운로드)
+function exportSave(slot) {
+  const raw = localStorage.getItem(SAVE_KEY_PREFIX + slot);
+  if (!raw) { showToast('저장 데이터가 없습니다.'); return; }
+  try {
+    const data = JSON.parse(raw);
+    const meta = data.meta || {};
+    const safeName = (meta.name || '이름없음').replace(/[<>:"/\\|?*]/g, '_');
+    const y = meta.year || '';
+    const mo = meta.month || '';
+    const ts = new Date().toISOString().split('T')[0];
+    const filename = `lawyer_save_${safeName}_${y}y${mo}m_${ts}.json`;
+    const blob = new Blob([raw], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    showToast(`슬롯 ${slot+1} 내보내기 완료`);
+  } catch (e) {
+    showToast('내보내기 실패: ' + e.message);
+  }
+}
+
+// JSON 파일에서 저장 데이터를 가져오기 (업로드)
+// onDone: 완료/취소 후 호출할 콜백 (화면 재렌더링 등) — 선택
+// hostModalId: 덮어쓰기 확인 시 잠시 숨길 모달 id — 선택
+function importSave(slot, onDone, hostModalId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) { if (onDone) onDone(); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('파일이 너무 큽니다 (5MB 초과). 세이브 파일이 아닐 수 있습니다.');
+      if (onDone) onDone();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      let data;
+      try {
+        data = JSON.parse(ev.target.result);
+      } catch (err) {
+        showToast('JSON 파일이 아닙니다.');
+        if (onDone) onDone();
+        return;
+      }
+      if (!data || typeof data !== 'object' || !data.state || typeof data.state !== 'object') {
+        showToast('유효한 세이브 파일이 아닙니다.');
+        if (onDone) onDone();
+        return;
+      }
+      const from = data.version || 0;
+      if (from > GAME_VERSION) {
+        showToast('이 세이브는 현재 게임보다 최신 버전이라 가져올 수 없습니다.');
+        if (onDone) onDone();
+        return;
+      }
+      const existing = getSaveInfo(slot);
+      const doImport = () => {
+        localStorage.setItem(SAVE_KEY_PREFIX + slot, JSON.stringify(data));
+        showToast(`슬롯 ${slot+1}에 가져오기 완료`);
+        if (onDone) onDone();
+      };
+      if (existing) {
+        const hostModal = hostModalId ? document.getElementById(hostModalId) : null;
+        if (hostModal) hostModal.style.display = 'none';
+        gameConfirm(
+          `슬롯 ${slot+1}에 이미 저장이 있습니다. 덮어쓰시겠습니까?`,
+          () => {
+            doImport();
+            if (hostModal) hostModal.style.display = 'flex';
+          },
+          () => {
+            if (hostModal) hostModal.style.display = 'flex';
+            if (onDone) onDone();
+          }
+        );
+      } else {
+        doImport();
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  };
+  input.click();
 }
 
 function formatSaveDate(isoStr) {
