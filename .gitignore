@@ -9,3 +9,9 @@ node_modules/
 package.json
 package-lock.json
 *.png
+
+# Tauri 빌드 산출물
+/dist/
+/src-tauri/target/
+/src-tauri/gen/
+_icon_source.png
