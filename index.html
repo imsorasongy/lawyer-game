@@ -2982,6 +2982,7 @@ function confirmOpeningCreate() {
   G.mbti = mbti;
   initStats();
   applyMBTIBonus(mbti);
+  seedInitialSNSPost();
 
   // 오프닝 화면 페이드아웃 (2초)
   const screen = document.getElementById('opening-screen');
@@ -3030,6 +3031,7 @@ function confirmName() {
   G.mbti = mbti;
   initStats();
   applyMBTIBonus(mbti);
+  seedInitialSNSPost();
   document.getElementById('name-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'block';
   document.getElementById('room-char-img').src = G.gender === 'male' ? '남주인공.webp' : '여주인공.webp';
@@ -4896,6 +4898,26 @@ function addDiary(icon, text, day) {
   const item = { icon: icon || '📝', text: String(text) };
   if (day != null && day > 0) item.day = day;
   entry.entries.push(item);
+}
+
+// 신규 게임 시작 시 SNS에 첫 게시물 (2029.12.31자)
+function seedInitialSNSPost() {
+  if (!G.diary) G.diary = [];
+  // year=0 → openDiaryModal에서 2029년으로 표시됨
+  let entry = G.diary.find(d => d.year === 0 && d.month === 12);
+  if (!entry) {
+    entry = { year: 0, month: 12, entries: [] };
+    G.diary.push(entry);
+  }
+  entry.entries.push({
+    day: 31,
+    icon: '🎊',
+    text: pickDiaryText([
+      `내일부터 ${G.firmName||'새 로펌'} 첫 근무 🎉 내 변호사 라이프 시작! #신입변호사 #내일첫출근 #설렘반긴장반`,
+      `드디어 내일이면 ${G.firmName||'새 로펌'} 출근 😮‍💨 변호사 라이프 스타트 #첫출근디데이 #변호사시작`,
+      `${G.firmName||'새 로펌'} 입사 하루 전 ✨ 양복 다려놓고 서류 챙기고... 떨린다 #첫출근준비 #변호사라이프`,
+    ]),
+  });
 }
 
 // 변형 중 랜덤 선택 (일기 문체 다양성)
