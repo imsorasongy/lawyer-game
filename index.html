@@ -1424,6 +1424,8 @@ const G = {
   _userSNSLastMonth: -1,
   // 가족 이벤트 플래그 (v8)
   spouseEvents: {},
+  // 계절·명절 이벤트 플래그 (v9) — 'YYYY-id' 형태
+  seasonalEvents: {},
 };
 
 const STATUS_NAMES = {
@@ -2421,14 +2423,35 @@ function getActionEvents(actionId) {
         { id:'unexpectedCase5', prob:0.02,
           condition:()=>canGetCase,
           bg:'배경/공익활동.webp', face:'캐릭터얼굴/이희선.webp',
-          dialogues: [
-            {speaker:'이희선', text:'{name} 변호사님, 제가 돕고 있는 분이 법률 도움이 절실한데요... 혹시 사건을 맡아주실 수 있나요?'}
-          ],
-          choices:[
-            {text:'수임하겠습니다', effects:{sales:1}, special:'addCaseHeesen'},
-            {text:'안 하겠습니다', effects:{sociability:-2,morality:-2}},
-            {text:'아는 변호사를 소개해드릴게요', effects:{sociability:1}}
-          ]
+          get dialogues() {
+            ensureRomance();
+            const isWithHer = G.romance && G.romance.dating === 'heesun';
+            const isMarriedToHer = isWithHer && G.isMarried;
+            if (isMarriedToHer) {
+              return [{speaker:'이희선', text:'여보, 내가 돕는 분 중에 법률 문제로 많이 곤란한 분이 있어. 맡아줄 수 있을까?'}];
+            }
+            if (isWithHer) {
+              const callName = `${G.name}${_hasJong(G.name)?'아':'야'}`;
+              return [{speaker:'이희선', text:`${callName}, 내가 지금 돕고 있는 분이 법률 도움이 급한데... 사건 좀 맡아줄 수 있어?`}];
+            }
+            return [{speaker:'이희선', text:'{name} 변호사님, 제가 돕고 있는 분이 법률 도움이 절실한데요... 혹시 사건을 맡아주실 수 있나요?'}];
+          },
+          get choices() {
+            ensureRomance();
+            const isWithHer = G.romance && G.romance.dating === 'heesun';
+            if (isWithHer) {
+              return [
+                {text:'그래, 맡아볼게', effects:{sales:1}, special:'addCaseHeesen'},
+                {text:'미안, 이번엔 어려워', effects:{sociability:-2,morality:-2}},
+                {text:'내가 아는 변호사 소개해줄게', effects:{sociability:1}}
+              ];
+            }
+            return [
+              {text:'수임하겠습니다', effects:{sales:1}, special:'addCaseHeesen'},
+              {text:'안 하겠습니다', effects:{sociability:-2,morality:-2}},
+              {text:'아는 변호사를 소개해드릴게요', effects:{sociability:1}}
+            ];
+          }
         }
       ];
     case 'studyGroup':
@@ -3415,16 +3438,29 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
     mc.wrongCount = (mc.wrongCount || 0) + 1;
     if (mc.wrongCount >= 3) {
       mc.failed = true; mc.active = false;
+      const verdictText = (subNum === 5)
+        ? '판결을 선고합니다. 피고인 정수빈에게 징역 3년형을 선고한다.'
+        : (subNum === 3)
+          ? (phase === 0 ? '판결을 선고합니다. 원고의 청구를 인용한다.' : '판결을 선고합니다. 반소원고의 청구를 기각한다.')
+          : '판결을 선고합니다. 원고의 청구를 기각한다.';
       showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
-        showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 원고의 청구를 기각한다.'}, () => {
+        showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:verdictText}, () => {
           showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 증거가 부족했다. 실패했어.)'}, () => {
             showToast(`서브스토리 사건${subNum} 패소...`);
-            const _cn = {1:'대여금',2:'손해배상'}[subNum] || '';
-            addDiary('⚖', pickDiaryText([
-              `${_cn} 사건 졌다 😩 증거 더 챙겼어야 했는데 #패소 #반성중`,
-              `패소... 의뢰인분께 죄송한 마음 😔 #패소 #오늘은이만`,
-              `${_cn} 패소. 오늘은 그냥 자야겠다 #패소 #멘탈관리`,
-            ]), _currentTrialDay);
+            const _cn = {1:'대여금',2:'손해배상',5:'보이스피싱'}[subNum] || '';
+            if (subNum === 5) {
+              addDiary('⚖', pickDiaryText([
+                `보이스피싱 사건 졌다... 정수빈씨가 징역형을 받았다 😩 #패소 #죄책감`,
+                `패소. 정수빈씨는 억울하게 유죄를 받았다 😔 #패소 #형사사건`,
+                `보이스피싱 패소. 할머니가 울먹이시던 모습이 잊히지 않는다 💔 #패소`,
+              ]), _currentTrialDay);
+            } else {
+              addDiary('⚖', pickDiaryText([
+                `${_cn} 사건 졌다 😩 증거 더 챙겼어야 했는데 #패소 #반성중`,
+                `패소... 의뢰인분께 죄송한 마음 😔 #패소 #오늘은이만`,
+                `${_cn} 패소. 오늘은 그냥 자야겠다 #패소 #멘탈관리`,
+              ]), _currentTrialDay);
+            }
             playBGM('normal');
             finalCallback();
           });
@@ -3452,16 +3488,29 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
       selected = [];
       if (mc.wrongCount >= 3) {
         mc.failed = true; mc.active = false;
+        const verdictText = (subNum === 5)
+          ? '판결을 선고합니다. 피고인 정수빈에게 징역 3년형을 선고한다.'
+          : (subNum === 3)
+            ? (phase === 0 ? '판결을 선고합니다. 원고의 청구를 인용한다.' : '판결을 선고합니다. 반소원고의 청구를 기각한다.')
+            : '판결을 선고합니다. 원고의 청구를 기각한다.';
         showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
-          showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 원고의 청구를 기각한다.'}, () => {
+          showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:verdictText}, () => {
             showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 증거를 제대로 제시하지 못했다. 실패했어.)'}, () => {
               showToast(`서브스토리 사건${subNum} 패소...`);
-              const _cn = {1:'대여금',2:'손해배상'}[subNum] || '';
-              addDiary('⚖', pickDiaryText([
-                `${_cn} 사건 졌다 😩 증거 더 챙겼어야 했는데 #패소 #반성중`,
-                `패소... 의뢰인분께 죄송한 마음 😔 #패소 #오늘은이만`,
-                `${_cn} 패소. 오늘은 그냥 자야겠다 #패소 #멘탈관리`,
-              ]), _currentTrialDay);
+              const _cn = {1:'대여금',2:'손해배상',5:'보이스피싱'}[subNum] || '';
+              if (subNum === 5) {
+                addDiary('⚖', pickDiaryText([
+                  `보이스피싱 사건 졌다... 정수빈씨가 징역형을 받았다 😩 #패소 #죄책감`,
+                  `패소. 정수빈씨는 억울하게 유죄를 받았다 😔 #패소 #형사사건`,
+                  `보이스피싱 패소. 할머니가 울먹이시던 모습이 잊히지 않는다 💔 #패소`,
+                ]), _currentTrialDay);
+              } else {
+                addDiary('⚖', pickDiaryText([
+                  `${_cn} 사건 졌다 😩 증거 더 챙겼어야 했는데 #패소 #반성중`,
+                  `패소... 의뢰인분께 죄송한 마음 😔 #패소 #오늘은이만`,
+                  `${_cn} 패소. 오늘은 그냥 자야겠다 #패소 #멘탈관리`,
+                ]), _currentTrialDay);
+              }
               playBGM('normal');
               finalCallback();
             });
@@ -3885,7 +3934,7 @@ function applySc3Choice(idx, isCorrect) {
     if (mc.wrongCount >= 3) {
       mc.failed = true; mc.active = false;
       showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
-        showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 원고의 청구를 인용한다.'}, () => {
+        showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 반소원고의 청구를 기각한다.'}, () => {
           showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 제대로 대응하지 못했다. 실패했어.)'}, () => {
             showToast('서브스토리 사건3 패소...');
             addDiary('⚖', pickDiaryText([
@@ -5478,6 +5527,15 @@ function applyChildChoice(kind, choice, childKey) {
   if (cb) cb();
 }
 
+// 배우자 깜짝 선물 이벤트 — 주인공 응답 → 선택지 적용 단계
+function _showSpouseGiftReply() {
+  const sname = window._spouseGiftName || '배우자';
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = `${sname}, 고마워, 이런 선물까지. 기운낼게.`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applySpouseChoice('gift','_')">▼ 계속</button>`;
+}
+
 // 배우자 이벤트 표시
 function showSpouseEvent(kind, spouse, onDone) {
   const modal = document.getElementById('status-event-modal');
@@ -5497,8 +5555,11 @@ function showSpouseEvent(kind, spouse, onDone) {
       <button class="event-choice" onclick="applySpouseChoice('fight','counter')"><span class="choice-label">🔥</span> 맞받아침</button>`;
   } else if (kind === 'gift') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
-    document.getElementById('se-text').textContent = `그냥, 고마워서. (작은 선물을 내민다)`;
-    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applySpouseChoice('gift','_')">너무 고맙다...</button>`;
+    document.getElementById('se-text').textContent = `그냥, 고마워서.`;
+    // 배우자 → 플레이어 응답 → applySpouseChoice 순서로 대화
+    window._spouseGiftFace = spouse.face;
+    window._spouseGiftName = spouse.name;
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="_showSpouseGiftReply()">▼ 계속</button>`;
   } else if (kind === 'worry') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-text').textContent = `요즘 너무 무리하는 거 같아. 몸 상해.`;
@@ -5610,6 +5671,498 @@ function finishChildCharm() {
   const cb = window._childCharmOnDone;
   window._childCharmOnDone = null;
   if (cb) cb();
+}
+
+// ==================== 계절·명절 이벤트 ====================
+function _seasonalKey(id) { return `${G.year}-${id}`; }
+
+function checkSeasonalEvents(onDone) {
+  if (!G.seasonalEvents) G.seasonalEvents = {};
+  const k = _seasonalKey;
+  // 계절·명절 이벤트는 대부분 실제 날짜에 continueExecution 씬 삽입으로 발동
+  //  - 설날 1/1: closeSummary → doStartExecution
+  //  - 봄 꽃구경 4/5, 어린이날 5/5, 제헌절 7/17, 피서 8/1, 단풍 10/25, 크리스마스 12/25 → continueExecution
+  // 월말에는 연말 회고만 남김
+  if (G.month === 12 && !G.seasonalEvents[k('yearend')]) {
+    G.seasonalEvents[k('yearend')] = true;
+    window._seasonalOnDone = onDone;
+    showYearEndReflect(); return true;
+  }
+  return false;
+}
+
+function _seasonalSetupModal(bg) {
+  const modal = document.getElementById('status-event-modal');
+  modal.style.display = 'flex';
+  resetModalStyle(true);
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg(bg)}')`;
+  document.getElementById('se-face').style.display = 'block';
+  document.getElementById('se-dialog').classList.remove('no-face');
+}
+
+function _seasonalFinish(onDone) {
+  document.getElementById('status-event-modal').style.display = 'none';
+  const cb = window._seasonalOnDone;
+  window._seasonalOnDone = null;
+  if (cb) cb();
+  else if (onDone) onDone();
+}
+
+// 선택 후 짧은 대화 재생 → _seasonalFinish
+// lines: [{speaker, face?, text}]
+function _seasonalEpilogue(lines) {
+  if (!lines || lines.length === 0) { _seasonalFinish(); return; }
+  let i = 0;
+  function step() {
+    if (i >= lines.length) { _seasonalFinish(); return; }
+    const ln = lines[i++];
+    if (ln.face) document.getElementById('se-face-img').src = ln.face;
+    document.getElementById('se-speaker').textContent = ln.speaker || '';
+    document.getElementById('se-text').textContent = ln.text;
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="window._epiStep()">▼ 계속</button>`;
+  }
+  window._epiStep = step;
+  step();
+}
+
+// 연인/배우자 정보 가져오기 (결혼/연애 상태 모두 커버)
+function _getPartnerInfo() {
+  ensureRomance();
+  if (!G.romance || !G.romance.dating) return null;
+  const t = getRomanceTargets().find(x => x.id === G.romance.dating);
+  if (!t) return null;
+  return { id: t.id, name: t.name, face: t.face };
+}
+
+// 🎑 설날
+function showNewYearEvent(onDone) {
+  window._seasonalOnDone = onDone;
+  // 자녀 분기는 2살 이상 자녀가 있을 때만 (돌도 안 된 아기는 설빔·세배 연출이 부자연스러움)
+  const eligibleChild = (G.children || []).find(c => getChildAge(c) >= 2);
+  const spouse = getSpouseInfo();
+  const hasLover = G.romance && G.romance.dating;
+  if (eligibleChild) {
+    const child = eligibleChild;
+    const age = getChildAge(child);
+    _seasonalSetupModal('배경/방.webp');
+    document.getElementById('se-face-img').src = getChildFace(age);
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = `${child.name}${_hasJong(child.name)?'이':'가'} 설빔을 입고 싶다고 졸라댄다. 세배상도 차려야 할까.`;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applyNewYearChoice('big_family')"><span class="choice-label">🎎</span> 성대한 세배상 + 세뱃돈</button>
+      <button class="event-choice" onclick="applyNewYearChoice('small_family')"><span class="choice-label">🍲</span> 조촐한 새해</button>`;
+  } else if (hasLover) {
+    _seasonalSetupModal('배경/방.webp');
+    const targets = getRomanceTargets();
+    const t = targets.find(x => x.id === G.romance.dating);
+    document.getElementById('se-face-img').src = (t ? t.face : getPlayerFace());
+    document.getElementById('se-speaker').textContent = (t ? t.name : '연인');
+    document.getElementById('se-text').textContent = `${G.name}, 함께 맞는 새해야. 잘 부탁해.`;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applyNewYearChoice('together_lover')"><span class="choice-label">🎊</span> 같이 보내기</button>
+      <button class="event-choice" onclick="applyNewYearChoice('short_lover')"><span class="choice-label">💼</span> 업무 때문에 짧게</button>`;
+  } else {
+    _seasonalSetupModal('배경/방.webp');
+    document.getElementById('se-face-img').src = getPlayerFace();
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = '조용한 새해다. 올해는 어떤 해가 될까.';
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applyNewYearChoice('alone')">올해도 잘 해보자.</button>`;
+  }
+}
+function applyNewYearChoice(choice) {
+  // 설날 SNS 기록은 1월 1일자로
+  const _ld = 1;
+  const partner = _getPartnerInfo();
+  // 2살 이상 자녀만 (설빔·세배 연출 대상과 일치)
+  const child = (G.children || []).find(c => getChildAge(c) >= 2) || null;
+  const childFace = child ? getChildFace(getChildAge(child)) : null;
+  let epilogue = [];
+  if (choice === 'big_family') {
+    G.funds -= 500000;
+    if (G.isMarried) spouseAffectionDelta(10);
+    updateBurnout(-5);
+    addDiary('🎑', `세배상 차리느라 허리 아픔 ㅋㅋ 😂 #설날 #아이`, _ld);
+    if (child) {
+      epilogue = [
+        {speaker: child.name, face: childFace, text: '세배~! 새해 복 많이 받으세요!'},
+        {speaker: G.name, face: getPlayerFace(), text: '우리 가족 모두 건강한 한 해 되자.'}
+      ];
+    }
+  } else if (choice === 'small_family') {
+    G.funds -= 100000;
+    if (G.isMarried) spouseAffectionDelta(3);
+    addDiary('🎑', `새해 복 많이 받으세요 🎑 조촐한 가족 식사 #설날`, _ld);
+    if (child) {
+      epilogue = [
+        {speaker: child.name, face: childFace, text: '엄마아빠 새해 복 많이 받으세요!'},
+        {speaker: G.name, face: getPlayerFace(), text: '너도 건강하게 한 해 잘 보내자.'}
+      ];
+    }
+  } else if (choice === 'together_lover') {
+    spouseAffectionDelta(10);
+    updateBurnout(-5);
+    addDiary('🎑', `연인이랑 새해 ❤️ 따뜻한 하루 #새해 #데이트`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: `${G.name}이랑 새해 맞으니까 든든해.`},
+        {speaker: G.name, face: getPlayerFace(), text: '나도. 올해도 잘 부탁해.'}
+      ];
+    }
+  } else if (choice === 'short_lover') {
+    spouseAffectionDelta(-10);
+    addDiary('💼', `새해 첫날부터 업무... 미안하지만 어쩔 수 없다 #새해 #워커홀릭`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '새해 첫날부터... 몸 상하지 않게 해.'},
+        {speaker: G.name, face: getPlayerFace(), text: '미안해. 저녁에 꼭 시간 낼게.'}
+      ];
+    }
+  } else if (choice === 'alone') {
+    G.stats.mental = Math.min(999, G.stats.mental + 5);
+    addDiary('🎑', `새해 복 많이 받으세요 🎑 혼자라도 다짐은 단단히 #새해 #혼자`, _ld);
+  }
+  _seasonalEpilogue(epilogue);
+}
+
+// 🌸 봄 꽃구경
+function showSpringEvent(onDone) {
+  window._seasonalOnDone = onDone;
+  const hasLover = G.romance && G.romance.dating;
+  _seasonalSetupModal('배경/봄.jpg');
+  if (hasLover) {
+    const targets = getRomanceTargets();
+    const t = targets.find(x => x.id === G.romance.dating);
+    document.getElementById('se-face-img').src = (t ? t.face : getPlayerFace());
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = `${t ? t.name : '연인'}${t && _hasJong(t.name)?'과':'와'} 꽃놀이 약속을 잡았다.`;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applySpringChoice('day_lover')"><span class="choice-label">🌸</span> 하루 비워서 가기</button>
+      <button class="event-choice" onclick="applySpringChoice('short_lover')"><span class="choice-label">⏰</span> 짧게 다녀오기</button>`;
+  } else {
+    document.getElementById('se-face-img').src = getPlayerFace();
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = '창밖의 꽃이 유난히 예쁘다. 혼자라도 잠깐 나가볼까.';
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applySpringChoice('alone')">잠깐이라도 걷자.</button>`;
+  }
+}
+function applySpringChoice(choice) {
+  // 봄 꽃구경 SNS 기록은 4월 5일자로
+  const _ld = 5;
+  const partner = _getPartnerInfo();
+  let epilogue = [];
+  if (choice === 'day_lover') {
+    spouseAffectionDelta(10);
+    updateBurnout(-10);
+    G.stats.stress = Math.max(0, G.stats.stress - 110);
+    addDiary('🌸', `꽃놀이 🌸 이번 봄은 유난히 예쁘다 #봄 #꽃구경`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '와... 꽃 진짜 예쁘다. 사진 많이 찍자.'},
+        {speaker: G.name, face: getPlayerFace(), text: '사진보다 네가 더 예쁜걸.'}
+      ];
+    }
+  } else if (choice === 'short_lover') {
+    spouseAffectionDelta(3);
+    G.stats.stress = Math.max(0, G.stats.stress - 5);
+    addDiary('🌸', `짧게나마 봄나들이 🌸 역시 봄은 좋다 #봄`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '짧아도 같이 봐서 좋았어.'},
+        {speaker: G.name, face: getPlayerFace(), text: '다음엔 좀 더 시간 빼볼게.'}
+      ];
+    }
+  } else {
+    G.stats.stress = Math.max(0, G.stats.stress - 10);
+    G.stats.mental = Math.min(999, G.stats.mental + 5);
+    addDiary('🌸', `혼자 꽃 보러 다녀왔다 🌸 묘하게 위로받는 기분 #봄 #산책`, _ld);
+  }
+  _seasonalEpilogue(epilogue);
+}
+
+// 🎈 어린이날
+function showChildrensDayEvent(onDone, childIdx) {
+  window._seasonalOnDone = onDone;
+  const idx = (typeof childIdx === 'number' && G.children[childIdx]) ? childIdx : 0;
+  const child = G.children[idx];
+  const age = getChildAge(child);
+  _seasonalSetupModal('배경/방.webp');
+  document.getElementById('se-face-img').src = getChildFace(age);
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = `${child.name} 어린이날. 어떻게 보낼까?`;
+  document.getElementById('se-choices').innerHTML = `
+    <button class="event-choice" onclick="applyChildrensDayChoice('park','${child.name}')"><span class="choice-label">🎢</span> 놀이공원</button>
+    <button class="event-choice" onclick="applyChildrensDayChoice('home','${child.name}')"><span class="choice-label">🎁</span> 집에서 선물</button>
+    <button class="event-choice" onclick="applyChildrensDayChoice('skip','${child.name}')"><span class="choice-label">💼</span> 일 때문에 못 챙김</button>`;
+}
+function applyChildrensDayChoice(choice, cname) {
+  // 어린이날 SNS 기록은 5월 5일자로
+  const _ld = 5;
+  const child = (G.children || []).find(c => c.name === cname) || (G.children && G.children[0]);
+  const childFace = child ? getChildFace(getChildAge(child)) : null;
+  const parent = G.gender === 'male' ? '아빠' : '엄마';
+  let epilogue = [];
+  if (choice === 'park') {
+    G.funds -= 300000;
+    updateBurnout(-10);
+    G.stats.stress = Math.max(0, G.stats.stress - 10);
+    if (G.isMarried) spouseAffectionDelta(10);
+    addDiary('🎢', `${cname}${_hasJong(cname)?'이':'가'} 놀이공원에서 신남! 🎢 오늘 하루 행복 #어린이날 #가족`, _ld);
+    epilogue = [
+      {speaker: cname, face: childFace, text: `${parent}, 오늘 진짜 재밌었어!`},
+      {speaker: G.name, face: getPlayerFace(), text: '그래, 내년에도 같이 오자.'}
+    ];
+  } else if (choice === 'home') {
+    G.funds -= 100000;
+    if (G.isMarried) spouseAffectionDelta(5);
+    addDiary('🎁', `${cname} 선물 🎁 좋아하는 거 보니 뿌듯 #어린이날`, _ld);
+    epilogue = [
+      {speaker: cname, face: childFace, text: '우와, 이거 갖고 싶었던 거야! 어떻게 알았어?'},
+      {speaker: G.name, face: getPlayerFace(), text: '너 좋아하는 거라면 다 알지.'}
+    ];
+  } else {
+    if (G.isMarried) spouseAffectionDelta(-15);
+    G.stats.stress = Math.min(999, G.stats.stress + 10);
+    addDiary('😔', `어린이날인데 일 때문에 ${cname} 못 챙겼다... 미안 #어린이날 #미안`, _ld);
+    epilogue = [
+      {speaker: cname, face: childFace, text: `${parent}... 같이 놀고 싶었는데.`},
+      {speaker: G.name, face: getPlayerFace(), text: '미안해... 주말에 꼭 시간 낼게.'}
+    ];
+  }
+  _seasonalEpilogue(epilogue);
+}
+
+// ⚖ 제헌절
+function showConstitutionDayEvent(onDone) {
+  window._seasonalOnDone = onDone;
+  _seasonalSetupModal('배경/재판.webp');
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-speaker').textContent = G.name;
+  let text = '오늘은 제헌절. 헌법 제정 기념일이다.\n변호사로서 한 번쯤은 돌아보게 되는 날.';
+  if ((G.stats.morality || 0) >= 700) {
+    text += '\n법이 약자의 편에 서도록, 내가 할 일을 해야겠다.';
+  }
+  document.getElementById('se-text').textContent = text;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applyConstitutionDay()">헌법 정신을 새긴다.</button>`;
+}
+function applyConstitutionDay() {
+  // 제헌절 SNS 기록은 7월 17일자로
+  const _ld = 17;
+  G.stats.mental = Math.min(999, G.stats.mental + 1);
+  G.stats.reputation = Math.min(999, G.stats.reputation + 1);
+  addDiary('⚖', `제헌절 ⚖ 헌법 정신을 다시 새긴다 #제헌절 #법조인`, _ld);
+  _seasonalFinish();
+}
+
+// 🏖 한여름 피서
+function showSummerEvent(onDone) {
+  window._seasonalOnDone = onDone;
+  const hasLoverOrChild = (G.romance && G.romance.dating) || (G.children && G.children.length > 0);
+  _seasonalSetupModal('배경/여름.jpg');
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-speaker').textContent = G.name;
+  if (hasLoverOrChild) {
+    document.getElementById('se-text').textContent = '더위에 지쳐 휴가 생각이 간절해진다.';
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applySummerChoice('plan')"><span class="choice-label">🏖</span> 가족과 짧은 휴가 계획</button>
+      <button class="event-choice" onclick="applySummerChoice('work')"><span class="choice-label">💼</span> 일에 집중</button>`;
+  } else {
+    document.getElementById('se-text').textContent = '여름이 너무 덥다. 퇴근길에 에어컨 빵빵한 카페에 앉았다.';
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applySummerChoice('alone')">잠깐 쉬자.</button>`;
+  }
+}
+function applySummerChoice(choice) {
+  // 한여름 피서 SNS 기록은 8월 1일자로
+  const _ld = 1;
+  const partner = _getPartnerInfo();
+  const child = (G.children && G.children[0]) || null;
+  const childFace = child ? getChildFace(getChildAge(child)) : null;
+  let epilogue = [];
+  if (choice === 'plan') {
+    G.funds -= 500000;
+    if (G.isMarried) spouseAffectionDelta(10);
+    updateBurnout(-10);
+    addDiary('🏖', `가족이랑 짧게 휴가 🏖 바다 냄새 좋다 #여름 #휴가`, _ld);
+    if (child) {
+      epilogue = [
+        {speaker: child.name, face: childFace, text: '바다다! 우와~ 진짜 오랜만이다!'},
+        {speaker: G.name, face: getPlayerFace(), text: '이번 여름은 잘 쉬다 가자.'}
+      ];
+    } else if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '역시 여름엔 바다지. 이렇게 쉬어야 사람이 산다.'},
+        {speaker: G.name, face: getPlayerFace(), text: '나도 그래. 덕분에 숨통 트인다.'}
+      ];
+    }
+  } else if (choice === 'work') {
+    G.stats.stress = Math.min(999, G.stats.stress + 5);
+    addDiary('💼', `다 젖혀두고 일만 했다 😮‍💨 #여름 #워커홀릭`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '이번 여름도 일이야? 좀 쉬어가면서 해.'},
+        {speaker: G.name, face: getPlayerFace(), text: '미안... 이번만 좀 봐줘.'}
+      ];
+    }
+  } else {
+    G.stats.stress = Math.max(0, G.stats.stress - 5);
+    addDiary('🏖', `여름 휴가 생각 🏖 에어컨이 최고 #여름`, _ld);
+  }
+  _seasonalEpilogue(epilogue);
+}
+
+// 🍂 단풍
+function showAutumnEvent(onDone) {
+  window._seasonalOnDone = onDone;
+  const hasLover = G.romance && G.romance.dating;
+  _seasonalSetupModal('배경/가을.jpg');
+  if (hasLover) {
+    const targets = getRomanceTargets();
+    const t = targets.find(x => x.id === G.romance.dating);
+    document.getElementById('se-face-img').src = (t ? t.face : getPlayerFace());
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = `${t ? t.name : '연인'}${t && _hasJong(t.name)?'과':'와'} 단풍 구경 약속을 잡았다.`;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applyAutumnChoice('hike')"><span class="choice-label">🍁</span> 산행</button>
+      <button class="event-choice" onclick="applyAutumnChoice('park')"><span class="choice-label">☕</span> 가까운 공원만</button>`;
+  } else {
+    document.getElementById('se-face-img').src = getPlayerFace();
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = '거리의 단풍이 유난히 곱다.';
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applyAutumnChoice('alone')">걷자.</button>`;
+  }
+}
+function applyAutumnChoice(choice) {
+  // 단풍 SNS 기록은 10월 25일자로
+  const _ld = 25;
+  const partner = _getPartnerInfo();
+  let epilogue = [];
+  if (choice === 'hike') {
+    G.stats.fatigue = Math.min(999, G.stats.fatigue + 10);
+    spouseAffectionDelta(10);
+    updateBurnout(-10);
+    addDiary('🍁', `단풍 산행 🍁 힘들었지만 뷰 미침 #가을 #단풍`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '정상에서 내려다보는 단풍 진짜 장관이다.'},
+        {speaker: G.name, face: getPlayerFace(), text: '힘들게 올라온 보람이 있네.'}
+      ];
+    }
+  } else if (choice === 'park') {
+    spouseAffectionDelta(5);
+    G.stats.stress = Math.max(0, G.stats.stress - 5);
+    addDiary('☕', `공원 산책 ☕ 커피 한 잔이랑 단풍 🍂 #가을`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '커피 한 잔에 단풍 보기 딱이다.'},
+        {speaker: G.name, face: getPlayerFace(), text: '가끔은 이런 여유도 필요하지.'}
+      ];
+    }
+  } else {
+    G.stats.stress = Math.max(0, G.stats.stress - 5);
+    G.stats.mental = Math.min(999, G.stats.mental + 3);
+    addDiary('🍂', `단풍이 너무 예쁘다 🍂 이 맛에 가을이지 #단풍 #가을`, _ld);
+  }
+  _seasonalEpilogue(epilogue);
+}
+
+// 🎄 크리스마스 + 연말 (2스테이지)
+function showYearEndEvent(onDone) {
+  window._seasonalOnDone = onDone;
+  const hasLover = G.romance && G.romance.dating;
+  const hasChild = G.children && G.children.length > 0;
+  _seasonalSetupModal('배경/크리스마스.jpg');
+  // Stage 1: Christmas
+  if (hasLover) {
+    const targets = getRomanceTargets();
+    const t = targets.find(x => x.id === G.romance.dating);
+    document.getElementById('se-face-img').src = (t ? t.face : getPlayerFace());
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = `${t ? t.name : '연인'}${t && _hasJong(t.name)?'과':'와'} 크리스마스를 어떻게 보낼까?`;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applyXmasChoice('date')"><span class="choice-label">💐</span> 로맨틱 데이트 (고급 레스토랑)</button>
+      <button class="event-choice" onclick="applyXmasChoice('home')"><span class="choice-label">🏠</span> 집에서 조용히</button>`;
+  } else if (hasChild) {
+    const child = G.children[0];
+    const age = getChildAge(child);
+    document.getElementById('se-face-img').src = getChildFace(age);
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = `${child.name} 산타를 기다린다.`;
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applyXmasChoice('gift','${child.name}')"><span class="choice-label">🎁</span> 선물 챙기기</button>
+      <button class="event-choice" onclick="applyXmasChoice('forgot','${child.name}')"><span class="choice-label">😔</span> 바빠서 깜빡</button>`;
+  } else {
+    document.getElementById('se-face-img').src = getPlayerFace();
+    document.getElementById('se-speaker').textContent = G.name;
+    document.getElementById('se-text').textContent = '거리는 시끌벅적한데 나는 조용하다.';
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applyXmasChoice('alone')">혼자 조용히 보내자.</button>`;
+  }
+}
+function applyXmasChoice(choice, cname) {
+  // 크리스마스 SNS 기록은 12월 25일자로
+  const _ld = 25;
+  const partner = _getPartnerInfo();
+  const child = cname ? (G.children || []).find(c => c.name === cname) : null;
+  const childFace = child ? getChildFace(getChildAge(child)) : null;
+  let epilogue = [];
+  if (choice === 'date') {
+    G.funds -= 300000;
+    spouseAffectionDelta(15);
+    updateBurnout(-5);
+    addDiary('💐', `메리 크리스마스 🎄 오늘만큼은 로맨틱하게 #크리스마스 #데이트`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '오늘 레스토랑 진짜 좋았어. 분위기 너무 예뻤다.'},
+        {speaker: G.name, face: getPlayerFace(), text: '메리 크리스마스. 내년에도 이렇게 같이 보내자.'}
+      ];
+    }
+  } else if (choice === 'home') {
+    spouseAffectionDelta(5);
+    addDiary('🎄', `집에서 조용한 크리스마스 🎄 이것도 나쁘지 않다 #크리스마스`, _ld);
+    if (partner) {
+      epilogue = [
+        {speaker: partner.name, face: partner.face, text: '역시 집이 제일 편해. 오붓하고 좋다.'},
+        {speaker: G.name, face: getPlayerFace(), text: '내년에도 이렇게 옆에 있어줘.'}
+      ];
+    }
+  } else if (choice === 'gift') {
+    G.funds -= 200000;
+    updateBurnout(-5);
+    if (G.isMarried) spouseAffectionDelta(5);
+    addDiary('🎁', `${cname} 산타 선물 🎁 눈 반짝이는 모습이 최고 #크리스마스 #아이`, _ld);
+    if (child) {
+      epilogue = [
+        {speaker: cname, face: childFace, text: '우와! 산타 할아버지가 주신 거야?!'},
+        {speaker: G.name, face: getPlayerFace(), text: '그럼~ 착한 아이라서 주셨대.'}
+      ];
+    }
+  } else if (choice === 'forgot') {
+    if (G.isMarried) spouseAffectionDelta(-10);
+    addDiary('😔', `크리스마스 선물 깜빡... ${cname}한테 너무 미안 #크리스마스 #미안`, _ld);
+    if (child) {
+      epilogue = [
+        {speaker: cname, face: childFace, text: '산타 할아버지가 올해 바쁘셨나봐...'},
+        {speaker: G.name, face: getPlayerFace(), text: '미안... 내년엔 꼭 챙길게.'}
+      ];
+    }
+  } else {
+    G.stats.mental = Math.min(999, G.stats.mental + 2);
+    addDiary('🎄', `메리 크리스마스 🎄 혼자라도 나는 나 #크리스마스`, _ld);
+  }
+  _seasonalEpilogue(epilogue);
+}
+
+function showYearEndReflect() {
+  _seasonalSetupModal('배경/방.webp');
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = '벌써 한 해가 끝났다. 올해는 어떤 해였지...';
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applyYearEndReflect()">수고했어, 나 자신.</button>`;
+}
+function applyYearEndReflect() {
+  const _ld = new Date(2029 + G.year, G.month, 0).getDate();
+  G.stats.mental = Math.min(999, G.stats.mental + 3);
+  updateBurnout(-3);
+  addDiary('🎊', `벌써 한 해가 끝나네... 수고했어 나 자신 #연말 #회고`, _ld);
+  _seasonalFinish();
 }
 
 // 현재 진행 중인 슬롯의 day (일기 날짜용)
@@ -6252,7 +6805,26 @@ function renderNewsModal() {
     return `<button onclick="setNewsFilter('${c}')" style="padding:4px 10px;font-size:0.74rem;border-radius:4px;border:1px solid ${active?'#c9a84c':'#5a4a30'};background:${active?'#3a3020':'#1a1810'};color:${active?'#e8d5b5':'#a09080'};cursor:pointer;margin:0 2px">${catLabels[c]}</button>`;
   }).join('');
 
-  const filtered = _newsFilter === 'all' ? G.monthlyNews : G.monthlyNews.filter(n => n.category === _newsFilter);
+  // 주인공 탭: 모든 주인공 뉴스 기록 표시. 그 외: 가장 최근 배치만.
+  // (비주인공 뉴스는 월말에 한 달치만 남기고 정리되므로 그 연월을 기준으로 판별)
+  let filtered;
+  if (_newsFilter === 'player') {
+    filtered = G.monthlyNews.filter(n => n.category === 'player');
+  } else {
+    let latestY = 0, latestM = 0;
+    G.monthlyNews.forEach(n => {
+      if (n.category !== 'player' && (n.year > latestY || (n.year === latestY && n.month > latestM))) {
+        latestY = n.year; latestM = n.month;
+      }
+    });
+    // 월말 전이라 비주인공 뉴스가 없으면 현재 진행 중인 연월을 기준으로
+    if (latestY === 0) { latestY = G.year; latestM = G.month; }
+    if (_newsFilter === 'all') {
+      filtered = G.monthlyNews.filter(n => n.year === latestY && n.month === latestM);
+    } else {
+      filtered = G.monthlyNews.filter(n => n.category === _newsFilter && n.year === latestY && n.month === latestM);
+    }
+  }
   const sorted = [...filtered].sort((a,b) => (b.year - a.year) || (b.month - a.month));
 
   let bodyHtml;
@@ -9175,6 +9747,26 @@ function checkDateEvent(datingId, datingName, datingFace) {
     }
   }
 
+  // 0-1. 결혼 기념일 (100% 발생, 월 1회) — 랜덤 이벤트에 밀리지 않도록 상위에서 체크
+  ensureRomance();
+  if (G.marriageMonth > 0 && G.month === G.marriageMonth && G.isMarried && !G.anniversaryDone && G.year !== G.marriageYear) {
+    G.anniversaryDone = true;
+    const td = getDateTone('anniversary', datingId);
+    return {
+      id:'anniversary', bg:'배경/식당.webp', face:datingFace,
+      dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
+        {speaker:G.name, text:'우리 결혼한지 벌써 오래됐네.'},
+        {speaker:datingName, text:'그러게. 시간이 정말 빠르다.'},
+        {speaker:G.name, text:'앞으로도 잘 부탁해.'},
+        {speaker:datingName, text:'나야말로. 항상 고마워.'}
+      ],
+      autoResolve: false,
+      noChoice: true,
+      affDelta: 10,
+      stressDelta: -10
+    };
+  }
+
   // 1. 썸녀/썸남에 대한 질문 (5%) - 연인 외 호감도 80+ 이성이 있을 때
   const otherCrush = targets.find(t => t.id !== datingId && (G.romance.affection[t.id]||0) >= 80);
   if (otherCrush && Math.random() < 0.05) {
@@ -9378,26 +9970,6 @@ function checkDateEvent(datingId, datingName, datingFace) {
       ]
     };
   }
-  // 6. 기념일 이벤트 (결혼 기념일, 100% 발생, 월 1회)
-  ensureRomance();
-  if (G.marriageMonth > 0 && G.month === G.marriageMonth && G.isMarried && !G.anniversaryDone && G.year !== G.marriageYear) {
-    G.anniversaryDone = true;
-    const td = getDateTone('anniversary', datingId);
-    return {
-      id:'anniversary', bg:'배경/식당.webp', face:datingFace,
-      dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
-        {speaker:G.name, text:'우리 결혼한지 벌써 오래됐네.'},
-        {speaker:datingName, text:'그러게. 시간이 정말 빠르다.'},
-        {speaker:G.name, text:'앞으로도 잘 부탁해.'},
-        {speaker:datingName, text:'나야말로. 항상 고마워.'}
-      ],
-      autoResolve: false,
-      noChoice: true,
-      affDelta: 10,
-      stressDelta: -10
-    };
-  }
-
   // 7. 깜짝 선물 (배우자 호감도 100, 10% 확률)
   if (G.isMarried && (G.romance.affection[datingId]||0) >= 100 && Math.random() < 0.10) {
     const unownedItems = SHOP_ITEMS.filter(i => {
@@ -11814,6 +12386,16 @@ function doStartExecution() {
   // 지난달 스케줄 패턴 저장 (자동배치 '지난달 복사'용) — 휴식 채운 후 저장
   const _pat = extractSchedulePattern();
   G._lastSchedulePattern = { buckets: _pat.buckets, status: G.status, firmId: G.firmId };
+  // 설날 이벤트 (1월 스케줄 진행 시작 시 바로 발동)
+  if (G.month === 1) {
+    if (!G.seasonalEvents) G.seasonalEvents = {};
+    const nyKey = `${G.year}-newyear`;
+    if (!G.seasonalEvents[nyKey]) {
+      G.seasonalEvents[nyKey] = true;
+      showNewYearEvent(() => continueExecution());
+      return;
+    }
+  }
   continueExecution();
 }
 
@@ -11881,7 +12463,77 @@ function continueExecution() {
   let monthInsertedEvents = {}; // 한 달 내 이벤트 중복 방지
   G.schedule.forEach(ds=>{ds.slots.forEach(slot=>{allSlots.push({day:ds.day,dow:ds.dow,isWeekend:ds.isWeekend,...slot});});});
 
+  let _childrensDayInserted = false;
+  let _christmasInserted = false;
+  let _springInserted = false;
+  let _constitutionInserted = false;
+  let _summerInserted = false;
+  let _autumnInserted = false;
+  const _ensureSeasonal = () => { if (!G.seasonalEvents) G.seasonalEvents = {}; };
   allSlots.forEach(slot => {
+    // 봄 꽃구경 (4월 5일)
+    if (!_springInserted && G.month === 4 && slot.day === 5) {
+      _ensureSeasonal();
+      const key = `${G.year}-spring`;
+      if (!G.seasonalEvents[key]) {
+        G.seasonalEvents[key] = true;
+        vnScenes.push({ type: 'spring' });
+      }
+      _springInserted = true;
+    }
+    // 어린이날 이벤트 (5월 5일 스케줄 시작 직전, 자녀 2세+ 1명 이상)
+    if (!_childrensDayInserted && G.month === 5 && slot.day === 5 && G.children && G.children.length > 0) {
+      _ensureSeasonal();
+      const cdKey = `${G.year}-childrenday`;
+      if (!G.seasonalEvents[cdKey]) {
+        const eligible = G.children.find(c => getChildAge(c) >= 2);
+        if (eligible) {
+          G.seasonalEvents[cdKey] = true;
+          vnScenes.push({ type: 'childrensDay', childIdx: G.children.indexOf(eligible) });
+        }
+      }
+      _childrensDayInserted = true;
+    }
+    // 제헌절 (7월 17일)
+    if (!_constitutionInserted && G.month === 7 && slot.day === 17) {
+      _ensureSeasonal();
+      const key = `${G.year}-constitution`;
+      if (!G.seasonalEvents[key]) {
+        G.seasonalEvents[key] = true;
+        vnScenes.push({ type: 'constitutionDay' });
+      }
+      _constitutionInserted = true;
+    }
+    // 한여름 피서 (8월 1일)
+    if (!_summerInserted && G.month === 8 && slot.day === 1) {
+      _ensureSeasonal();
+      const key = `${G.year}-summer`;
+      if (!G.seasonalEvents[key]) {
+        G.seasonalEvents[key] = true;
+        vnScenes.push({ type: 'summer' });
+      }
+      _summerInserted = true;
+    }
+    // 단풍 (10월 25일)
+    if (!_autumnInserted && G.month === 10 && slot.day === 25) {
+      _ensureSeasonal();
+      const key = `${G.year}-autumn`;
+      if (!G.seasonalEvents[key]) {
+        G.seasonalEvents[key] = true;
+        vnScenes.push({ type: 'autumn' });
+      }
+      _autumnInserted = true;
+    }
+    // 크리스마스 이벤트 (12월 25일 일과 종료 후 = 12/26 슬롯 시작 직전)
+    if (!_christmasInserted && G.month === 12 && slot.day === 26) {
+      _ensureSeasonal();
+      const xmasKey = `${G.year}-christmas`;
+      if (!G.seasonalEvents[xmasKey]) {
+        G.seasonalEvents[xmasKey] = true;
+        vnScenes.push({ type: 'christmas' });
+      }
+      _christmasInserted = true;
+    }
     sceneMilestone = null;
     const scene = buildScene(slot);
     if (scene) {
@@ -12658,6 +13310,42 @@ function showVNScene(idx) {
   // 자녀 재롱 이벤트
   if (scene.type === 'childCharm') {
     triggerChildCharmVN(scene.child, scene.age, () => showVNScene(idx + 1));
+    return;
+  }
+
+  // 어린이날 이벤트 (5월 5일 스케줄 시작 직전)
+  if (scene.type === 'childrensDay') {
+    showChildrensDayEvent(() => showVNScene(idx + 1), scene.childIdx);
+    return;
+  }
+
+  // 크리스마스 이벤트 (12월 25일 일과 종료 후 / 12월 26일 슬롯 시작 직전)
+  if (scene.type === 'christmas') {
+    showYearEndEvent(() => showVNScene(idx + 1));
+    return;
+  }
+
+  // 봄 꽃구경 (4/5)
+  if (scene.type === 'spring') {
+    showSpringEvent(() => showVNScene(idx + 1));
+    return;
+  }
+
+  // 제헌절 (7/17)
+  if (scene.type === 'constitutionDay') {
+    showConstitutionDayEvent(() => showVNScene(idx + 1));
+    return;
+  }
+
+  // 한여름 피서 (8/1)
+  if (scene.type === 'summer') {
+    showSummerEvent(() => showVNScene(idx + 1));
+    return;
+  }
+
+  // 단풍 (10/25)
+  if (scene.type === 'autumn') {
+    showAutumnEvent(() => showVNScene(idx + 1));
     return;
   }
 
@@ -13624,7 +14312,7 @@ function showBabyNamePrompt(spouseName, spouseFace) {
     G.children.push({name: babyName, birthYear: 2029 + G.year, birthMonth: G.month, events: {}});
     G.fixedExpense = calcFixedExpense();
     document.getElementById('status-event-modal').style.display = 'none';
-    showToast(babyName + '이(가) 태어났습니다!');
+    showToast(J(babyName, '이/가') + ' 태어났습니다!');
     const _lastDay = new Date(2029 + G.year, G.month, 0).getDate();
     addDiary('👶', pickDiaryText([
       `${babyName} 태어남 👶 처음 품에 안았을 때 세상 달라보임 #출산 #부모됨`,
@@ -13775,10 +14463,10 @@ function finishMonthFinal(){
       ]);
   }
   // 이번 달 월간 뉴스 생성 + 다음달용 효과 설정
-  // 지난 달 이전 뉴스는 제거 (이번 달에 트리거된 주인공 뉴스는 유지)
+  // 지난 달 이전 뉴스는 제거하되, 주인공 뉴스는 모든 기록 보존 (주인공 탭에서 과거 기록 열람)
   const newNews = generateMonthlyNews();
   if (!G.monthlyNews) G.monthlyNews = [];
-  G.monthlyNews = G.monthlyNews.filter(n => n.year === G.year && n.month === G.month);
+  G.monthlyNews = G.monthlyNews.filter(n => n.category === 'player' || (n.year === G.year && n.month === G.month));
   G.monthlyNews = G.monthlyNews.concat(newNews);
   applyNewsEffects(newNews);
   // 어쏘/직원 월간 처리
@@ -13851,9 +14539,10 @@ function finishMonthFinal(){
 
   document.getElementById('vn-screen').style.display='none';
   updateUI();
-  // 월말 이벤트 체인: 번아웃 → 슬럼프 → 가족 → 월간 정산
+  // 월말 이벤트 체인: 번아웃 → 슬럼프 → 가족 → 계절·명절 → 월간 정산
   const finalizeSummary = () => showMonthSummary(empReports);
-  const afterFamily = finalizeSummary;
+  const afterSeasonal = finalizeSummary;
+  const afterFamily = () => { if (checkSeasonalEvents(afterSeasonal)) return; afterSeasonal(); };
   const afterSlump = () => { if (checkFamilyEvents(afterFamily)) return; afterFamily(); };
   const afterBurnout = () => { if (checkSlumpEvent(afterSlump)) return; afterSlump(); };
   if (checkBurnoutThresholds(afterBurnout)) return;
@@ -16018,7 +16707,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 8;
+const GAME_VERSION = 9;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -16080,7 +16769,12 @@ const MIGRATIONS = {
     }
     return state;
   },
-  // 향후 업데이트: v9, v10 ... 형태로 추가
+  // v8 → v9 : 계절·명절 이벤트 플래그
+  9: function(state) {
+    if (!state.seasonalEvents || typeof state.seasonalEvents !== 'object') state.seasonalEvents = {};
+    return state;
+  },
+  // 향후 업데이트: v10, v11 ... 형태로 추가
 };
 
 function migrateSave(saveData) {
@@ -16510,6 +17204,7 @@ function showMainTrialEvent(caseNum, trialDay, callback) {
   if (!mc) { callback(); return; }
   window._currentTrialCaseNum = caseNum;
   _currentTrialDay = trialDay || null;
+  if (trialDay) mc.lastTrialDay = trialDay; // 재판(판결)일 기록 — 월말 SNS 포스팅 날짜용
   playBGM('trial');
   const phase = mc.trialPhase;
   mc.wrongCount = 0;
@@ -17695,7 +18390,7 @@ function processMainStoryMonthEnd(checkOffer) {
       if (mc.trialPhase >= 4 && !mc.cleared) {
         mc.cleared = true;
         mc.active = false;
-        const _mainLastDay = new Date(2029 + G.year, G.month, 0).getDate();
+        const _mainLastDay = mc.lastTrialDay || new Date(2029 + G.year, G.month, 0).getDate();
         if (idx === 0) {
           G.mainStoryFlag.case1_cleared = true;
           G.stats.reputation = Math.min(999, G.stats.reputation + 10);
@@ -17706,12 +18401,12 @@ function processMainStoryMonthEnd(checkOffer) {
             `그 사건 매듭 지음 🔥 한 고비 넘긴 기분 #승소 #해냈다`,
           ]), _mainLastDay);
           triggerPlayerNews('mainCase1',
-            `신예 변호사 ${G.name}, 세간 이목 집중 사건 승소`,
-            `법조계가 주목한 사건의 승소 판결. 업계에 신선한 바람이 분다.`,
+            `신예 변호사 ${G.name}, 성진그룹 비자금 사건 무죄 이끌어`,
+            `성진그룹 비자금 사건에서 피고인의 변호인으로 무죄 판결을 이끌어내 법조계 이목이 집중됐다.`,
             [
-              `{이름}({소속 기술})변호사가 지난달부터 계속된 ${MAIN_CASE_DESC[1]}에서 승소 판결을 이끌어냈다.`,
+              `{이름}({소속 기술})변호사가 성진그룹 비자금 사건에서 피고인의 변호인으로 무죄판결을 이끌어냈다.`,
               `{이름} 변호사는 {전문분야 기술}에 강점을 둔 신진 법조인으로, {승률 기술} 소유자다.`,
-              `{이름} 변호사는 "이 사건은 ${MAIN_CASE_DESC[1]} 이었다."며, "의뢰인의 신뢰에 보답하기 위해 최선을 다했을 뿐"이라고 밝혔다.`,
+              `{이름} 변호사는 "이 사건은 대기업이 그룹의 비리를 고발하려던 직원을 말살하려던 범죄를 막아낸 사건이었다."며, "의뢰인의 신뢰에 보답하기 위해 최선을 다했을 뿐"이라고 밝혔다.`,
               `법조계는 {가치관 톤} 신진 법조인의 등장에 주목하고 있다.`,
             ]);
         } else if (idx === 1) {
@@ -17724,12 +18419,12 @@ function processMainStoryMonthEnd(checkOffer) {
             `힘든 사건이었지만 해냄 🔥 내 이름 또 기사 오를 듯 #승소 #뿌듯`,
           ]), _mainLastDay);
           triggerPlayerNews('mainCase2',
-            `${G.name} 변호사, 또 하나의 대형 사건 해결`,
-            `연이은 굵직한 사건 승소로 법조계 주목을 받고 있다.`,
+            `${G.name} 변호사, 도라군 살인사건 무죄 판결 이끌어내`,
+            `도라군 살인사건에서 피고인 박정호의 무죄 판결을 얻어내 화제다.`,
             [
-              `{이름}({소속 기술})변호사가 ${MAIN_CASE_DESC[2]}에서 무죄 판결을 이끌어냈다.`,
+              `{이름}({소속 기술})변호사가 도라군 살인사건에서 피고인 박정호의 무죄판결을 얻어내 화제이다.`,
               `{이름} 변호사는 {전문분야 기술}에 강점을 두고 {승률 기술} 실력자로, 연이은 굵직한 사건 해결로 법조계 주목을 받고 있다.`,
-              `{이름} 변호사는 "이 사건은 ${MAIN_CASE_DESC[2]} 이었다."며, "의뢰인의 목소리에 귀 기울여 진실을 밝혀냈을 뿐"이라고 소감을 전했다.`,
+              `{이름} 변호사는 "이 사건은 누군가가 피해자를 살해한 후 피고인에게 누명을 씌우려던 사건이었다."며, "의뢰인의 목소리에 귀 기울여 진실을 밝혀냈을 뿐"이라고 소감을 전했다.`,
               `{가치관 톤} 태도가 의뢰인들 사이에 입소문을 타고 있다.`,
             ]);
         } else if (idx === 2) {
@@ -17742,12 +18437,12 @@ function processMainStoryMonthEnd(checkOffer) {
             `그 사건 이겼다 🔥 이 자리에 서 있는 게 꿈같음 #승소`,
           ]), _mainLastDay);
           triggerPlayerNews('mainCase3',
-            `${G.name} 변호사, 대형 분쟁 사건 종결`,
-            `사회적 파장이 컸던 사건이 마무리됐다.`,
+            `${G.name} 변호사, 도라군 개발사업 취소소송 승소`,
+            `도라군 개발사업승인처분 취소소송에서 승소판결을 얻어내 화제다.`,
             [
-              `{이름}({소속 기술})변호사가 ${MAIN_CASE_DESC[3]}에서 승소 판결을 이끌어냈다.`,
+              `{이름}({소속 기술})변호사가 도라군 개발사업승인처분 취소소송에서 승소판결을 얻어내 화제이다.`,
               `{이름} 변호사는 {전문분야 기술}의 내공과 {승률 기술} 기록을 앞세워 험난했던 행정 소송을 관철했다.`,
-              `{이름} 변호사는 "이 사건은 ${MAIN_CASE_DESC[3]} 이었다."며, "위법한 행정은 끝까지 바로잡아야 한다는 원칙을 지켰을 뿐"이라고 밝혔다.`,
+              `{이름} 변호사는 "이 사건은 전형적 권력형 비리사건이었다."며, "이태준 국장을 살해한 진범이 꼭 잡히기 바란다"는 말을 덧붙였다.`,
               `시민단체들은 "{가치관 톤} 변호인의 손에 결정적 사건이 매듭지어진 것"이라며 환영했다.`,
             ]);
         } else if (idx === 3) {
@@ -17760,12 +18455,12 @@ function processMainStoryMonthEnd(checkOffer) {
             `그 사건의 종착점 🏁 돌아보면 먼 길이었다 #대형승소 #완결`,
           ]), _mainLastDay);
           triggerPlayerNews('mainCase4',
-            `${G.name} 변호사, 법조계 새 역사 쓰다`,
-            `누구도 풀지 못했던 거대한 매듭이 드디어 풀렸다.`,
+            `${G.name} 변호사, 장현우 군수 살인사건 진범 밝혀내`,
+            `장현우 군수를 살해한 범인을 밝혀내 화제다.`,
             [
-              `{이름}({소속 기술})변호사가 ${MAIN_CASE_DESC[4]}에서 마지막 진실을 밝혀냈다.`,
+              `{이름}({소속 기술})변호사가 장현우 군수를 살해한 범인을 밝혀내 화제이다.`,
               `{이름} 변호사는 {경력 기술}과 {전문분야 기술}을 바탕으로 복잡하게 얽힌 진상을 풀어냈다.`,
-              `{이름} 변호사는 "이 사건은 ${MAIN_CASE_DESC[4]} 이었다."며, "의문이 남지 않도록 끝까지 밝혀내는 것이 법률가의 역할"이라고 강조했다.`,
+              `{이름} 변호사는 "이 사건은 대한민국 법조카르텔의 실체를 세상에 알려준 사건이었다."며, "의문이 남지 않도록 끝까지 밝혀내는 것이 법률가의 역할"이라고 강조했다.`,
               `법조계에서는 "한 시대를 상징하는 사건이 마침내 결판났다"는 반응이 나온다.`,
             ]);
         }
