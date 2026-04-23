@@ -1591,6 +1591,15 @@ const SPECIAL_TRAINING = {id:'specialTraining',name:'특별연수',cost:100000,e
 function randomColleagueFace() {
   return Math.random()<0.5 ? '캐릭터얼굴/동료남자어쏘.webp' : '캐릭터얼굴/동료여자어쏘.webp';
 }
+
+// Fisher-Yates 셔플 (in-place + 반환)
+function _shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 function randomPTFace() {
   return Math.random()<0.5 ? '캐릭터얼굴/PT남자강사.webp' : '캐릭터얼굴/PT여자강사.webp';
 }
@@ -3324,7 +3333,7 @@ function subCase2IntroEnd() {
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = '(증거 서류함에서 증거를 미리 읽어보고, 재판에 대비하자.)';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건2가 시작되었습니다. 증거함에서 증거를 확인하세요.');updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건2가 시작되었습니다. 증거함에서 증거를 확인하세요.');updateUI();">확인</button>`;
 }
 
 // --- 서브스토리 공통 실행 함수 ---
@@ -3404,15 +3413,17 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = evStep.prompt || '(어떤 증거를 제시할까?)';
 
+  // 증거 순서 셔플 — 발견 순서대로 클릭하면 정답이 되는 꼼수 차단
+  const shuffledEvidence = _shuffleArray([...allEvidence]);
   const needed = evStep.count || 1;
   let selected = [];
 
   function renderBtns() {
     let html = `<div style="font-size:0.75rem;color:#c9a84c;margin-bottom:6px">증거를 ${needed}개 선택하세요 (선택: ${selected.length}/${needed})</div>`;
-    if (allEvidence.length === 0) {
+    if (shuffledEvidence.length === 0) {
       html += `<div style="padding:8px;color:#cc6666;font-size:0.78rem;text-align:center">제시할 수 있는 증거가 없습니다.</div>`;
     } else {
-      allEvidence.forEach(ev => {
+      shuffledEvidence.forEach(ev => {
         const isSel = selected.includes(ev.id);
         html += `<button class="event-choice" style="${isSel?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleSubEv('${ev.id}')"><span class="choice-label">${isSel?'✓':' '}</span> ${ev.name}</button>`;
       });
@@ -3814,14 +3825,14 @@ function sc3Accept() {
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = '알겠습니다. 맡아서 진행해보겠습니다. 증거를 검토해서 재판을 준비하겠습니다.';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건3이 시작되었습니다. 스케줄에서 사건 검토를 진행하세요.');updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건3이 시작되었습니다. 스케줄에서 사건 검토를 진행하세요.');updateUI();">확인</button>`;
 }
 function sc3Decline() {
   G.subCase3 = {active:false, cleared:false, failed:false, trialPhase:0, wrongCount:0, reviewedCount:0, trialScheduledPhase:-1, startYear:G.year, startMonth:G.month};
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = '죄송합니다. 이번 사건은 제가 맡기 어려울 것 같습니다.';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';updateUI();">확인</button>`;
 }
 
 // 서브스토리 사건3 재판 실행
@@ -4176,14 +4187,14 @@ function sc4AcceptEnd() {
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = '네, 최선을 다 해 보겠습니다.';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건4가 시작되었습니다. 스케줄에서 사건 검토를 진행하세요.');updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건4가 시작되었습니다. 스케줄에서 사건 검토를 진행하세요.');updateUI();">확인</button>`;
 }
 function sc4Decline() {
   G.subCase4 = {active:false, cleared:false, failed:false, trialPhase:0, wrongCount:0, reviewedCount:0, trialScheduledPhase:-1, startYear:G.year, startMonth:G.month};
   document.getElementById('se-face-img').src = '캐릭터얼굴/의뢰인3.webp';
   document.getElementById('se-speaker').textContent = '김도윤';
   document.getElementById('se-text').textContent = '역시... 안 되는 건가요. 알겠습니다.';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';updateUI();">확인</button>`;
 }
 
 // 서브스토리 사건4 재판 실행 — 사건3과 동일 구조 + 2단계 증거 지원
@@ -4544,14 +4555,14 @@ function sc5AcceptEnd() {
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = '네, 최선을 다 해 보겠습니다.';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건5가 시작되었습니다. 스케줄에서 사건 검토를 진행하세요.');updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건5가 시작되었습니다. 스케줄에서 사건 검토를 진행하세요.');updateUI();">확인</button>`;
 }
 function sc5Decline() {
   G.subCase5 = {active:false, cleared:false, failed:false, trialPhase:0, wrongCount:0, reviewedCount:0, trialScheduledPhase:-1, startYear:G.year, startMonth:G.month};
   document.getElementById('se-face-img').src = '캐릭터얼굴/의뢰인5.webp';
   document.getElementById('se-speaker').textContent = '정수빈';
   document.getElementById('se-text').textContent = '그렇군요... 알겠습니다.';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';updateUI();buildSchedule();showScheduleOverlay();">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';updateUI();">확인</button>`;
 }
 
 // 서브스토리 사건5 재판 실행 — 3단계 증거 지원
@@ -5461,41 +5472,116 @@ function _findChildByKey(key) {
   return G.children.find(c => c.birthYear === by && c.birthMonth === bm) || null;
 }
 
+// 가족 이벤트 선택 후 간단 대화 재생 → 모달 닫고 _familyOnDone
+function _familyEpilogue(lines) {
+  if (!lines || lines.length === 0) {
+    document.getElementById('status-event-modal').style.display = 'none';
+    const cb = window._familyOnDone;
+    window._familyOnDone = null;
+    if (cb) cb();
+    return;
+  }
+  let i = 0;
+  function step() {
+    if (i >= lines.length) {
+      document.getElementById('status-event-modal').style.display = 'none';
+      const cb = window._familyOnDone;
+      window._familyOnDone = null;
+      if (cb) cb();
+      return;
+    }
+    const ln = lines[i++];
+    if (ln.face) document.getElementById('se-face-img').src = ln.face;
+    document.getElementById('se-speaker').textContent = ln.speaker || '';
+    document.getElementById('se-text').textContent = ln.text;
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="window._famEpiStep()">▼ 계속</button>`;
+  }
+  window._famEpiStep = step;
+  step();
+}
+
 function applyChildChoice(kind, choice, childKey) {
   const child = _findChildByKey(childKey);
   const cname = child ? child.name : '아이';
+  const childFace = child ? getChildFace(getChildAge(child)) : null;
+  const parentCall = G.gender === 'male' ? '아빠' : '엄마';
+  const spouse = getSpouseInfo();
+  const partner = _getPartnerInfo();
+  const sp = spouse || partner;
   const _lastDay = new Date(2029 + G.year, G.month, 0).getDate();
+  let familyEpi = null;
   if (kind === 'firstBirthday') {
+    const guestFace1 = randomColleagueFace();
+    const guestFace2 = randomColleagueFace();
     if (choice === 'big') {
       G.funds -= 3000000;
       spouseAffectionDelta(10);
       updateBurnout(-5);
       addDiary('🎂', `${cname} 돌잔치! 🎉 #감격 #벌써1년`, _lastDay);
+      familyEpi = [];
+      if (sp) {
+        familyEpi.push({speaker: sp.name, face: sp.face, text: `${cname} 돌잡이까지 당당하게 하네. 감격스럽다.`});
+        familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `그러게. 벌써 1년이라니 믿기지가 않네.`});
+      }
+      familyEpi.push({speaker: '동료 변호사', face: guestFace1, text: `${G.name} 변호사님, ${cname} 돌 축하드립니다! 아기 정말 예쁘네요.`});
+      familyEpi.push({speaker: '지인', face: guestFace2, text: `건강하고 밝게 자라길 바랄게요. 오늘 자리 정말 훈훈하네요.`});
+      familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `다들 와주셔서 정말 감사합니다.`});
     } else if (choice === 'small') {
       G.funds -= 500000;
       spouseAffectionDelta(5);
       updateBurnout(-5);
       addDiary('🎂', `${cname} 조촐한 돌잔치 🎂 가족끼리 식사 #돌잔치 #감격`, _lastDay);
+      familyEpi = [];
+      if (sp) {
+        familyEpi.push({speaker: sp.name, face: sp.face, text: `이 정도면 충분하지. 가족끼리 조용히 보내는 게 더 좋아.`});
+        familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `맞아. ${cname}${_hasJong(cname)?'이':'가'} 건강한 게 제일이지.`});
+      }
+      familyEpi.push({speaker: '동료 변호사', face: guestFace1, text: `${cname} 돌 축하해요. 조촐해도 따뜻한 자리네요.`});
     } else {
       spouseAffectionDelta(-10);
       G.stats.stress = Math.min(999, G.stats.stress + 5);
       addDiary('😔', `바빠서 ${cname} 돌잔치 제대로 못 챙김... 미안 #일바빠서 #미안`, _lastDay);
+      familyEpi = [];
+      if (sp) {
+        familyEpi.push({speaker: sp.name, face: sp.face, text: `이번은 넘어간다지만... ${cname} 돌잔치마저 못 챙길 만큼 바빠?`});
+        familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `미안해... 다음엔 꼭 챙길게.`});
+      }
     }
   } else if (kind === 'firstWord') {
     G.stats.stress = Math.max(0, G.stats.stress - 5);
     updateBurnout(-5);
-    addDiary('👶', `${cname}${_hasJong(cname)?'이':'가'} 드디어 "${G.gender==='male'?'아빠':'엄마'}!" 했다 😭 심쿵 #감격 #아이의첫마디`, _lastDay);
+    addDiary('👶', `${cname}${_hasJong(cname)?'이':'가'} 드디어 "${parentCall}!" 했다 😭 심쿵 #감격 #아이의첫마디`, _lastDay);
+    familyEpi = [];
+    if (sp) {
+      familyEpi.push({speaker: sp.name, face: sp.face, text: `세상에, 정말 방금 '${parentCall}'라고 한 거야?`});
+      familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `응, 나도 얼떨떨해.`});
+    }
+    familyEpi.push({speaker: cname, face: childFace, text: `${parentCall}~`});
+    familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `... 이 순간 진짜 못 잊겠다.`});
   } else if (kind === 'kindergarten') {
     if (choice === 'go') {
       G.stats.stress = Math.max(0, G.stats.stress - 5);
       G.stats.fatigue = Math.min(999, G.stats.fatigue + 3);
       spouseAffectionDelta(5);
       addDiary('🏃', `${cname} 어린이집 첫 등원 동행 🏃 울먹이는 거 겨우 달래고 왔다 #아이의성장`, _lastDay);
+      familyEpi = [
+        {speaker: cname, face: childFace, text: `${parentCall}, 집에 있으면 안 돼...?`},
+        {speaker: G.name, face: getPlayerFace(), text: `친구들이 기다려. 재밌게 놀다 와. 이따 보자.`},
+      ];
+      if (sp) {
+        familyEpi.push({speaker: sp.name, face: sp.face, text: `울먹이는 거 보니까 나도 울컥했어.`});
+      }
     } else {
       spouseAffectionDelta(-5);
       G.stats.stress = Math.min(999, G.stats.stress + 5);
       G.stats.fatigue = Math.max(0, G.stats.fatigue - 3);
       addDiary('💼', `${cname} 등원은 ${G.gender==='male'?'아내':'남편'}에게 부탁... #업무 #가정`, _lastDay);
+      if (sp) {
+        familyEpi = [
+          {speaker: sp.name, face: sp.face, text: `또 일 때문에? 하... 알았어, 내가 데려갈게.`},
+          {speaker: G.name, face: getPlayerFace(), text: `미안해. 다음 주엔 꼭 내가 갈게.`},
+        ];
+      }
     }
   } else if (kind === 'elementary') {
     if (choice === 'go') {
@@ -5503,9 +5589,23 @@ function applyChildChoice(kind, choice, childKey) {
       updateBurnout(-5);
       G.stats.stress = Math.max(0, G.stats.stress - 5);
       addDiary('🎒', `${cname} 초등학교 입학식 🎒 #세월무상 #벌써초딩`, _lastDay);
+      familyEpi = [
+        {speaker: cname, face: childFace, text: `${parentCall}, 떨려... 친구 사귈 수 있을까?`},
+        {speaker: G.name, face: getPlayerFace(), text: `잘할 수 있을 거야. ${parentCall}도 응원할게.`},
+      ];
+      if (sp) {
+        familyEpi.push({speaker: sp.name, face: sp.face, text: `${cname}${_hasJong(cname)?'이':'가'} 벌써 초등학생이라니... 믿기지가 않네.`});
+        familyEpi.push({speaker: G.name, face: getPlayerFace(), text: `그러게. 시간 정말 빠르다.`});
+      }
     } else {
       spouseAffectionDelta(-5);
       addDiary('📸', `${cname} 입학식 못 감. 사진으로만 봄 😔 #미안`, _lastDay);
+      if (sp) {
+        familyEpi = [
+          {speaker: sp.name, face: sp.face, text: `입학식 사진 보내놨어. 확인해.`},
+          {speaker: G.name, face: getPlayerFace(), text: `... 고마워. 미안해, 나중에 꼭 만회할게.`},
+        ];
+      }
     }
   } else if (kind === 'sick') {
     if (choice === 'hospital') {
@@ -5514,12 +5614,30 @@ function applyChildChoice(kind, choice, childKey) {
       G.stats.stress = Math.min(999, G.stats.stress + 5);
       spouseAffectionDelta(10);
       addDiary('🏥', `${cname} 병원 동행 🏥 고생했다 괜찮아졌으면 #가족 #걱정`, _lastDay);
+      familyEpi = [
+        {speaker: cname, face: childFace, text: `${parentCall}... 무서워.`},
+        {speaker: G.name, face: getPlayerFace(), text: `괜찮아, ${parentCall} 옆에 있을게.`},
+        {speaker: '강민우', face: '캐릭터얼굴/강민우.webp', text: `열이 좀 있긴 한데 큰 문제는 없네요. 약 며칠만 드시면 괜찮아질 거예요.`},
+      ];
+      if (sp) {
+        familyEpi.push({speaker: sp.name, face: sp.face, text: `오늘 같이 가줘서 고마워. ${cname}${_hasJong(cname)?'이':'가'} 많이 의지됐을 거야.`});
+      }
     } else {
       spouseAffectionDelta(-10);
       G.stats.stress = Math.min(999, G.stats.stress + 10);
       G.stats.fatigue = Math.max(0, G.stats.fatigue - 5);
       addDiary('💼', `${cname} 아픈데 내가 못 가봤다... #미안 #죄책감`, _lastDay);
+      if (sp) {
+        familyEpi = [
+          {speaker: sp.name, face: sp.face, text: `${cname} 열이 좀 높은데... 내가 볼게.`},
+          {speaker: G.name, face: getPlayerFace(), text: `미안해. 퇴근하고 바로 들를게.`},
+        ];
+      }
     }
+  }
+  if (familyEpi && familyEpi.length > 0) {
+    _familyEpilogue(familyEpi);
+    return;
   }
   document.getElementById('status-event-modal').style.display = 'none';
   const cb = window._familyOnDone;
@@ -5581,21 +5699,37 @@ function showSpouseEvent(kind, spouse, onDone) {
 
 function applySpouseChoice(kind, choice) {
   const sname = window._familyCurrentSpouseName || '배우자';
+  const partner = _getPartnerInfo();
+  const spouseFace = partner ? partner.face : null;
   const _lastDay = new Date(2029 + G.year, G.month, 0).getDate();
+  let familyEpi = null;
   if (kind === 'fight') {
     if (choice === 'apology') {
       spouseAffectionDelta(15);
       G.stats.fatigue = Math.min(999, G.stats.fatigue + 10);
       G.stats.stress = Math.min(999, G.stats.stress + 10);
       addDiary('🙏', `${sname}랑 긴 대화. 오랜만에 속 시원하다 #부부 #화해`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `... 진심으로 얘기해줘서 고마워.`},
+        {speaker: G.name, face: getPlayerFace(), text: `내가 요즘 너무 무심했어. 미안해.`},
+        {speaker: sname, face: spouseFace, text: `나도 말이 좀 심했어. 우리 다시 맞춰가자.`},
+      ];
     } else if (choice === 'avoid') {
       spouseAffectionDelta(-10);
       G.stats.mental = Math.max(0, G.stats.mental - 5);
       addDiary('🤐', `${sname}랑 또 어색한 분위기... #부부 #회피`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `... 결국 또 이런 식이네.`},
+        {speaker: G.name, face: getPlayerFace(), text: `(지금은 말이 안 통해. 나중에 다시 얘기하자...)`},
+      ];
     } else {
       spouseAffectionDelta(-25);
       G.stats.stress = Math.min(999, G.stats.stress + 20);
       addDiary('🔥', `${sname}랑 크게 싸웠다. 후회된다 #부부싸움 #후회`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `하... 됐어. 이제 말도 하기 싫다.`},
+        {speaker: G.name, face: getPlayerFace(), text: `(돌이키기 어려운 말을 해버렸다...)`},
+      ];
     }
   } else if (kind === 'gift') {
     G.stats.stress = Math.max(0, G.stats.stress - 5);
@@ -5606,13 +5740,25 @@ function applySpouseChoice(kind, choice) {
       G.stats.stress = Math.max(0, G.stats.stress - 20);
       updateBurnout(-5);
       addDiary('🤗', `${sname} 덕분에 한결 가벼워짐 #부부 #위로`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `이렇게 안아주니까 나도 힘 나.`},
+        {speaker: G.name, face: getPlayerFace(), text: `덕분에 버틴다. 고마워.`},
+      ];
     } else if (choice === 'ok') {
       G.stats.stress = Math.max(0, G.stats.stress - 5);
       addDiary('😮‍💨', `${sname} 걱정에 "괜찮다"고만 했다 #부부`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `정말 괜찮은 거지? 무리하지 마.`},
+        {speaker: G.name, face: getPlayerFace(), text: `... 응, 괜찮아.`},
+      ];
     } else {
       spouseAffectionDelta(-20);
       G.stats.stress = Math.min(999, G.stats.stress + 10);
       addDiary('😤', `${sname}한테 괜히 짜증냈다... 내일 사과해야지 #후회`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `(말없이 돌아선다.)`},
+        {speaker: G.name, face: getPlayerFace(), text: `(아... 왜 그랬지. 후회된다.)`},
+      ];
     }
   } else if (kind === 'sick') {
     if (choice === 'care') {
@@ -5621,15 +5767,31 @@ function applySpouseChoice(kind, choice) {
       G.stats.fatigue = Math.min(999, G.stats.fatigue + 10);
       G.stats.stress = Math.min(999, G.stats.stress + 10);
       addDiary('🏥', `${sname} 간병 🏥 오늘은 연차 썼다 #부부 #가족`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `... 오늘 옆에 있어줘서 고마워.`},
+        {speaker: G.name, face: getPlayerFace(), text: `당연한 거야. 푹 쉬어.`},
+      ];
     } else if (choice === 'medicine') {
       G.funds -= 50000;
       spouseAffectionDelta(5);
       G.stats.stress = Math.min(999, G.stats.stress + 5);
       addDiary('💊', `${sname}${_hasJong(sname)?'이':'가'} 아프다. 약 사다주고 출근 #미안`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `약 잘 먹을게. 다녀와.`},
+        {speaker: G.name, face: getPlayerFace(), text: `집에서 푹 쉬고 있어. 이따 전화할게.`},
+      ];
     } else {
       spouseAffectionDelta(-15);
       addDiary('🙅', `${sname} 아픈데 그냥 출근. 마음이 안 좋다 #바쁨 #미안`, _lastDay);
+      familyEpi = [
+        {speaker: sname, face: spouseFace, text: `(대답 없이 이불을 덮는다.)`},
+        {speaker: G.name, face: getPlayerFace(), text: `(... 이게 맞는 건지...)`},
+      ];
     }
+  }
+  if (familyEpi && familyEpi.length > 0) {
+    _familyEpilogue(familyEpi);
+    return;
   }
   document.getElementById('status-event-modal').style.display = 'none';
   const cb = window._familyOnDone;
@@ -5701,11 +5863,14 @@ function _seasonalSetupModal(bg) {
 }
 
 function _seasonalFinish(onDone) {
-  document.getElementById('status-event-modal').style.display = 'none';
-  const cb = window._seasonalOnDone;
-  window._seasonalOnDone = null;
-  if (cb) cb();
-  else if (onDone) onDone();
+  // 마지막 대사 여운 — 0.5초 모달 유지 후 닫고 다음 씬
+  setTimeout(() => {
+    document.getElementById('status-event-modal').style.display = 'none';
+    const cb = window._seasonalOnDone;
+    window._seasonalOnDone = null;
+    if (cb) cb();
+    else if (onDone) onDone();
+  }, _SCENE_TRANSITION_MS);
 }
 
 // 선택 후 짧은 대화 재생 → _seasonalFinish
@@ -5801,10 +5966,15 @@ function applyNewYearChoice(choice) {
   } else if (choice === 'together_lover') {
     spouseAffectionDelta(10);
     updateBurnout(-5);
-    addDiary('🎑', `연인이랑 새해 ❤️ 따뜻한 하루 #새해 #데이트`, _ld);
+    if (G.isMarried) {
+      const spouseTerm = G.gender === 'male' ? '사랑하는 부인' : '사랑하는 남편';
+      addDiary('🎑', `${spouseTerm}과 새해 ❤️ 따뜻한 하루 #새해 #부부`, _ld);
+    } else {
+      addDiary('🎑', `연인이랑 새해 ❤️ 따뜻한 하루 #새해 #데이트`, _ld);
+    }
     if (partner) {
       epilogue = [
-        {speaker: partner.name, face: partner.face, text: `${G.name}이랑 새해 맞으니까 든든해.`},
+        {speaker: partner.name, face: partner.face, text: `${J(G.name, '랑/이랑')} 새해 맞으니까 든든해.`},
         {speaker: G.name, face: getPlayerFace(), text: '나도. 올해도 잘 부탁해.'}
       ];
     }
@@ -6394,7 +6564,7 @@ const NEWS_TEMPLATES = {
       '한편 졸업 후 시장 공급 과잉에 대한 우려도 함께 커지고 있다.',
       '변협 관계자는 "양적 성장 못지않게 질적 교육이 중요하다"고 밝혔다.',
     ]},
-    {title:'대한변협, 신년 기자회견 개최', body:'협회 주요 안건이 발표됐다.', fullBody:[
+    {title:'대한변협, 신년 기자회견 개최', body:'협회 주요 안건이 발표됐다.', month:1, fullBody:[
       '{date} 대한변호사협회는 신년 기자회견을 열었다.',
       '변호사 광고 규정 재검토, 공익활동 활성화, AI 가이드라인 제정이 핵심 안건으로 제시됐다.',
       '협회장은 "법조계 신뢰 회복이 최우선 과제"라고 강조했다.',
@@ -6675,12 +6845,17 @@ function generateMonthlyNews() {
     else if (r < 0.8) cat = 'economy';
     else cat = 'social';
     const pool = NEWS_TEMPLATES[cat];
-    // 중복 방지: 이미 이번 달에 선택된 제목은 제외
-    let candidates = pool.filter(t => !usedTitles.has(t.title));
+    // 중복 방지 + 월 제한 필터 (t.month 또는 t.months 배열 지정 시 해당 월에만 노출)
+    const monthOk = (t) => {
+      if (Array.isArray(t.months)) return t.months.includes(G.month);
+      if (typeof t.month === 'number') return t.month === G.month;
+      return true;
+    };
+    let candidates = pool.filter(t => !usedTitles.has(t.title) && monthOk(t));
     // 해당 카테고리에서 모두 소진 → 다른 카테고리에서 대체
     if (candidates.length === 0) {
       const allPool = [...NEWS_TEMPLATES.legal, ...NEWS_TEMPLATES.economy, ...NEWS_TEMPLATES.social];
-      candidates = allPool.filter(t => !usedTitles.has(t.title));
+      candidates = allPool.filter(t => !usedTitles.has(t.title) && monthOk(t));
       if (candidates.length === 0) break; // 전부 소진 (극단적 상황)
       // 카테고리 추정 (풀 비교)
       if (NEWS_TEMPLATES.legal.includes(candidates[0])) cat = 'legal';
@@ -6913,6 +7088,11 @@ function openNewsArticleModal(idx) {
 
 // ==================== SCHEDULE ====================
 function openScheduleOverlay() {
+  // 10년 완주 후에는 스케줄 진행 대신 엔딩 확인
+  if (G.year > 10) {
+    gameConfirm('10년간의 변호사 생활이 마무리됐습니다.\n엔딩을 보시겠습니까?', () => { showEnding(); });
+    return;
+  }
   document.getElementById('stats-panel').style.display = 'none';
   // 이미 이번 달 스케줄이 빌드되어 있으면 재빌드하지 않음 (강제배치 스케줄 보존)
   const scheduleKey = G.year + '-' + G.month + '-' + G.status + '-' + G.firmId + '-' + (G.isLecturer?'L':'');
@@ -11909,7 +12089,7 @@ function finishMaleRomanceEvent() {
 
     document.getElementById('se-speaker').textContent = '';
     document.getElementById('se-text').innerHTML = `<div style="text-align:center;font-size:1.2rem;font-weight:700;color:#ff8888;margin:16px 0">${J(partnerName, '와/과')} 연인이 되었습니다.</div>`;
-    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="document.getElementById('status-event-modal').style.display='none';if(window._romanceFinishCb)window._romanceFinishCb()">확인</button>`;
+    document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="_romanceFinishWithDelay()">확인</button>`;
     window._romanceFinishCb = () => {
       currentMaleRomanceEvent = null;
       maleRomanceExtraDialogues = null;
@@ -11928,10 +12108,21 @@ function finishMaleRomanceEvent() {
     return;
   }
 
-  document.getElementById('status-event-modal').style.display = 'none';
-  currentMaleRomanceEvent = null;
-  maleRomanceExtraDialogues = null;
-  if (maleRomanceCallback) maleRomanceCallback();
+  // 마지막 대사 여운 — 0.5초 모달 유지 후 닫고 다음 씬
+  setTimeout(() => {
+    document.getElementById('status-event-modal').style.display = 'none';
+    currentMaleRomanceEvent = null;
+    maleRomanceExtraDialogues = null;
+    if (maleRomanceCallback) maleRomanceCallback();
+  }, _SCENE_TRANSITION_MS);
+}
+
+// 연인 성립 확인 버튼 → 0.5초 홀드 후 모달 닫고 onDone
+function _romanceFinishWithDelay() {
+  setTimeout(() => {
+    document.getElementById('status-event-modal').style.display = 'none';
+    if (window._romanceFinishCb) window._romanceFinishCb();
+  }, _SCENE_TRANSITION_MS);
 }
 
 function findImmediateRomanceEvent() {
@@ -12085,6 +12276,7 @@ function finishFriendEvent() {
 }
 
 function finishRomanceScene() {
+  // 일반 이성 만남 이벤트는 템포 유지 (지연 없음)
   document.getElementById('status-event-modal').style.display = 'none';
   currentRomanceTarget = null;
   if (romanceCallback) romanceCallback();
@@ -12448,6 +12640,7 @@ function continueExecution() {
   for(const k in G.stats)G.monthStatSnapshot[k]=G.stats[k];
   G.monthStatSnapshot.funds=G.funds; G.monthStatSnapshot.cases=G.cases; G.monthStatSnapshot.preparation=G.preparation;
 
+  _lastSceneType = null; // 월 스케줄 시작 시 씬 전환 지연 트래커 초기화
   execIndex=0; statChanges={};
   for(const k in STAT_NAMES)statChanges[k]=0;
   statChanges.funds=0; statChanges.cases=0; statChanges.preparation=0;
@@ -13289,9 +13482,30 @@ function applyStat(k,v){
 }
 
 // ==================== VN SCENE DISPLAY ====================
+// 씬 종료 후 다음 씬으로 넘어갈 때 0.5초 여백이 필요한 타입들
+// (vn-screen 기반 씬만 — 재판 씬은 화면을 안 닫고 내용만 바꾸므로 지연만 주면 됨)
+// 모달을 쓰는 씬(계절·로맨스)은 모달을 500ms 유지 후 닫도록 finish 함수 쪽에서 처리
+const PAUSE_AFTER_SCENE_TYPES = new Set([
+  'mainTrial',
+  'subTrial1','subTrial2','subTrial3','subTrial4','subTrial5',
+]);
+let _lastSceneType = null;
+const _SCENE_TRANSITION_MS = 500;
+
 function showVNScene(idx) {
+  const scene = vnScenes[idx];
+  const needsDelay = PAUSE_AFTER_SCENE_TYPES.has(_lastSceneType);
+  _lastSceneType = (scene && scene.type) || null;
+  if (needsDelay) {
+    setTimeout(() => _renderVNScene(idx), _SCENE_TRANSITION_MS);
+    return;
+  }
+  _renderVNScene(idx);
+}
+
+function _renderVNScene(idx) {
   execIndex = idx;
-  if (idx >= vnScenes.length) { finishMonth(); return; }
+  if (idx >= vnScenes.length) { _lastSceneType = null; finishMonth(); return; }
 
   const scene = vnScenes[idx];
 
@@ -14528,7 +14742,7 @@ function finishMonthFinal(){
           `낙선... 애써주신 분들께 죄송 😢 #낙선 #다음을기약`,
           `이름 옆 숫자가 못 넘어감 😩 더 열심히 했어야 했나 #낙선 #반성`,
         ]), new Date(2029 + G.year, G.month, 0).getDate());
-        showMilestonePopup({title:'낙선',desc:'아쉽게도 당선되지 못했습니다.',bg:'배경/의회.webp',face:getPlayerFace(),speaker:G.name,text:'아쉽지만 다음을 기약해야겠다.'}, ()=>{showMonthSummary(empReports);});
+        showMilestonePopup({title:'낙선',desc:'아쉽게도 당선되지 못했습니다.',bg:'배경/의회.webp',face:getPlayerFace(),speaker:G.name,text:'아쉽지만 다음을 기약해야겠다.',btnLabel:'확인'}, ()=>{showMonthSummary(empReports);});
       }
       return;
     }
@@ -14600,8 +14814,14 @@ function closeSummary(){
     G.yearCaseSeq = 0; // 연도별 사건번호 리셋
   }
   G.totalMonths++;
-  // 게임 종료 체크 (엔딩 후에는 자동저장하지 않음)
-  if(G.year>10){showEnding();return;}
+  // 10년 완주 시: 엔딩 자동 발동 없이 대시보드에 머무름.
+  // 스케줄 버튼을 누를 때 엔딩 확인 팝업이 뜨도록 openScheduleOverlay에서 처리.
+  if (G.year > 10) {
+    if (G.autoSave) saveGame(SAVE_SLOT_COUNT - 1, true);
+    updateUI();
+    showToast('10년이 마무리됐습니다. 정리 후 스케줄 버튼을 눌러 엔딩을 확인하세요.');
+    return;
+  }
   // 자동 저장 (슬롯 10)
   if (G.autoSave) saveGame(SAVE_SLOT_COUNT - 1, true);
   // 메인스토리 하위호환 보장
@@ -17325,7 +17545,8 @@ function showMainTrialDialogueSequence(arr, idx, callback) {
 
 function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback) {
   const mc = getMainCaseObj(caseNum);
-  const allFound = getAllFoundEvidence(caseNum);
+  // 증거 순서 셔플 — 발견 순서대로 클릭하면 정답이 되는 꼼수 차단
+  const allFound = _shuffleArray(getAllFoundEvidence(caseNum).slice());
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
   const bgMap = {1:'배경/재판.webp', 2:'배경/재판.webp', 3:'배경/재판.webp', 4:'배경/경찰서.webp'};
@@ -18352,9 +18573,7 @@ function showCase4PressureEvent() {
     showMainTrialDialogueSequence([...pressureDialogues, ...successDialogues], 0, () => {
       G.mainCase4.pressurePassed = true;
       playBGM('normal');
-      buildSchedule();
       updateUI();
-      openScheduleOverlay();
     });
   } else {
     // 실패: 메인스토리 종료
@@ -18370,9 +18589,7 @@ function showCase4PressureEvent() {
       G.mainCase4.active = false;
       showToast('메인스토리 사건 4 실패... 사교성이 부족했습니다.');
       playBGM('normal');
-      buildSchedule();
       updateUI();
-      openScheduleOverlay();
     });
   }
 }
@@ -18441,9 +18658,9 @@ function processMainStoryMonthEnd(checkOffer) {
             `도라군 개발사업승인처분 취소소송에서 승소판결을 얻어내 화제다.`,
             [
               `{이름}({소속 기술})변호사가 도라군 개발사업승인처분 취소소송에서 승소판결을 얻어내 화제이다.`,
-              `{이름} 변호사는 {전문분야 기술}의 내공과 {승률 기술} 기록을 앞세워 험난했던 행정 소송을 관철했다.`,
+              `{이름} 변호사는 {전문분야 기술}의 내공을 앞세워 험난했던 행정 소송에서 승소했다.`,
               `{이름} 변호사는 "이 사건은 전형적 권력형 비리사건이었다."며, "이태준 국장을 살해한 진범이 꼭 잡히기 바란다"는 말을 덧붙였다.`,
-              `시민단체들은 "{가치관 톤} 변호인의 손에 결정적 사건이 매듭지어진 것"이라며 환영했다.`,
+              `시민단체들은 "{가치관 톤} 변호사의 손에 결정적 사건이 매듭지어진 것"이라며 환영했다.`,
             ]);
         } else if (idx === 3) {
           G.mainStoryFlag.case4_cleared = true;
