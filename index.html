@@ -1498,7 +1498,8 @@ const G = {
   },
   // 라이벌 변호사 (v11) — 게임 시작 시 성별에 따라 2명 자동 배정
   rivals: [],
-  rivalNewsSeen: {},   // 라이벌 뉴스 중복 방지: 'rivalId-newsKey' → true
+  rivalNewsSeen: {},     // 라이벌 뉴스 중복 방지: 'rivalId-newsKey' → true
+  rivalBigDuelDone: {},  // 본격 대결 이벤트 발동 기록: 'rivalId' → true
 };
 
 const STATUS_NAMES = {
@@ -2302,9 +2303,10 @@ function getGeneralEvents() {
     // ===== 추가 공통 이벤트 =====
     // 법률 세미나 발표 기회
     { id:'seminarInvite', prob:0.001, condition:()=>G.stats.reputation>=400,
-      bg:'배경/업계모임.webp', faceFn: getPlayerFace,
+      bg:'배경/업계모임.webp', face:'캐릭터얼굴/대한변협협회장.webp',
       dialogues:[
-        {speaker:'학회', text:'{name} 변호사님, 이번 세미나에서 발표를 해주실 수 있겠습니까?'}
+        {speaker:'변협 협회장', text:'{name} 변호사님, 오랜만입니다. 다름이 아니라, 이번 변협 세미나에서 실무자 발표 자리를 하나 마련하고 있는데요.'},
+        {speaker:'변협 협회장', text:'요즘 {name} 변호사님 성함이 법조계에서 자주 오르내리더군요. 후배들 앞에서 발표 한 번 맡아주실 수 있으시겠습니까?'}
       ],
       prompt:'어떡하지?',
       choices:[
@@ -3509,7 +3511,7 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
       html += `<button class="event-choice" style="background:#2a3828;border-color:#80cc90;margin-top:8px" onclick="window._submitSubEv()"><span class="choice-label">▶</span> 제출</button>`;
     }
     // 항상 표시되는 포기 옵션 (증거 없거나 못 고를 때)
-    html += `<button class="event-choice" style="background:#2a1818;border-color:#884444;margin-top:8px;color:#cc8888" onclick="window._skipSubEv()"><span class="choice-label">⚠</span> 증거 제시 포기 (경고 +1)</button>`;
+    html += `<button class="event-choice" style="background:#2a1818;border-color:#884444;margin-top:8px;color:#cc8888" onclick="window._skipSubEv()">증거 제시 포기 (경고 +1)</button>`;
     document.getElementById('se-choices').innerHTML = html;
   }
 
@@ -3960,14 +3962,16 @@ function runSubTrial3Phase(phase, step, callback) {
             const clearDlgs = trialData.clearDialogues || [];
             if (clearDlgs.length > 0) {
               showMainTrialDialogueSequence(clearDlgs, 0, () => {
-                showToast('서브스토리 사건3 승소! 명성 +10, 자금 +2000만원');
-                addDiary('⚖', pickDiaryText([
-                  `이혼 사건 승소 💪 재산분할도 제대로 받아냄! 의뢰인분 울먹이심 ㅠㅠ #승소 #가사전문`,
-                  `오늘 이혼 판결 나옴 ✨ 긴 싸움 끝 후련 #승소 #변호사라이프`,
-                  `이혼 사건 OK 🎉 가정 정리는 매번 힘들지만 오늘은 잘한듯 #승소 #뿌듯`,
-                ]), _currentTrialDay);
-                playBGM('normal');
-                callback();
+                playSubRivalReaction(3, 'win', () => {
+                  showToast('서브스토리 사건3 승소! 명성 +10, 자금 +2000만원');
+                  addDiary('⚖', pickDiaryText([
+                    `이혼 사건 승소 💪 재산분할도 제대로 받아냄! 의뢰인분 울먹이심 ㅠㅠ #승소 #가사전문`,
+                    `오늘 이혼 판결 나옴 ✨ 긴 싸움 끝 후련 #승소 #변호사라이프`,
+                    `이혼 사건 OK 🎉 가정 정리는 매번 힘들지만 오늘은 잘한듯 #승소 #뿌듯`,
+                  ]), _currentTrialDay);
+                  playBGM('normal');
+                  callback();
+                });
               });
             } else {
               showToast('서브스토리 사건3 승소! 명성 +10, 자금 +2000만원');
@@ -4024,14 +4028,16 @@ function applySc3Choice(idx, isCorrect) {
       showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
         showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 반소원고의 청구를 기각한다.'}, () => {
           showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 제대로 대응하지 못했다. 실패했어.)'}, () => {
-            showToast('서브스토리 사건3 패소...');
-            addDiary('⚖', pickDiaryText([
-              `이혼 패소 😢 의뢰인분 얼굴 못 쳐다봄... #패소 #힘든하루`,
-              `이혼 사건 졌다 😔 가정 깨지는 것도 모자라 지기까지... #패소 #마음무거움`,
-              `오늘 판결 별로다. 의뢰인분께 뭐라 말하지 😩 #패소 #막막`,
-            ]), _currentTrialDay);
-            playBGM('normal');
-            window._sc3ChoiceFinalCb();
+            playSubRivalReaction(3, 'lose', () => {
+              showToast('서브스토리 사건3 패소...');
+              addDiary('⚖', pickDiaryText([
+                `이혼 패소 😢 의뢰인분 얼굴 못 쳐다봄... #패소 #힘든하루`,
+                `이혼 사건 졌다 😔 가정 깨지는 것도 모자라 지기까지... #패소 #마음무거움`,
+                `오늘 판결 별로다. 의뢰인분께 뭐라 말하지 😩 #패소 #막막`,
+              ]), _currentTrialDay);
+              playBGM('normal');
+              window._sc3ChoiceFinalCb();
+            });
           });
         });
       });
@@ -4323,13 +4329,15 @@ function runSubTrial4Phase(phase, step, callback) {
                 const cd = trialData.clearDialogues || [];
                 if (cd.length > 0) {
                   showMainTrialDialogueSequence(cd, 0, () => {
-                    showToast('서브스토리 사건4 승소! 명성 +15');
-                    addDiary('⚖', pickDiaryText([
-                    `부당해고 승소 💪 회사 상대 싸움 끝까지 밀어붙인 보람! #승소 #노동법`,
-                    `오늘 부당해고 이겼다 🎉 의뢰인분 복직 확정 #승소 #뿌듯`,
-                    `부당해고 OK ✨ 한 사람 생계 지켜냈다는 느낌이 이런거구나 #승소 #이맛에`,
-                    ]), _currentTrialDay);
-                    playBGM('normal'); callback();
+                    playSubRivalReaction(4, 'win', () => {
+                      showToast('서브스토리 사건4 승소! 명성 +15');
+                      addDiary('⚖', pickDiaryText([
+                      `부당해고 승소 💪 회사 상대 싸움 끝까지 밀어붙인 보람! #승소 #노동법`,
+                      `오늘 부당해고 이겼다 🎉 의뢰인분 복직 확정 #승소 #뿌듯`,
+                      `부당해고 OK ✨ 한 사람 생계 지켜냈다는 느낌이 이런거구나 #승소 #이맛에`,
+                      ]), _currentTrialDay);
+                      playBGM('normal'); callback();
+                    });
                   });
                 } else {
                   showToast('서브스토리 사건4 승소! 명성 +15');
@@ -4386,11 +4394,13 @@ function applySc4Choice(idx, isCorrect) {
       showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
         showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 원고의 청구를 기각한다.'}, () => {
           showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 제대로 대응하지 못했다. 실패했어.)'}, () => {
-            showToast('서브스토리 사건4 패소...'); addDiary('⚖', pickDiaryText([
-              `부당해고 패소 😩 의뢰인분 복직 못 함... 무력감이 몰려옴 #패소 #힘든하루`,
-              `오늘 부당해고 졌다 😔 생계 걸린 싸움이었는데 #패소 #자책`,
-              `부당해고 패소... 법이 언제나 약자 편은 아니네 😢 #패소 #현실`,
-            ]), _currentTrialDay); playBGM('normal'); window._sc4FinalCb();
+            playSubRivalReaction(4, 'lose', () => {
+              showToast('서브스토리 사건4 패소...'); addDiary('⚖', pickDiaryText([
+                `부당해고 패소 😩 의뢰인분 복직 못 함... 무력감이 몰려옴 #패소 #힘든하루`,
+                `오늘 부당해고 졌다 😔 생계 걸린 싸움이었는데 #패소 #자책`,
+                `부당해고 패소... 법이 언제나 약자 편은 아니네 😢 #패소 #현실`,
+              ]), _currentTrialDay); playBGM('normal'); window._sc4FinalCb();
+            });
           });
         });
       });
@@ -5152,17 +5162,236 @@ function spawnRivals() {
   const pool = RIVAL_PROFILES[G.gender] || RIVAL_PROFILES.male;
   G.rivals = pool.map(p => ({
     ...p,
-    fame: 300,        // 0~1000
+    fame: p.type === 'friendly' ? 250 : 300,  // 0~1000 (친근형 250, 경쟁형 300)
     rivalry: 0,       // -100(친밀) ~ +100(적대)
     encounters: 0,    // 마주친 횟수
   }));
   G.rivalNewsSeen = {};
+  // 서브3·4 재판 대사의 상대 변호사를 라이벌로 교체
+  if (typeof patchSubTrialsWithRivals === 'function') patchSubTrialsWithRivals();
 }
 
 // 라이벌 이름(또는 id)으로 라이벌 객체 조회
 function getRival(key) {
   if (!Array.isArray(G.rivals)) return null;
   return G.rivals.find(r => r.id === key || r.name === key) || null;
+}
+
+// 서브3 상대 = 적대 라이벌 (안진담·성리나) / 서브4 상대 = 친근 라이벌 (이기승·강하주)
+function _getSub3Rival() { return getRivalByType('competitive'); }
+function _getSub4Rival() { return getRivalByType('friendly'); }
+
+// 대사 배열에서 기존 "안수철" 변호사를 지정한 라이벌 이름·얼굴로 치환
+function _patchRivalDialogues(arr, rival) {
+  if (!Array.isArray(arr) || !rival) return;
+  const OLD_FACE = '캐릭터얼굴/동료남자어쏘.webp';
+  const OLD_NAME_RE = /안수철/g;
+  arr.forEach(d => {
+    if (d && d.face === OLD_FACE) d.face = rival.face;
+    if (d && typeof d.speaker === 'string') d.speaker = d.speaker.replace(OLD_NAME_RE, rival.name);
+    if (d && typeof d.text === 'string')    d.text    = d.text.replace(OLD_NAME_RE, rival.name);
+  });
+}
+
+// 서브3·4 재판 대사의 상대 변호사를 라이벌로 교체 (게임 시작·로드 시 1회)
+// 주: SUB_TRIAL_3/4 가 상수 배열이므로 새로고침 없이 이미 patch된 객체를 재-patch 해도
+//     "안수철" 문자열이 없으면 no-op. idempotent.
+function patchSubTrialsWithRivals() {
+  // 서브4의 2단계 증거 구조(successDialogues2)와 choiceQuestion 내부 단일 대사까지 커버
+  const dialogueKeys = ['dialogues', 'successDialogues', 'successDialogues2', 'clearDialogues'];
+  const patchPhase = (phase, rival) => {
+    if (!phase || !rival) return;
+    dialogueKeys.forEach(k => _patchRivalDialogues(phase[k], rival));
+    // choiceQuestion 의 단일 대사 객체들 (서브4 phase 1)
+    if (phase.choiceQuestion) {
+      const cq = phase.choiceQuestion;
+      const solo = [cq.successDialogue, cq.playerReply, cq.wrongReply].filter(Boolean);
+      _patchRivalDialogues(solo, rival);
+    }
+  };
+  const r3 = _getSub3Rival();
+  const r4 = _getSub4Rival();
+  if (r3 && typeof SUB_TRIAL_3 !== 'undefined') SUB_TRIAL_3.forEach(p => patchPhase(p, r3));
+  if (r4 && typeof SUB_TRIAL_4 !== 'undefined') SUB_TRIAL_4.forEach(p => patchPhase(p, r4));
+}
+
+// ===== 라이벌 조우·대결 이벤트 빌더 (단계 3) =====
+// 성격별 재판 대결 첫 대사
+function _rivalDuelFirstLine(r, pn) {
+  if (r.personality === '냉철') return `${pn} 변호사, 여기서 보네요. 이 사건은 저희가 이길 것 같은데요.`;
+  if (r.personality === '지적') return `${pn} 변호사, 상대방이었네. 기록 보니까 쉽지 않아 보이던데 괜찮겠어요?`;
+  if (r.personality === '다정') return `${pn} 변호사, 오랜만이야. 싸우게 됐지만 그래도 잘 부탁해.`;
+  return `${pn} 변호사, 재판 잘 부탁합니다.`;
+}
+// 재판 대결 선택지 후 라이벌 반응 (성격별)
+function _rivalReplyDuel(choice, p) {
+  const lines = {
+    accept: {
+      '냉철': '그래요. 법정에서 봅시다. 후회 없도록 최선을 다하죠.',
+      '지적': '좋아. 그게 당연하지. 서로 배울 게 많을 거야.',
+      '다정': '응, 나도 그래. 열심히 준비해왔거든. 잘 해보자.',
+    },
+    fair: {
+      '냉철': '...그럽시다. 결과가 어찌 되든, 깨끗하게.',
+      '지적': '그래, 그게 변호사다운 자세지. 나도 그렇게 생각해.',
+      '다정': '응, 고마워. 나도 최선을 다할게. 서로 좋은 결과 있기를.',
+    },
+    avoid: {
+      '냉철': '바쁘시군요. 그럼 법정에서 보죠.',
+      '지적': '음, 여유가 없어 보이네. 법정에서 봐.',
+      '다정': '아, 바쁜가보네. 그럼 법정에서 보자.',
+    },
+  };
+  return (lines[choice] && lines[choice][p]) || '...';
+}
+// 조우 첫 대사
+function _rivalMeetFirstLine(r, pn) {
+  if (r.type === 'friendly') return `${pn}! 오랜만이야, 요즘 어때?`;
+  return `${pn} 변호사... 요즘 기세 좋던데?`;
+}
+// 조우 선택지 후 라이벌 반응
+function _rivalReplyMeet(choice, pn) {
+  if (choice === 'polite')  return `하하. 겸손하기는, 그래요. 저도 늘 ${pn} 보며 많이 배우고 있어요.`;
+  if (choice === 'provoke') return `하하. 지금 도전하는건가? 알겠어. 언제든 받아주지.`;
+  if (choice === 'ignore')  return `대답 좀 하지, ${pn} 변호사?`;
+  return '...';
+}
+
+// 재판 대기실 3% 대결 이벤트
+function _buildRivalTrialDuelEvent(r) {
+  const pn = G.name;
+  return {
+    id: '_rivalTrialDuel',
+    _rivalId: r.id,
+    bg: '배경/재판.webp',
+    face: r.face,
+    dialogues: [{ speaker: r.name, text: _rivalDuelFirstLine(r, pn) }],
+    choices: [
+      { text: '승부에 응한다',     effects: { _rivalry:  5 }, playerPreLine: '좋아, 한 번 붙어봅시다.', rivalReply: _rivalReplyDuel('accept', r.personality) },
+      { text: '서로 최선을 다하자', effects: { _rivalry: -5 }, playerPreLine: '서로 최선을 다합시다.', rivalReply: _rivalReplyDuel('fair',   r.personality) },
+      { text: '가볍게 인사만',      effects: {},               playerPreLine: '네, 수고하세요.',       rivalReply: _rivalReplyDuel('avoid',  r.personality) },
+    ],
+  };
+}
+// 재판 대기실 1% 언급 (효과 없음, 단순 분위기)
+function _buildRivalTrialBriefEvent(r) {
+  const lines = [
+    `이 사건, 원래 ${r.name} 변호사가 맡을 뻔했다던데.`,
+    `${r.name} 변호사 이번엔 다른 사건 붙었다고 들었어. 바쁘대.`,
+    `참고로 오늘 법정에서 ${r.name} 변호사 봤어. 다른 사건 건으로 온 모양이야.`,
+  ];
+  const line = lines[Math.floor(Math.random() * lines.length)];
+  return {
+    id: '_rivalTrialBrief',
+    bg: '배경/재판.webp',
+    face: '캐릭터얼굴/동료남자어쏘.webp',
+    dialogues: [{ speaker: '동료 변호사', text: line }],
+    choices: [
+      { text: '그렇군요', effects: {} },
+    ],
+  };
+}
+// 업계모임·와인모임·스터디 5% 조우
+function _buildRivalMeetEvent(r, actionId) {
+  const bgMap = {
+    wineMeet:     '배경/와인모임.webp',
+    industryMeet: '배경/업계모임.webp',
+    studyGroup:   '배경/스터디.webp',
+  };
+  const pn = G.name;
+  return {
+    id: '_rivalMeet',
+    _rivalId: r.id,
+    bg: bgMap[actionId] || '배경/업계모임.webp',
+    face: r.face,
+    dialogues: [{ speaker: r.name, text: _rivalMeetFirstLine(r, pn) }],
+    choices: [
+      { text: '정중히 인사', effects: { sociability: 2, _rivalry: -5 }, playerPreLine: `아, ${r.name} 변호사, 잘 지냈어? 늘 보면서 많이 배우고 있어.`,           rivalReply: _rivalReplyMeet('polite',  pn) },
+      { text: '가볍게 도발', effects: { debate: 2,      _rivalry: 10 }, playerPreLine: `아, 우리 잘 나가는 ${r.name} 변호사님! 나도 요즘 안 지려고 노력하고 있지.`, rivalReply: _rivalReplyMeet('provoke', pn) },
+      { text: '무시',        effects: { mental: 2,      _rivalry:  5 }, playerPreLine: '...',                                                                    rivalReply: _rivalReplyMeet('ignore',  pn) },
+    ],
+  };
+}
+
+// 스케줄 실행 중 라이벌 조우 확률 체크 + vnScenes 에 삽입
+// - trial: 3% 대결, 미발동 시 1% 언급
+// - wineMeet/industryMeet/studyGroup: 5% 조우
+function maybeInsertRivalEncounter(slot, vnScenes, monthInsertedEvents) {
+  if (!Array.isArray(G.rivals) || G.rivals.length === 0) return;
+  const a = slot.action;
+  if (!a) return;
+
+  if (a === 'trial') {
+    if (!monthInsertedEvents._rivalTrialDuel && !monthInsertedEvents._rivalTrialBrief) {
+      if (Math.random() < 0.03) {
+        const r = pickRandomRival();
+        vnScenes.push({ type: 'contextEvent', eventDef: _buildRivalTrialDuelEvent(r) });
+        monthInsertedEvents._rivalTrialDuel = true;
+        return;
+      }
+      if (Math.random() < 0.01) {
+        const r = pickRandomRival();
+        vnScenes.push({ type: 'contextEvent', eventDef: _buildRivalTrialBriefEvent(r) });
+        monthInsertedEvents._rivalTrialBrief = true;
+        return;
+      }
+    }
+    return;
+  }
+  if (a === 'wineMeet' || a === 'industryMeet' || a === 'studyGroup') {
+    if (!monthInsertedEvents._rivalMeet && Math.random() < 0.05) {
+      const r = pickRandomRival();
+      vnScenes.push({ type: 'contextEvent', eventDef: _buildRivalMeetEvent(r, a) });
+      monthInsertedEvents._rivalMeet = true;
+    }
+    return;
+  }
+  // 상담 중 라이벌 본격 대결 제안 (명성≥500, 라이벌 fame≥500, 라이벌별 1회, 10%)
+  if (a === 'consult') {
+    if (monthInsertedEvents._rivalBigDuel) return;
+    if ((G.stats && G.stats.reputation || 0) < 500) return;
+    if (!G.rivalBigDuelDone) G.rivalBigDuelDone = {};
+    const candidates = G.rivals.filter(r => r.fame >= 500 && !G.rivalBigDuelDone[r.id]);
+    if (candidates.length === 0) return;
+    if (Math.random() >= 0.1) return;
+    const r = candidates[Math.floor(Math.random() * candidates.length)];
+    G.rivalBigDuelDone[r.id] = true;
+    vnScenes.push({ type: 'contextEvent', eventDef: _buildRivalBigDuelEvent(r) });
+    monthInsertedEvents._rivalBigDuel = true;
+  }
+}
+
+// 라이벌 본격 대결 이벤트 (명성·fame 500 이상, 의뢰인 공동수임 제안)
+function _buildRivalBigDuelEvent(r) {
+  const pn = G.name;
+  const clientNum = Math.floor(Math.random() * 8) + 1;
+  const clientFace = `캐릭터얼굴/의뢰인${clientNum}.webp`;
+  return {
+    id: '_rivalBigDuel',
+    _rivalId: r.id,
+    bg: '배경/상담.webp',
+    face: clientFace,
+    dialogues: [
+      { speaker: '의뢰인', text: `${pn} 변호사님, 이번에 사건을 의뢰하려고 하는데, 아무래도 이 분야 전문가인 ${r.name} 변호사님과 같이 좀 해주면 어떨까 해서요. 가능하시겠어요?` },
+      { speaker: pn,       text: '(어떻게 해야 하지?)' },
+    ],
+    choices: [
+      { text: '협력 제안',
+        effects: { _rivalry: -40, reputation: 10, sociability: 3 },
+        playerPreLine: `네, 알겠습니다. ${r.name} 변호사에게 연락해보겠습니다. ... ${r.name} 변호사, 지금 우리 의뢰인이 제게 ${r.name} 변호사와 사건을 함께 수임해줬으면 하시네요. 가능하시겠어요?`,
+        rivalReply: `아, ${pn} 변호사님께서 저를 그렇게 생각해주시는지 몰랐네요. 감사합니다. 한 번 잘 해보시죠.`,
+      },
+      { text: '단독 수임',
+        effects: {},
+        result: '아, 죄송하지만 이 사건은 저 혼자서도 충분히 처리할 수 있을 것 같습니다.',
+      },
+      { text: '양보',
+        effects: { _rivalry: -20, reputation: -5 },
+        playerPreLine: `그러시다면 이 사건은 ${r.name} 변호사님께 맡겨보시는 건 어떨까요? 저는 빠지도록 하겠습니다. ... ${r.name} 변호사, 지금 우리 의뢰인이 사건을 하나 의뢰하셨는데, ${r.name} 변호사가 처리해주면 좋을 것 같아서 연락드려요.`,
+        rivalReply: `오, 언제든 환영이지요. 감사합니다.`,
+      },
+    ],
+  };
 }
 
 // 타입별 라이벌 조회
@@ -5184,10 +5413,12 @@ function pickRandomRival() {
 }
 
 // 라이벌 명성 자연 증가 (월 1회, 월말에 호출)
+// 친근형(이기승·강하주): +4~6 / 경쟁형(안진담·성리나): +3~5
 function growRivalFame() {
   if (!Array.isArray(G.rivals)) return;
   G.rivals.forEach(r => {
-    r.fame = Math.min(1000, r.fame + 3 + Math.floor(Math.random() * 3));
+    const base = r.type === 'friendly' ? 4 : 3;
+    r.fame = Math.min(1000, r.fame + base + Math.floor(Math.random() * 3));
   });
 }
 
@@ -5209,6 +5440,46 @@ function getRivalRivalryLabel(rivalry) {
   return '적대';
 }
 
+// 결혼식 축하 대사 (친한 라이벌, 성격+id별 분기)
+function getRivalWeddingLine(r) {
+  if (r.personality === '지적') return '결혼 축하해. 좋은 변호사이자 좋은 사람이니까, 분명 좋은 배우자가 될 거야. 가끔은 일보다 집을 우선하는 것도 잊지 말고.';
+  if (r.personality === '다정') return '너무 축하해! 이렇게 행복한 모습 보니까 나도 눈물이 날 것 같아. 잘 살아야 해, 꼭. 힘들면 언제든 연락하고.';
+  if (r.personality === '냉철') {
+    if (r.id === 'rival_anjindam')  return '...축하합니다. 변호사 일과 가정을 양립하는 게 쉽지 않지만, 당신이라면 잘 해내시리라 믿습니다.';
+    if (r.id === 'rival_seongrina') return '축하드려요. 이런 자리에 초대해주셔서 감사하네요. 오래 행복하시길 바랄게요.';
+  }
+  return '축하드려요. 행복하시길 바랍니다.';
+}
+
+// 서브3·4 승패 라이벌 반응 대사
+function getSubRivalReaction(subNum, outcome) {
+  const r = subNum === 3 ? _getSub3Rival() : _getSub4Rival();
+  if (!r) return null;
+  const map = {
+    rival_anjindam:  { win: '...이번엔 당신이 한 수 위였습니다. 인정하죠.',               lose: '예상대로였군요. 역시 이런 사건은 경험 차이입니다.' },
+    rival_seongrina: { win: '...인정할 건 인정해야겠네요. 잘 하셨어요.',                    lose: '안타깝네요. 다음엔 더 준비하고 오세요.' },
+    rival_iguseung:  { win: '좋은 변론이었어. 법리 정리가 깔끔하던데. 축하해.',              lose: '아쉽네. 그래도 네 주장 자체는 설득력 있었어. 한 끗 차이였다고 생각해.' },
+    rival_ganghaju:  { win: '축하해. 나도 이번 사건 준비하면서 많이 배웠어, 정말로.',        lose: '너무 속상해하지 마. 다음엔 꼭 이길 수 있을 거야. 나도 응원할게.' },
+  };
+  const m = map[r.id];
+  if (!m) return null;
+  return { rival: r, text: m[outcome] };
+}
+function playSubRivalReaction(subNum, outcome, onDone) {
+  const data = getSubRivalReaction(subNum, outcome);
+  if (!data) { onDone(); return; }
+  showMainTrialDialogue({bg:'배경/재판.webp', face: data.rival.face, speaker: data.rival.name, text: data.text}, onDone);
+}
+
+// 메인4 조력자 대사 (친한 라이벌)
+function getRivalMain4HelpLine(r, pn) {
+  if (r.id === 'rival_iguseung')  return `${pn}, 내가 알아본 바에 따르면 상대측 증거에 허점이 있어. 이 부분을 집요하게 파고들어봐. 자료는 메일로 보내둘게.`;
+  if (r.id === 'rival_ganghaju')  return `${J(pn, '아/야')} 혼자 감당할 일이 아니야. 내가 도울게. 필요한 자료는 다 모아놨어. 너무 무리하지 마.`;
+  if (r.id === 'rival_anjindam')  return `${pn} 변호사. 이번 사건, 당신 쪽에 섭니다. 제 명성을 걸고라도 이 정도 일은 두고 볼 수 없으니까요.`;
+  if (r.id === 'rival_seongrina') return `${pn} 변호사. 이건 개인 차원을 넘어선 문제예요. 내가 도울게요. 대신 이 신세, 기억해두시길.`;
+  return `${pn} 변호사, 이번 사건 내가 도울게.`;
+}
+
 // 변형 중 랜덤 선택 (일기 문체 다양성)
 function pickDiaryText(variants) {
   return variants[Math.floor(Math.random() * variants.length)];
@@ -5228,6 +5499,7 @@ const _JOSA = {
   '을/를':   ['을','를'],
   '은/는':   ['은','는'],
   '으로/로': ['으로','로'],
+  '아/야':   ['아','야'],
 };
 function J(name, kind) {
   const pair = _JOSA[kind];
@@ -5357,9 +5629,9 @@ function showBurnoutEvent(stage, onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = '(펜을 쥐었는데 손이 덜덜 떨린다... 이대로는 안 되겠다.)';
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyBurnoutChoice(80,'vacation')"><span class="choice-label">🏖 긴급 장기 휴가</span> 번아웃 -30, 자금 -200만</button>
-      <button class="event-choice" onclick="applyBurnoutChoice(80,'doctor')"><span class="choice-label">💊 병원 집중 치료</span> 자금 -500만, 번아웃 -15</button>
-      <button class="event-choice" onclick="applyBurnoutChoice(80,'endure')"><span class="choice-label">💀 버티기</span> 번아웃 +5 (위험)</button>`;
+      <button class="event-choice" onclick="applyBurnoutChoice(80,'vacation')"><span class="choice-label">긴급 장기 휴가</span> 번아웃 -30, 자금 -200만</button>
+      <button class="event-choice" onclick="applyBurnoutChoice(80,'doctor')"><span class="choice-label">병원 집중 치료</span> 자금 -500만, 번아웃 -15</button>
+      <button class="event-choice" onclick="applyBurnoutChoice(80,'endure')"><span class="choice-label">버티기</span> 번아웃 +5 (위험)</button>`;
     window._burnoutOnDone = onDone;
   }
 }
@@ -5424,9 +5696,9 @@ function showSlumpEvent(onDone) {
   document.getElementById('se-speaker').textContent = '동료 변호사';
   document.getElementById('se-text').textContent = `${G.name}, 최근 판결 잘 안 풀렸다며? 괜찮아?`;
   document.getElementById('se-choices').innerHTML = `
-    <button class="event-choice" onclick="applySlumpChoice('advice')"><span class="choice-label">👴 선배에게 조언</span> 준비도 +15, 다음 재판 +5%</button>
-    <button class="event-choice" onclick="applySlumpChoice('push')"><span class="choice-label">🔥 더 밀어붙이기</span> 준비도 +30, 피로 +10</button>
-    <button class="event-choice" onclick="applySlumpChoice('reduce')"><span class="choice-label">😌 사건 수 줄이기</span> 다음달 수임 -30%</button>`;
+    <button class="event-choice" onclick="applySlumpChoice('advice')"><span class="choice-label">선배에게 조언</span> 준비도 +15, 다음 재판 +5%</button>
+    <button class="event-choice" onclick="applySlumpChoice('push')"><span class="choice-label">더 밀어붙이기</span> 준비도 +30, 피로 +10</button>
+    <button class="event-choice" onclick="applySlumpChoice('reduce')"><span class="choice-label">사건 수 줄이기</span> 다음달 수임 -30%</button>`;
   window._slumpOnDone = onDone;
 }
 
@@ -5613,9 +5885,9 @@ function showChildEvent(kind, child, onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `우리 ${cname} 벌써 돌이네. 시간 참 빠르다.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyChildChoice('firstBirthday','big','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">🎉</span> 성대한 돌잔치 (자금 -300만)</button>
-      <button class="event-choice" onclick="applyChildChoice('firstBirthday','small','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">🎂</span> 조촐하게 (자금 -50만)</button>
-      <button class="event-choice" onclick="applyChildChoice('firstBirthday','skip','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">😔</span> 업무 때문에 미룸</button>`;
+      <button class="event-choice" onclick="applyChildChoice('firstBirthday','big','${child.birthYear}-${child.birthMonth}')">성대한 돌잔치 (자금 -300만)</button>
+      <button class="event-choice" onclick="applyChildChoice('firstBirthday','small','${child.birthYear}-${child.birthMonth}')">조촐하게 (자금 -50만)</button>
+      <button class="event-choice" onclick="applyChildChoice('firstBirthday','skip','${child.birthYear}-${child.birthMonth}')">업무 때문에 미룸</button>`;
   } else if (kind === 'firstWord') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-speaker').textContent = G.name;
@@ -5626,22 +5898,22 @@ function showChildEvent(kind, child, onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${cname} 오늘 어린이집 첫 등원. ${parentCall} 손 놓기 싫다며 울었다.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyChildChoice('kindergarten','go','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">🏃</span> 직접 등원 시켜줌</button>
-      <button class="event-choice" onclick="applyChildChoice('kindergarten','ask','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">💼</span> 배우자에게 부탁</button>`;
+      <button class="event-choice" onclick="applyChildChoice('kindergarten','go','${child.birthYear}-${child.birthMonth}')">직접 등원 시켜줌</button>
+      <button class="event-choice" onclick="applyChildChoice('kindergarten','ask','${child.birthYear}-${child.birthMonth}')">배우자에게 부탁</button>`;
   } else if (kind === 'elementary') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `우리 ${cname}${_hasJong(cname)?'이':'가'} 벌써 초등학생이라니...`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyChildChoice('elementary','go','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">🎒</span> 연차 내고 참석</button>
-      <button class="event-choice" onclick="applyChildChoice('elementary','photo','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">📸</span> 사진만 받음</button>`;
+      <button class="event-choice" onclick="applyChildChoice('elementary','go','${child.birthYear}-${child.birthMonth}')">연차 내고 참석</button>
+      <button class="event-choice" onclick="applyChildChoice('elementary','photo','${child.birthYear}-${child.birthMonth}')">사진만 받음</button>`;
   } else if (kind === 'sick') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/병원.webp')}')`;
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${cname}${_hasJong(cname)?'이':'가'} 고열이 난다. 어떻게 할까?`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyChildChoice('sick','hospital','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">🏥</span> 병원 동행</button>
-      <button class="event-choice" onclick="applyChildChoice('sick','spouse','${child.birthYear}-${child.birthMonth}')"><span class="choice-label">💊</span> 배우자에게 맡김</button>`;
+      <button class="event-choice" onclick="applyChildChoice('sick','hospital','${child.birthYear}-${child.birthMonth}')">병원 동행</button>
+      <button class="event-choice" onclick="applyChildChoice('sick','spouse','${child.birthYear}-${child.birthMonth}')">배우자에게 맡김</button>`;
   }
   window._familyOnDone = onDone;
   window._familyCurrentChildKey = `${child.birthYear}-${child.birthMonth}`;
@@ -5849,9 +6121,9 @@ function showSpouseEvent(kind, spouse, onDone) {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-text').textContent = `우리 얘기 좀 해.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applySpouseChoice('fight','apology')"><span class="choice-label">🙏</span> 사과하고 대화</button>
-      <button class="event-choice" onclick="applySpouseChoice('fight','avoid')"><span class="choice-label">🤐</span> 피함</button>
-      <button class="event-choice" onclick="applySpouseChoice('fight','counter')"><span class="choice-label">🔥</span> 맞받아침</button>`;
+      <button class="event-choice" onclick="applySpouseChoice('fight','apology')">사과하고 대화</button>
+      <button class="event-choice" onclick="applySpouseChoice('fight','avoid')">피함</button>
+      <button class="event-choice" onclick="applySpouseChoice('fight','counter')">맞받아침</button>`;
   } else if (kind === 'gift') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-text').textContent = `그냥, 고마워서.`;
@@ -5863,16 +6135,16 @@ function showSpouseEvent(kind, spouse, onDone) {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-text').textContent = `요즘 너무 무리하는 거 같아. 몸 상해.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applySpouseChoice('worry','hug')"><span class="choice-label">🤗</span> 고마워하며 안아줌</button>
-      <button class="event-choice" onclick="applySpouseChoice('worry','ok')"><span class="choice-label">😮‍💨</span> "괜찮아"</button>
-      <button class="event-choice" onclick="applySpouseChoice('worry','snap')"><span class="choice-label">😤</span> "당신이 뭘 알아"</button>`;
+      <button class="event-choice" onclick="applySpouseChoice('worry','hug')">고마워하며 안아줌</button>
+      <button class="event-choice" onclick="applySpouseChoice('worry','ok')">"괜찮아"</button>
+      <button class="event-choice" onclick="applySpouseChoice('worry','snap')">"당신이 뭘 알아"</button>`;
   } else if (kind === 'sick') {
     document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
     document.getElementById('se-text').textContent = `몸살이 난 것 같아... 누워있게.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applySpouseChoice('sick','care')"><span class="choice-label">🏥</span> 간병 (연차)</button>
-      <button class="event-choice" onclick="applySpouseChoice('sick','medicine')"><span class="choice-label">💊</span> 약 사다주고 출근</button>
-      <button class="event-choice" onclick="applySpouseChoice('sick','ignore')"><span class="choice-label">🙅</span> 그대로 출근</button>`;
+      <button class="event-choice" onclick="applySpouseChoice('sick','care')">간병 (연차)</button>
+      <button class="event-choice" onclick="applySpouseChoice('sick','medicine')">약 사다주고 출근</button>
+      <button class="event-choice" onclick="applySpouseChoice('sick','ignore')">그대로 출근</button>`;
   }
   window._familyOnDone = onDone;
   window._familyCurrentSpouseName = spouse.name;
@@ -6095,8 +6367,8 @@ function showNewYearEvent(onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${child.name}${_hasJong(child.name)?'이':'가'} 설빔을 입고 싶다고 졸라댄다. 세배상도 차려야 할까.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyNewYearChoice('big_family')"><span class="choice-label">🎎</span> 성대한 세배상 + 세뱃돈</button>
-      <button class="event-choice" onclick="applyNewYearChoice('small_family')"><span class="choice-label">🍲</span> 조촐한 새해</button>`;
+      <button class="event-choice" onclick="applyNewYearChoice('big_family')">성대한 세배상 + 세뱃돈</button>
+      <button class="event-choice" onclick="applyNewYearChoice('small_family')">조촐한 새해</button>`;
   } else if (hasLover) {
     _seasonalSetupModal('배경/방.webp');
     const targets = getRomanceTargets();
@@ -6105,8 +6377,8 @@ function showNewYearEvent(onDone) {
     document.getElementById('se-speaker').textContent = (t ? t.name : '연인');
     document.getElementById('se-text').textContent = `${G.name}, 함께 맞는 새해야. 잘 부탁해.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyNewYearChoice('together_lover')"><span class="choice-label">🎊</span> 같이 보내기</button>
-      <button class="event-choice" onclick="applyNewYearChoice('short_lover')"><span class="choice-label">💼</span> 업무 때문에 짧게</button>`;
+      <button class="event-choice" onclick="applyNewYearChoice('together_lover')">같이 보내기</button>
+      <button class="event-choice" onclick="applyNewYearChoice('short_lover')">업무 때문에 짧게</button>`;
   } else {
     _seasonalSetupModal('배경/방.webp');
     document.getElementById('se-face-img').src = getPlayerFace();
@@ -6187,8 +6459,8 @@ function showSpringEvent(onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${t ? t.name : '연인'}${t && _hasJong(t.name)?'과':'와'} 꽃놀이 약속을 잡았다.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applySpringChoice('day_lover')"><span class="choice-label">🌸</span> 하루 비워서 가기</button>
-      <button class="event-choice" onclick="applySpringChoice('short_lover')"><span class="choice-label">⏰</span> 짧게 다녀오기</button>`;
+      <button class="event-choice" onclick="applySpringChoice('day_lover')">하루 비워서 가기</button>
+      <button class="event-choice" onclick="applySpringChoice('short_lover')">짧게 다녀오기</button>`;
   } else {
     document.getElementById('se-face-img').src = getPlayerFace();
     document.getElementById('se-speaker').textContent = G.name;
@@ -6207,9 +6479,12 @@ function applySpringChoice(choice) {
     G.stats.stress = Math.max(0, G.stats.stress - 110);
     addDiary('🌸', `꽃놀이 🌸 이번 봄은 유난히 예쁘다 #봄 #꽃구경`, _ld);
     if (partner) {
+      const reply = G.gender === 'male'
+        ? '꽃보다 네가 더 예쁜걸.'
+        : '이렇게 같이 꽃구경 오니까 참 좋다.';
       epilogue = [
         {speaker: partner.name, face: partner.face, text: '와... 꽃 진짜 예쁘다. 사진 많이 찍자.'},
-        {speaker: G.name, face: getPlayerFace(), text: '사진보다 네가 더 예쁜걸.'}
+        {speaker: G.name, face: getPlayerFace(), text: reply}
       ];
     }
   } else if (choice === 'short_lover') {
@@ -6241,9 +6516,9 @@ function showChildrensDayEvent(onDone, childIdx) {
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = `${child.name} 어린이날. 어떻게 보낼까?`;
   document.getElementById('se-choices').innerHTML = `
-    <button class="event-choice" onclick="applyChildrensDayChoice('park','${child.name}')"><span class="choice-label">🎢</span> 놀이공원</button>
-    <button class="event-choice" onclick="applyChildrensDayChoice('home','${child.name}')"><span class="choice-label">🎁</span> 집에서 선물</button>
-    <button class="event-choice" onclick="applyChildrensDayChoice('skip','${child.name}')"><span class="choice-label">💼</span> 일 때문에 못 챙김</button>`;
+    <button class="event-choice" onclick="applyChildrensDayChoice('park','${child.name}')">놀이공원</button>
+    <button class="event-choice" onclick="applyChildrensDayChoice('home','${child.name}')">집에서 선물</button>
+    <button class="event-choice" onclick="applyChildrensDayChoice('skip','${child.name}')">일 때문에 못 챙김</button>`;
 }
 function applyChildrensDayChoice(choice, cname) {
   // 어린이날 SNS 기록은 5월 5일자로
@@ -6307,15 +6582,21 @@ function applyConstitutionDay() {
 // 🏖 한여름 피서
 function showSummerEvent(onDone) {
   window._seasonalOnDone = onDone;
-  const hasLoverOrChild = (G.romance && G.romance.dating) || (G.children && G.children.length > 0);
+  const hasChild = G.children && G.children.length > 0;
+  const hasLover = G.romance && G.romance.dating;
   _seasonalSetupModal('배경/여름.jpg');
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
-  if (hasLoverOrChild) {
+  if (hasChild || G.isMarried) {
     document.getElementById('se-text').textContent = '더위에 지쳐 휴가 생각이 간절해진다.';
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applySummerChoice('plan')"><span class="choice-label">🏖</span> 가족과 짧은 휴가 계획</button>
-      <button class="event-choice" onclick="applySummerChoice('work')"><span class="choice-label">💼</span> 일에 집중</button>`;
+      <button class="event-choice" onclick="applySummerChoice('plan')">가족과 짧은 휴가 계획</button>
+      <button class="event-choice" onclick="applySummerChoice('work')">일에 집중</button>`;
+  } else if (hasLover) {
+    document.getElementById('se-text').textContent = '더위에 지쳐 휴가 생각이 간절해진다.';
+    document.getElementById('se-choices').innerHTML = `
+      <button class="event-choice" onclick="applySummerChoice('plan')">연인과 짧은 휴가 계획</button>
+      <button class="event-choice" onclick="applySummerChoice('work')">일에 집중</button>`;
   } else {
     document.getElementById('se-text').textContent = '여름이 너무 덥다. 퇴근길에 에어컨 빵빵한 카페에 앉았다.';
     document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="applySummerChoice('alone')">잠깐 쉬자.</button>`;
@@ -6325,14 +6606,16 @@ function applySummerChoice(choice) {
   // 한여름 피서 SNS 기록은 8월 1일자로
   const _ld = 1;
   const partner = _getPartnerInfo();
-  const child = (G.children && G.children[0]) || null;
+  // 자녀 대사는 만 2세 이상부터 (돌 이전 아기는 "오랜만이다" 등 대사 부자연스러움)
+  const child = (G.children || []).find(c => getChildAge(c) >= 2) || null;
   const childFace = child ? getChildFace(getChildAge(child)) : null;
   let epilogue = [];
   if (choice === 'plan') {
     G.funds -= 500000;
     if (G.isMarried) spouseAffectionDelta(10);
     updateBurnout(-10);
-    addDiary('🏖', `가족이랑 짧게 휴가 🏖 바다 냄새 좋다 #여름 #휴가`, _ld);
+    const diaryWho = (G.isMarried || (G.children && G.children.length > 0)) ? '가족' : '연인';
+    addDiary('🏖', `${diaryWho}이랑 짧게 휴가 🏖 바다 냄새 좋다 #여름 #휴가`, _ld);
     if (child) {
       epilogue = [
         {speaker: child.name, face: childFace, text: '바다다! 우와~ 진짜 오랜만이다!'},
@@ -6372,8 +6655,8 @@ function showAutumnEvent(onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${t ? t.name : '연인'}${t && _hasJong(t.name)?'과':'와'} 단풍 구경 약속을 잡았다.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyAutumnChoice('hike')"><span class="choice-label">🍁</span> 산행</button>
-      <button class="event-choice" onclick="applyAutumnChoice('park')"><span class="choice-label">☕</span> 가까운 공원만</button>`;
+      <button class="event-choice" onclick="applyAutumnChoice('hike')">산행</button>
+      <button class="event-choice" onclick="applyAutumnChoice('park')">가까운 공원만</button>`;
   } else {
     document.getElementById('se-face-img').src = getPlayerFace();
     document.getElementById('se-speaker').textContent = G.name;
@@ -6419,7 +6702,8 @@ function applyAutumnChoice(choice) {
 function showYearEndEvent(onDone) {
   window._seasonalOnDone = onDone;
   const hasLover = G.romance && G.romance.dating;
-  const hasChild = G.children && G.children.length > 0;
+  // 산타 분기는 만 2세 이상 자녀가 있을 때만 (돌 이전 아기는 산타 기다리기 연출 부자연스러움)
+  const eligibleChild = (G.children || []).find(c => getChildAge(c) >= 2);
   _seasonalSetupModal('배경/크리스마스.jpg');
   // Stage 1: Christmas
   if (hasLover) {
@@ -6429,17 +6713,17 @@ function showYearEndEvent(onDone) {
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${t ? t.name : '연인'}${t && _hasJong(t.name)?'과':'와'} 크리스마스를 어떻게 보낼까?`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyXmasChoice('date')"><span class="choice-label">💐</span> 로맨틱 데이트 (고급 레스토랑)</button>
-      <button class="event-choice" onclick="applyXmasChoice('home')"><span class="choice-label">🏠</span> 집에서 조용히</button>`;
-  } else if (hasChild) {
-    const child = G.children[0];
+      <button class="event-choice" onclick="applyXmasChoice('date')">로맨틱 데이트 (고급 레스토랑)</button>
+      <button class="event-choice" onclick="applyXmasChoice('home')">집에서 조용히</button>`;
+  } else if (eligibleChild) {
+    const child = eligibleChild;
     const age = getChildAge(child);
     document.getElementById('se-face-img').src = getChildFace(age);
     document.getElementById('se-speaker').textContent = G.name;
     document.getElementById('se-text').textContent = `${child.name} 산타를 기다린다.`;
     document.getElementById('se-choices').innerHTML = `
-      <button class="event-choice" onclick="applyXmasChoice('gift','${child.name}')"><span class="choice-label">🎁</span> 선물 챙기기</button>
-      <button class="event-choice" onclick="applyXmasChoice('forgot','${child.name}')"><span class="choice-label">😔</span> 바빠서 깜빡</button>`;
+      <button class="event-choice" onclick="applyXmasChoice('gift','${child.name}')">선물 챙기기</button>
+      <button class="event-choice" onclick="applyXmasChoice('forgot','${child.name}')">바빠서 깜빡</button>`;
   } else {
     document.getElementById('se-face-img').src = getPlayerFace();
     document.getElementById('se-speaker').textContent = G.name;
@@ -6964,8 +7248,8 @@ function getWinRateDesc() {
   const total = (G.wins||0) + (G.losses||0);
   if (total < 5) return '법정 경험을 쌓아가는';
   const wr = G.wins / total * 100;
-  if (wr >= 70) return `${Math.round(wr)}%에 이르는 높은 승소율의`;
-  if (wr >= 55) return '견실한 승소율을 유지하는';
+  if (wr >= 70) return `${Math.round(wr)}%에 이르는 높은 승소율을 자랑하는 업계 정상급 실력의`;
+  if (wr >= 55) return '견실한 승소율을 자랑하는 풍부한 경험의';
   return '꾸준한 법정 경험의';
 }
 function getMoralityTone() {
@@ -7008,6 +7292,7 @@ function fillPlayerArticle(tpl) {
     .replace(/\{전문분야 기술\}/g, getSpecialtyDesc())
     .replace(/\{승률 기술\}/g, getWinRateDesc())
     .replace(/\{가치관 톤\}/g, getMoralityTone())
+    .replace(/\{활동 기술\}을 통해/g, J(getActivityDesc(), '을/를') + ' 통해')
     .replace(/\{활동 기술\}/g, getActivityDesc())
     .replace(/\{경력 기술\}/g, getCareerDesc())
     .replace(/\{가정 기술\}/g, getFamilyDesc())
@@ -7087,7 +7372,9 @@ const RIVAL_NEWS_TEMPLATES = [
     ],
     fameGain: 10,
     popup: true,
-    popupLine: (r) => `${r.name} 변호사가 법조계 정상에 섰구나. 대단하다. 나도 이대로 있을 수는 없지.`,
+    popupLine: (r, plRep) => (plRep > r.fame)
+      ? `${r.name} 변호사도 드디어 여기까지 왔구나. 수고했네.`
+      : `${r.name} 변호사가 법조계 정상에 섰구나. 대단하다. 나도 이대로 있을 수는 없지.`,
   },
   {
     key: 'fame800',
@@ -7101,7 +7388,9 @@ const RIVAL_NEWS_TEMPLATES = [
     ],
     fameGain: 20,
     popup: true,
-    popupLine: (r) => `${r.name} 변호사, 벌써 대형펌 파트너라고? 빠르네. 나도 뒤쳐지면 안 될텐데..`,
+    popupLine: (r, plRep) => (plRep > r.fame)
+      ? `${r.name} 변호사도 열심히 하고 있군.`
+      : `${r.name} 변호사, 벌써 대형펌 파트너라고? 빠르네. 나도 뒤쳐지면 안 될텐데..`,
   },
   {
     key: 'fame500',
@@ -7115,7 +7404,9 @@ const RIVAL_NEWS_TEMPLATES = [
     ],
     fameGain: 30,
     popup: true,
-    popupLine: (r) => `${r.name} 변호사가 또 승소했구나. 기세가 좋네. 나도 뒤쳐지면 안 되는데...`,
+    popupLine: (r, plRep) => (plRep > r.fame)
+      ? `${r.name} 변호사도 열심히 하고 있군. 나도 화이팅하자.`
+      : `${r.name} 변호사가 또 승소했구나. 기세가 좋네. 나도 뒤쳐지면 안 되는데...`,
   },
   {
     key: 'fame300',
@@ -7172,7 +7463,7 @@ function generateRivalNews() {
       }
       result.push({
         newsItem,
-        popupLine: tpl.popup && tpl.popupLine ? tpl.popupLine(r) : null,
+        popupLine: tpl.popup && tpl.popupLine ? tpl.popupLine(r, plRep) : null,
         rival: r,
       });
       break; // 라이벌 1명당 한 건만
@@ -13140,6 +13431,8 @@ function continueExecution() {
           checkAndInsertEvent(evt, vnScenes);
         }
       }
+      // 라이벌 조우·대결 체크 (재판 1%/3%, 조우 5%)
+      maybeInsertRivalEncounter(slot, vnScenes, monthInsertedEvents);
     }
     // C+D. 연애이벤트 체크 (특수이벤트가 발생하면 일반 만남 스킵)
     if (slot.action) {
@@ -13600,6 +13893,12 @@ function buildScene(slot) {
       `${J(wName, '와/과')} 부부됨 ✨ 식장 들어서는 순간 꿈같음 #결혼 #영원히`,
       `결혼식 ❤️ ${wName} 웃는 거 보니 이 사람 선택한 게 맞다 싶음 #결혼`,
     ]), slot && slot.day);
+    // 친한 라이벌(rivalry<0) 축하 대사 — 성격별 분기
+    const rivalLines = [];
+    const friendRival = (typeof getFriendlierRival === 'function') ? getFriendlierRival() : null;
+    if (friendRival && friendRival.rivalry < 0) {
+      rivalLines.push({speaker: friendRival.name, face: friendRival.face, text: getRivalWeddingLine(friendRival)});
+    }
     return {type:'wedding', bg:'배경/결혼식.png', charFace, wName, wFace, date:dateStr,
       dialogues:[
         {speaker:'동료 변호사', face:'캐릭터얼굴/동료남자어쏘.webp', text:`${G.name} 변호사님, 결혼 정말 축하드립니다!`},
@@ -13607,6 +13906,7 @@ function buildScene(slot) {
         {speaker:'대표변호사', face:getBossFace(), text:`${G.name} 변호사, 축하하네. 행복하게 잘 살게나.`},
         {speaker:'법학교수', face:'캐릭터얼굴/법학교수.webp', text:`${G.name} 변호사, 축하하네. 좋은 가정 꾸리게 되었구만.`},
         {speaker:'법학강사', face:'캐릭터얼굴/법학강사.webp', text:`${G.name} 변호사님, 결혼 축하드려요!`},
+        ...rivalLines,
         {speaker:G.name, face:charFace, text:'감사합니다, 모두. 정말 감사합니다.'},
         {speaker:G.name, face:charFace, text:'이제 결혼식 시작이다. 들어가볼까.'},
       ]};
@@ -14317,6 +14617,17 @@ function applyEventChoice(choiceIdx) {
       const display = Math.abs(v) >= 10000 ? (v>0?'+':'')+Math.floor(v/10000)+'만원' : (v>0?'+':'')+v+'원';
       changeList.push({name:'자금', value:display, positive: v>0});
     }
+    else if (k === '_rivalry') {
+      // 라이벌 관계 수치 증감 — evtDef._rivalId 로 대상 지정. 변경 라벨은 표시하지 않음(내부 수치).
+      const rid = evtDef._rivalId;
+      if (rid && Array.isArray(G.rivals)) {
+        const r = G.rivals.find(x => x.id === rid);
+        if (r) {
+          r.rivalry = Math.max(-100, Math.min(100, (r.rivalry || 0) + choice.effects[k]));
+          r.encounters = (r.encounters || 0) + 1;
+        }
+      }
+    }
     else if (STAT_NAMES[k]) {
       const actualV = applyStat(k, choice.effects[k]);
       const rounded = Math.round(actualV * 10) / 10;
@@ -14490,14 +14801,29 @@ function applyEventChoice(choiceIdx) {
 }
 
 function showEventResult(evtDef, choice, changeList) {
-  // 주인공 얼굴로 전환
+  // 라이벌 이벤트: 주인공 선행 대사 → 라이벌 응답 2단계로 표시
+  let speakerName = G.name;
+  let speakerFace = getPlayerFace();
+  let resultText = choice.result || choice.text;
+  let pendingRivalStep = null; // {name, face, text, changeList}
+  if (evtDef && evtDef._rivalId && choice.rivalReply) {
+    const r = (typeof getRival === 'function') ? getRival(evtDef._rivalId) : null;
+    if (r) {
+      if (choice.playerPreLine) {
+        // 1단계: 주인공 선행 대사, 2단계: 라이벌 반응
+        resultText = choice.playerPreLine;
+        pendingRivalStep = { name: r.name, face: r.face, text: choice.rivalReply };
+      } else {
+        speakerName = r.name;
+        speakerFace = r.face;
+        resultText = choice.rivalReply;
+      }
+    }
+  }
   document.getElementById('se-face').style.display = 'block';
-  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-face-img').src = speakerFace;
   document.getElementById('se-dialog').classList.remove('no-face');
-  document.getElementById('se-speaker').textContent = G.name;
-
-  // 결과 텍스트 구성
-  const resultText = choice.result || choice.text;
+  document.getElementById('se-speaker').textContent = speakerName;
   let changesHtml = '';
   if (changeList.length > 0) {
     changesHtml = '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center">' +
@@ -14507,10 +14833,33 @@ function showEventResult(evtDef, choice, changeList) {
       }).join('') + '</div>';
   }
 
+  // 2단계 필요 시: 1단계는 changes 표시 보류 → 2단계에 몰아 표시
+  const firstChangesHtml = pendingRivalStep ? '' : changesHtml;
   document.getElementById('se-text').innerHTML =
-    `<div style="color:#e8d5b5;margin-bottom:4px">${resultText}</div>${changesHtml}`;
+    `<div style="color:#e8d5b5;margin-bottom:4px">${resultText}</div>${firstChangesHtml}`;
+  if (pendingRivalStep) {
+    // "다음" 클릭 시 라이벌 대사로 전환
+    window._pendingRivalStep = pendingRivalStep;
+    window._pendingRivalChangesHtml = changesHtml;
+    document.getElementById('se-choices').innerHTML =
+      `<button class="event-choice" onclick="_advanceRivalStep()"><span class="choice-label">다음</span></button>`;
+  } else {
+    document.getElementById('se-choices').innerHTML =
+      `<button class="event-choice" onclick="closeEventResult()"><span class="choice-label">확인</span></button>`;
+  }
+}
+function _advanceRivalStep() {
+  const step = window._pendingRivalStep;
+  if (!step) { closeEventResult(); return; }
+  const changesHtml = window._pendingRivalChangesHtml || '';
+  document.getElementById('se-face-img').src = step.face;
+  document.getElementById('se-speaker').textContent = step.name;
+  document.getElementById('se-text').innerHTML =
+    `<div style="color:#e8d5b5;margin-bottom:4px">${step.text}</div>${changesHtml}`;
   document.getElementById('se-choices').innerHTML =
     `<button class="event-choice" onclick="closeEventResult()"><span class="choice-label">확인</span></button>`;
+  window._pendingRivalStep = null;
+  window._pendingRivalChangesHtml = null;
 }
 
 function closeEventResult() {
@@ -15447,7 +15796,7 @@ function acceptPromotion(targetStatus) {
       `경영 일선에 나선 신임 대표의 향후 행보에 법조계가 주목하고 있다.`,
       [
         `{로펌명}이 신임 대표변호사로 {이름} 변호사를 선임했다.`,
-        `{이름} 신임 대표변호사는 {전문분야 기술}에 강점을 두고 {승률 기술} 쌓아온 인물로, 후배 변호사 양성과 {공익·수익 분기} 쪽에 힘을 싣겠다는 방침이다.`,
+        `{이름} 신임 대표변호사는 {전문분야 기술}에 강점을 두고 {경력 기술}을 쌓아온 인물로, 후배 변호사 양성과 {공익·수익 분기} 쪽에 힘을 싣겠다는 방침이다.`,
         `법조계는 "{로펌명}의 새로운 10년을 여는 계기"라며 신임 대표의 행보에 주목하고 있다.`,
         `{이름} 대표는 "의뢰인 신뢰를 최우선으로 하는 로펌을 만들겠다"고 포부를 밝혔다.`,
       ]);
@@ -17431,7 +17780,7 @@ function ensureDefaults(state) {
     'romanceEvents', 'romanceChoices', 'brokenUp',
     'mainStoryFlag', 'mainStoryOffered',
     'triggeredPlayerNews', 'spouseEvents', 'seasonalEvents',
-    'rivalNewsSeen',
+    'rivalNewsSeen', 'rivalBigDuelDone',
   ];
   for (const k of objs) {
     const v = state[k];
@@ -17582,6 +17931,8 @@ function loadGame(slot) {
   for (const k in migrated.state) { G[k] = migrated.state[k]; }
   // 연애/결혼/정치 하위호환 (ensureRomance는 게임 곳곳에서 방어적으로 호출되므로 유지)
   ensureRomance();
+  // 서브3·4 재판 대사의 상대 변호사를 라이벌로 교체 (로드한 세이브의 G.rivals 기준)
+  patchSubTrialsWithRivals();
   // 화면 전환
   document.getElementById('title-screen').style.display = 'none';
   document.getElementById('gender-screen').style.display = 'none';
@@ -17912,6 +18263,27 @@ function acceptMainStory(caseNum) {
       document.getElementById('status-event-modal').style.display = 'none';
       playBGM('normal');
     });
+  } else if (caseNum === 4) {
+    // 메인4 조력자: 친한 라이벌(rivalry<0)이 도움 씬 등장
+    const helper = (typeof getFriendlierRival === 'function') ? getFriendlierRival() : null;
+    if (helper && helper.rivalry < 0 && G.mainCase4) {
+      G.mainCase4.rivalHelper = helper.id;
+      applyStat('mental', 10);  // 친한 사람 지원으로 멘탈 보너스
+      const helpLine = getRivalMain4HelpLine(helper, G.name);
+      const scene = [
+        {bg:'배경/서면.webp', face: helper.face, speaker: helper.name, text: helpLine},
+        {bg:'배경/서면.webp', face: 'player', speaker: '{name}', text: `${helper.name}... 고마워. 정말 든든하다.`},
+      ];
+      addDiary('🤝', `${helper.name} 변호사가 메인4 조력자로 나서 줬다. 혼자가 아니라는 게 이렇게 든든할 줄이야 #메인스토리 #${helper.name}`);
+      showMainTrialDialogueSequence(scene, 0, () => {
+        document.getElementById('status-event-modal').style.display = 'none';
+        playBGM('normal');
+        showToast(`${helper.name} 변호사가 이번 사건을 함께합니다. 멘탈 +10`);
+      });
+    } else {
+      document.getElementById('status-event-modal').style.display = 'none';
+      playBGM('normal');
+    }
   }
 }
 
@@ -18068,7 +18440,7 @@ function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback)
 
   function renderEvidenceButtons() {
     let html = `<div style="font-size:0.75rem;color:#c9a84c;margin-bottom:6px">증거를 ${needed}개 선택하세요 (선택: ${selected.length}/${needed})</div>`;
-    html += `<button class="event-choice" style="background:rgba(40,48,56,0.85);border-color:#80a0cc;color:#b0c8e0;margin-bottom:8px" onclick="window._openEvCaseOverlay()"><span class="choice-label">🔍</span> 증거함 전체 열람</button>`;
+    html += `<button class="event-choice" style="background:rgba(40,48,56,0.85);border-color:#80a0cc;color:#b0c8e0;margin-bottom:8px" onclick="window._openEvCaseOverlay()">증거함 전체 열람</button>`;
     if (allFound.length === 0) {
       html += `<div style="padding:8px;color:#cc6666;font-size:0.78rem;text-align:center">확보한 증거가 없습니다.</div>`;
     } else {
@@ -18078,7 +18450,7 @@ function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback)
         html += `<div style="margin-bottom:4px">`;
         html += `<div style="display:flex;gap:4px">`;
         html += `<button class="event-choice" style="flex:1;margin:0;${isSel?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleEvidence('${ev.id}')"><span class="choice-label">${isSel?'✓':' '}</span> ${ev.name}</button>`;
-        html += `<button class="event-choice" style="width:52px;margin:0;padding:0;font-size:0.8rem;flex:none;${isOpen?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleEvDesc('${ev.id}')" title="상세보기">${isOpen?'▲':'📄'}</button>`;
+        html += `<button class="event-choice" style="width:52px;margin:0;padding:0;font-size:0.8rem;flex:none;${isOpen?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleEvDesc('${ev.id}')" title="상세보기">${isOpen?'닫기':'보기'}</button>`;
         html += `</div>`;
         if (isOpen) {
           html += `<div style="padding:6px 10px;margin-top:3px;background:#1a1810;border:1px solid #3a3020;border-radius:4px;color:#c0b090;font-size:0.75rem;line-height:1.5;white-space:pre-line">${ev.desc||''}</div>`;
@@ -18090,7 +18462,7 @@ function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback)
       html += `<button class="event-choice" style="background:#2a3828;border-color:#80cc90;margin-top:8px" onclick="window._submitEvidence()"><span class="choice-label">▶</span> 제출</button>`;
     }
     // 항상 표시되는 포기 옵션
-    html += `<button class="event-choice" style="background:#2a1818;border-color:#884444;margin-top:8px;color:#cc8888" onclick="window._skipEvidence()"><span class="choice-label">⚠</span> 증거 제시 포기 (경고 +1)</button>`;
+    html += `<button class="event-choice" style="background:#2a1818;border-color:#884444;margin-top:8px;color:#cc8888" onclick="window._skipEvidence()">증거 제시 포기 (경고 +1)</button>`;
     document.getElementById('se-choices').innerHTML = html;
   }
 
@@ -18274,7 +18646,7 @@ const MAIN_TRIAL_1 = [
     ],
     evidenceSteps: [{prompt:'(김서연이 해외 비자금 송금 업무를 했다는 증거를 제시하자.)', correct:['inv_remittance'], count:1}],
     successDialogues: [
-      {face:'player', speaker:'{name}', text:'증인에게 직접 묻겠습니다. 2030년 1월 1일, 증인 이름으로 홍콩 소재 \'SJ 인터내셔널\'로 10억 원을 송금한 사실이 있지 않습니까? 여기 해당 송금 기록이 있습니다. 증인이 그냥 비서에 불과하다면, 이러한 큰 돈은 어디서 난 거죠?'},
+      {face:'player', speaker:'{name}', text:'증인에게 묻겠습니다. 2030년 1월 1일, 증인 이름으로 홍콩 소재 \'SJ 인터내셔널\'로 10억 원을 송금한 사실이 있지 않습니까? 여기 해당 송금 기록이 있습니다. 증인이 그냥 비서에 불과하다면, 이러한 큰 돈은 어디서 난 거죠?'},
       {face:'캐릭터얼굴/동료여자어쏘.webp', speaker:'조미현 검사', text:'재판장님! 지금 변호인 측은 증거로 채택되지 않은 문서를 가지고 증인신문과정에서 제시하고 있습니다.'},
       {face:'player', speaker:'{name}', text:'이 자료는 금융감독원의 공식 외환거래 기록입니다. 지금 증거로 제출하겠습니다.'},
       {face:'캐릭터얼굴/의뢰인4.webp', speaker:'김서연', text:'...'},
