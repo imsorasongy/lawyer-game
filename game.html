@@ -1496,6 +1496,9 @@ const G = {
     endingStatsView:      'main',
     endingStatsMainTitle: '',
   },
+  // 라이벌 변호사 (v11) — 게임 시작 시 성별에 따라 2명 자동 배정
+  rivals: [],
+  rivalNewsSeen: {},   // 라이벌 뉴스 중복 방지: 'rivalId-newsKey' → true
 };
 
 const STATUS_NAMES = {
@@ -3097,6 +3100,7 @@ function confirmOpeningCreate() {
   applyMBTIBonus(mbti);
   seedInitialSNSPost();
   seedInitialNews();
+  spawnRivals();
 
   // 오프닝 화면 페이드아웃 (2초)
   const screen = document.getElementById('opening-screen');
@@ -3147,6 +3151,7 @@ function confirmName() {
   applyMBTIBonus(mbti);
   seedInitialSNSPost();
   seedInitialNews();
+  spawnRivals();
   document.getElementById('name-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'block';
   document.getElementById('room-char-img').src = G.gender === 'male' ? '남주인공.webp' : '여주인공.webp';
@@ -5112,6 +5117,98 @@ function seedInitialNews() {
   applyNewsEffects(news);
 }
 
+// ===== 라이벌 변호사 시스템 (v11) =====
+// 플레이어 성별에 따라 동성 라이벌 2명(친근+경쟁) 자동 배정.
+// fame: 0~1000 (초기 300, 매월 자연 증가 3~5)
+// rivalry: -100(친밀) ~ +100(적대) (초기 0)
+const RIVAL_PROFILES = {
+  male: [
+    {
+      id: 'rival_anjindam', name: '안진담', gender: 'male',
+      type: 'competitive', specialty: 'corpLaw', personality: '냉철',
+      face: '캐릭터얼굴/안진담.webp',
+    },
+    {
+      id: 'rival_iguseung', name: '이기승', gender: 'male',
+      type: 'friendly',    specialty: 'criminalLaw', personality: '지적',
+      face: '캐릭터얼굴/이기승.webp',
+    },
+  ],
+  female: [
+    {
+      id: 'rival_ganghaju', name: '강하주', gender: 'female',
+      type: 'friendly',    specialty: 'familyLaw', personality: '다정',
+      face: '캐릭터얼굴/강하주.webp',
+    },
+    {
+      id: 'rival_seongrina', name: '성리나', gender: 'female',
+      type: 'competitive', specialty: 'corpLaw', personality: '냉철',
+      face: '캐릭터얼굴/성리나.webp',
+    },
+  ],
+};
+
+function spawnRivals() {
+  const pool = RIVAL_PROFILES[G.gender] || RIVAL_PROFILES.male;
+  G.rivals = pool.map(p => ({
+    ...p,
+    fame: 300,        // 0~1000
+    rivalry: 0,       // -100(친밀) ~ +100(적대)
+    encounters: 0,    // 마주친 횟수
+  }));
+  G.rivalNewsSeen = {};
+}
+
+// 라이벌 이름(또는 id)으로 라이벌 객체 조회
+function getRival(key) {
+  if (!Array.isArray(G.rivals)) return null;
+  return G.rivals.find(r => r.id === key || r.name === key) || null;
+}
+
+// 타입별 라이벌 조회
+function getRivalByType(type) {
+  if (!Array.isArray(G.rivals)) return null;
+  return G.rivals.find(r => r.type === type) || null;
+}
+
+// 더 친한 라이벌 (rivalry 낮은 쪽) — 결혼 축하·메인4 조력자 등에서 사용
+function getFriendlierRival() {
+  if (!Array.isArray(G.rivals) || G.rivals.length === 0) return null;
+  return G.rivals.slice().sort((a, b) => a.rivalry - b.rivalry)[0];
+}
+
+// 랜덤 라이벌 1명 (조우 이벤트용)
+function pickRandomRival() {
+  if (!Array.isArray(G.rivals) || G.rivals.length === 0) return null;
+  return G.rivals[Math.floor(Math.random() * G.rivals.length)];
+}
+
+// 라이벌 명성 자연 증가 (월 1회, 월말에 호출)
+function growRivalFame() {
+  if (!Array.isArray(G.rivals)) return;
+  G.rivals.forEach(r => {
+    r.fame = Math.min(1000, r.fame + 3 + Math.floor(Math.random() * 3));
+  });
+}
+
+// 라이벌 명성 상태 한 줄 요약
+function getRivalFameLabel(fame) {
+  if (fame < 300) return '무명';
+  if (fame < 500) return '떠오르는 신예';
+  if (fame < 800) return '업계 주목';
+  if (fame < 950) return '법조계 스타';
+  return '법조계 정상';
+}
+
+// 라이벌과 플레이어 관계 한 줄 요약
+function getRivalRivalryLabel(rivalry) {
+  if (rivalry <= -50) return '동맹';
+  if (rivalry <= -10) return '친밀';
+  if (rivalry <   10) return '보통';
+  if (rivalry <   50) return '경쟁';
+  return '적대';
+}
+
 // 변형 중 랜덤 선택 (일기 문체 다양성)
 function pickDiaryText(variants) {
   return variants[Math.floor(Math.random() * variants.length)];
@@ -5156,6 +5253,7 @@ function computeMonthlyBurnoutDelta() {
     /^investigate\d$/.test(a) || /^review\d$/.test(a) ||
     /^mainTrial\d$/.test(a) || /^main(Investigation|Confrontation)\d$/.test(a) ||
     /^subReview\d$/.test(a) || /^subTrial\d$/.test(a);
+  let hadWorkWhileSick = false;
   G.schedule.forEach(ds => {
     ds.slots.forEach(slot => {
       const a = slot.action;
@@ -5164,7 +5262,7 @@ function computeMonthlyBurnoutDelta() {
       if (isWorkAction(a)) {
         if (isDayOff) delta += 2;
         else if (slot.time === 'evening') delta += 1;
-        if (G.isSick) delta += 5;
+        if (G.isSick) hadWorkWhileSick = true;  // 업무 슬롯마다 +5가 아니라, 질병 중 업무 있었는지 플래그만
       }
       // 감소 요인
       if (a === 'homeRest') delta -= 2;
@@ -5176,6 +5274,8 @@ function computeMonthlyBurnoutDelta() {
       else if (a === 'wineMeet' || a === 'industryMeet' || a === 'sportClub' || a === 'studyGroup') delta -= 1;
     });
   });
+  // 질병 중 업무했으면 월간 flat +5 (기획서 "질병 중 업무 | 5" 해석)
+  if (hadWorkWhileSick) delta += 5;
   // 휴업 감쇠
   if (G.status === 'suspended') delta -= 10;
   return delta;
@@ -6826,8 +6926,8 @@ const NEWS_TEMPLATES = {
   ],
 };
 
-const NEWS_ICONS = { legal:'⚖', economy:'💹', social:'🗞', player:'⭐' };
-const NEWS_CAT_NAMES = { legal:'법조', economy:'경제', social:'시사', player:'주인공' };
+const NEWS_ICONS = { legal:'⚖', economy:'💹', social:'🗞', player:'⭐', rival:'🎯' };
+const NEWS_CAT_NAMES = { legal:'법조', economy:'경제', social:'시사', player:'주인공', rival:'라이벌' };
 const ASSET_NAMES = { domesticStock:'국내주식', foreignStock:'해외주식', coins:'코인', realEstate:'부동산', commodity:'현물' };
 const PRESS_NAMES = ['고려일보','동방일보','한마음','동향신문','초코렛뉴스','우성경제','KBC','MBS','HTBC'];
 const REPORTER_NAMES = ['김민수','박정우','이지현','최혜원','정유진','강태희','조성민','한예린','윤서준','장다은','송민지','배준영','황수빈','임도현','노지훈','구예나'];
@@ -6970,6 +7070,117 @@ function generateMonthlyNews() {
   return result;
 }
 
+// ===== 라이벌 뉴스 템플릿 =====
+// 조건 순서대로 우선순위. fame 구간·특정 상황별 한 개씩만 발동.
+// 각 뉴스는 (rival, key) 조합으로 한 번만 뜨도록 G.rivalNewsSeen 에 기록.
+const RIVAL_NEWS_TEMPLATES = [
+  // ----- 전성기 마일스톤 (fame 기반, 각 1회만) -----
+  {
+    key: 'fame950',
+    cond: (r, plRep) => r.fame >= 950,
+    title: (r) => `${r.name} 변호사, 법조인이 꼽은 ${PRO_NAMES[r.specialty]||'법조'} 분야 최고변호사 선정`,
+    body:  (r) => `수많은 승소와 공로로 ${PRO_NAMES[r.specialty]||'법조'} 분야의 대표 주자로 자리매김했다.`,
+    fullBody: (r) => [
+      `{date}. ${r.name} 변호사가 법조인들이 뽑은 ${PRO_NAMES[r.specialty]||'법조'} 분야 최고변호사에 선정됐다.`,
+      `${r.personality} 성격으로 알려진 ${r.name} 변호사는 여러 굵직한 사건을 연이어 승소하며 전문성을 갖춘 이 시대 최고의 변호사 중 한 명이라는 평을 받고 있다.`,
+      `법조계 안팎에서는 "${PRO_NAMES[r.specialty]||'법조'} 분야 사건은 ${r.name} 변호사에게 가라는 이야기가 이미 파다하다."며 "그의 시대가 시작됐다"는 평가가 나온다.`,
+    ],
+    fameGain: 10,
+    popup: true,
+    popupLine: (r) => `${r.name} 변호사가 법조계 정상에 섰구나. 대단하다. 나도 이대로 있을 수는 없지.`,
+  },
+  {
+    key: 'fame800',
+    cond: (r, plRep) => r.fame >= 800,
+    title: (r) => `${r.name} 변호사, 대형펌 파트너로 영입`,
+    body:  (r) => `${r.name} 변호사가 대형펌 파트너로 영입되었다는 소문에 법조계가 들썩이고 있다.`,
+    fullBody: (r) => [
+      `{date}. ${r.name} 변호사가 국내 유수 로펌의 파트너로 합류했다.`,
+      `과거 여러 사건에서 이미 두각을 나타냈던 ${r.name} 변호사는, 이번에도 거액의 연봉을 받고 파트너로 영입된 것으로 알려졌다.`,
+      `${PRO_NAMES[r.specialty]||'법조'} 분야에서 독보적 성과를 낸 ${r.name} 변호사는 "저는 아직도 멀었다. 이제 시작일 뿐"이라며 짧게 영입 소감을 남겼다.`,
+    ],
+    fameGain: 20,
+    popup: true,
+    popupLine: (r) => `${r.name} 변호사, 벌써 대형펌 파트너라고? 빠르네. 나도 뒤쳐지면 안 될텐데..`,
+  },
+  {
+    key: 'fame500',
+    cond: (r, plRep) => r.fame >= 500,
+    title: (r) => `${r.name} 변호사, 대형 사건 승소… 업계 주목`,
+    body:  (r) => `${PRO_NAMES[r.specialty]||'법조'} 분야에서 주목할 만한 성과를 냈다.`,
+    fullBody: (r) => [
+      `{date}. ${r.name} 변호사가 화제의 ${PRO_NAMES[r.specialty]||'법조'} 사건에서 승소했다.`,
+      `${r.name} 변호사는 평소 명성대로 꼼꼼한 변론으로 사실상 어렵다는 평이 업계에서 많았던 사건을 뒤집는 데 성공했다.`,
+      `업계에서는 "${r.name} 변호사의 실력은 이미 업계 탑급"이라며, "이 속도라면 머지않아 대형펌 파트너가 될 것"이라는 이야기들이 나오고 있다.`,
+    ],
+    fameGain: 30,
+    popup: true,
+    popupLine: (r) => `${r.name} 변호사가 또 승소했구나. 기세가 좋네. 나도 뒤쳐지면 안 되는데...`,
+  },
+  {
+    key: 'fame300',
+    cond: (r, plRep) => r.fame >= 300,
+    title: (r) => `${r.name} 변호사, 주목받는 신예`,
+    body:  (r) => `${PRO_NAMES[r.specialty]||'법조'} 분야에서 눈에 띄는 신진 변호사로 거론된다.`,
+    fullBody: (r) => [
+      `{date}. ${r.name} 변호사(${PRO_NAMES[r.specialty]||'법조'})가 업계의 주목을 받고 있다.`,
+      `${r.name} 변호사는 최근 중요 사건에서 날카로운 변론으로 승소 판결을 이끌어내 주목을 받았으며, 재판뿐 아니라 다양한 방면에서 활동하며 두각을 드러내고 있다.`,
+      `동료 변호사는 "2년 차 변호사가 이 정도 성과를 낸다는 것은 놀라운 일"이라면서, "${r.name} 변호사는 ${r.personality}한 성격으로, 변호사 업무에 맞는 스타일"이라고 평했다.`,
+    ],
+    fameGain: 20,
+    popup: true,
+    popupLine: (r) => `${r.name}... 이름이 뉴스에 뜨기 시작했군. 학창시절부터 유명한 친구였는데, 역시 우리 중에 앞서나가는 걸까?`,
+  },
+];
+
+// 월간 라이벌 뉴스 생성 — 각 라이벌에 대해 최대 1건
+// - 조건 만족하는 템플릿 중 가장 높은 단계 하나 선택
+// - 이미 본 뉴스(G.rivalNewsSeen)는 스킵
+// - 반환: [ { newsItem, popupLine, rival } ... ]
+function generateRivalNews() {
+  const result = [];
+  if (!Array.isArray(G.rivals) || G.rivals.length === 0) return result;
+  if (!G.rivalNewsSeen || typeof G.rivalNewsSeen !== 'object') G.rivalNewsSeen = {};
+  const plRep = (G.stats && G.stats.reputation) || 0;
+
+  G.rivals.forEach(r => {
+    for (const tpl of RIVAL_NEWS_TEMPLATES) {
+      if (!tpl.cond(r, plRep)) continue;
+      const seenKey = r.id + '-' + tpl.key;
+      if (G.rivalNewsSeen[seenKey]) continue;
+      G.rivalNewsSeen[seenKey] = true;
+      const publishDay = pickPublishDay();
+      const dateStr = `${2029+G.year}년 ${G.month}월 ${publishDay}일`;
+      const fullBodyRaw = tpl.fullBody ? tpl.fullBody(r) : null;
+      const fullBody = Array.isArray(fullBodyRaw)
+        ? fullBodyRaw.map(line => String(line).replace(/\{date\}/g, dateStr))
+        : null;
+      const newsItem = {
+        year: G.year, month: G.month, publishDay,
+        category: 'rival',
+        press: pickPressName(),
+        reporter: pickReporter(),
+        icon: NEWS_ICONS.rival,
+        title: tpl.title(r),
+        body:  tpl.body(r),
+        fullBody,
+        rivalId: r.id,
+      };
+      // 라이벌 fame 추가 증가
+      if (typeof tpl.fameGain === 'number') {
+        r.fame = Math.min(1000, r.fame + tpl.fameGain);
+      }
+      result.push({
+        newsItem,
+        popupLine: tpl.popup && tpl.popupLine ? tpl.popupLine(r) : null,
+        rival: r,
+      });
+      break; // 라이벌 1명당 한 건만
+    }
+  });
+  return result;
+}
+
 // 뉴스의 effects를 다음달 플래그에 적용
 function applyNewsEffects(newsItems) {
   newsItems.forEach(n => {
@@ -7103,21 +7314,28 @@ function renderNewsModal() {
       const g = groups[k];
       const actualYear = 2029 + g.year;
       const items = g.items.map(n => {
-        const catColor = {legal:'#88aadd', economy:'#88cc88', social:'#ccaa44', player:'#c9a84c'}[n.category] || '#e8d5b5';
+        const catColor = {legal:'#88aadd', economy:'#88cc88', social:'#ccaa44', player:'#c9a84c', rival:'#e68080'}[n.category] || '#e8d5b5';
         // 전체 탭: 언론사 이름, 카테고리 탭: 카테고리명
         const labelText = (G.ui.newsFilter === 'all')
           ? (n.press || pickPressName())
           : (NEWS_CAT_NAMES[n.category] || '');
         // G.monthlyNews 에서의 실제 인덱스 (클릭 시 팝업용)
         const realIdx = G.monthlyNews.indexOf(n);
-        return `<div style="background:#1a1610;border:1px solid #3a3020;border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#241e16'" onmouseout="this.style.background='#1a1610'" onclick="openNewsArticleModal(${realIdx})">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-            <span style="font-size:0.78rem">${n.icon||''}</span>
-            <span style="color:${catColor};font-size:0.78rem;font-weight:700">${labelText}</span>
-            <span style="flex:1"></span>
+        const face = _getNewsFace(n);
+        const faceHtml = face
+          ? `<img src="${face.src}" alt="${face.caption}" style="width:44px;height:44px;border-radius:4px;object-fit:cover;border:1px solid #8b7355;flex-shrink:0" onerror="this.style.display='none'">`
+          : '';
+        return `<div style="background:#1a1610;border:1px solid #3a3020;border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:flex-start" onmouseover="this.style.background='#241e16'" onmouseout="this.style.background='#1a1610'" onclick="openNewsArticleModal(${realIdx})">
+          ${faceHtml}
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <span style="font-size:0.78rem">${n.icon||''}</span>
+              <span style="color:${catColor};font-size:0.78rem;font-weight:700">${labelText}</span>
+              <span style="flex:1"></span>
+            </div>
+            <div style="color:#e8d5b5;font-size:0.92rem;font-weight:700;margin-bottom:4px">${n.title}</div>
+            <div style="color:#a09080;font-size:0.78rem;line-height:1.55">${n.body}</div>
           </div>
-          <div style="color:#e8d5b5;font-size:0.92rem;font-weight:700;margin-bottom:4px">${n.title}</div>
-          <div style="color:#a09080;font-size:0.78rem;line-height:1.55">${n.body}</div>
         </div>`;
       }).join('');
       return `<div style="margin-bottom:16px">
@@ -7135,6 +7353,19 @@ function renderNewsModal() {
       <button class="btn btn-secondary" onclick="document.getElementById('news-modal').style.display='none'">닫기</button>
     </div>
   </div>`;
+}
+
+// 뉴스 아이템에서 얼굴 이미지 경로·캡션 추출 (주인공/라이벌만)
+function _getNewsFace(n) {
+  if (!n) return null;
+  if (n.category === 'player') {
+    return { src: getPlayerFace(), caption: G.name };
+  }
+  if (n.category === 'rival' && n.rivalId) {
+    const r = (typeof getRival === 'function') ? getRival(n.rivalId) : null;
+    if (r && r.face) return { src: r.face, caption: r.name };
+  }
+  return null;
 }
 
 // 뉴스 상세 기사 팝업
@@ -7155,11 +7386,23 @@ function openNewsArticleModal(idx) {
   const bodyLines = Array.isArray(n.fullBody) && n.fullBody.length > 0
     ? n.fullBody.map(line => `<p style="margin:0 0 12px;line-height:1.9">${line}</p>`).join('')
     : `<p style="margin:0 0 12px;line-height:1.9">${n.body || ''}</p>`;
+  const face = _getNewsFace(n);
+  const faceBlock = face
+    ? `<div style="display:flex;justify-content:center;margin:4px 0 12px">
+        <div style="text-align:center">
+          <img src="${face.src}" alt="${face.caption}" style="width:96px;height:116px;object-fit:cover;border:1px solid #8b7355;border-radius:3px;background:#1a1610;box-shadow:0 2px 8px rgba(0,0,0,0.5)" onerror="this.parentElement.parentElement.style.display='none'">
+          <div style="color:#a09080;font-size:0.72rem;margin-top:4px;letter-spacing:1px;font-family:serif">▲ ${face.caption}</div>
+        </div>
+      </div>`
+    : '';
   overlay.innerHTML = `<div style="background:linear-gradient(180deg,#2a2418,#1a1610);border:2px solid #8b7355;border-radius:10px;padding:24px 28px;width:560px;max-width:92vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,0.7);font-family:serif">
     <div style="color:#b39460;font-size:0.75rem;margin-bottom:8px;letter-spacing:0.5px">${press} · ${reporter} · ${dayStr}</div>
     <div style="color:#e8d5b5;font-size:1.15rem;font-weight:700;line-height:1.5;margin-bottom:10px">${n.title}</div>
     <hr style="border:none;border-top:1px solid #5a4a30;margin:0 0 14px">
-    <div style="flex:1;overflow-y:auto;color:#d0c0a0;font-size:0.9rem;padding-right:6px">${bodyLines}</div>
+    <div style="flex:1;overflow-y:auto;color:#d0c0a0;font-size:0.9rem;padding-right:6px">
+      ${faceBlock}
+      ${bodyLines}
+    </div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
       <button class="btn btn-secondary" onclick="document.getElementById('news-article-modal').style.display='none'">닫기</button>
     </div>
@@ -12634,6 +12877,32 @@ function openRelationshipPanel() {
       </div>`;
     });
   }
+  // 라이벌 변호사 표시 (v11)
+  if (Array.isArray(G.rivals) && G.rivals.length > 0) {
+    html += `<div style="margin-top:14px;padding:4px 2px;border-top:1px dashed #5a4a30;color:#a89880;font-size:0.74rem;letter-spacing:2px">⚔ 라이벌</div>`;
+    G.rivals.forEach(r => {
+      const fameLabel  = getRivalFameLabel(r.fame);
+      const relLabel   = getRivalRivalryLabel(r.rivalry);
+      const relColor   = r.rivalry <= -10 ? '#88cc88' : r.rivalry >= 50 ? '#e68080' : r.rivalry >= 10 ? '#e0c070' : '#a09080';
+      const typeLabel  = r.type === 'friendly' ? '동기' : '경쟁 상대';
+      const specName   = (typeof PRO_NAMES !== 'undefined' && PRO_NAMES[r.specialty]) || r.specialty;
+      const famePct    = Math.min(100, Math.round(r.fame / 10));
+      html += `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,30,25,0.6);border-radius:6px;border:1px solid #4a3020">
+        <img src="${r.face}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #8b7355" onerror="this.style.display='none';this.style.visibility='hidden'">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap">
+            <span style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${r.name}</span>
+            <span style="font-size:0.7rem;color:#a09080">${typeLabel} · ${specName} 전문</span>
+          </div>
+          <div style="font-size:0.74rem;color:${relColor};margin-top:2px">${relLabel} · ${fameLabel}${r.encounters > 0 ? ' · 만남 '+r.encounters+'회' : ''}</div>
+          <div style="margin-top:5px;height:4px;background:#2a1f15;border-radius:2px;overflow:hidden">
+            <div style="width:${famePct}%;height:100%;background:linear-gradient(90deg,#8b7355,#c9a84c);transition:width .3s"></div>
+          </div>
+          <div style="font-size:0.66rem;color:#8a7a60;margin-top:2px">명성 ${r.fame}/1000</div>
+        </div>
+      </div>`;
+    });
+  }
   document.getElementById('storage-list').innerHTML = html;
 }
 
@@ -14772,6 +15041,20 @@ function finishMonthFinal(){
   G.monthlyNews = G.monthlyNews.filter(n => n.category === 'player' || (n.year === G.year && n.month === G.month));
   G.monthlyNews = G.monthlyNews.concat(newNews);
   applyNewsEffects(newNews);
+
+  // 라이벌 명성 자연 증가 + 월간 라이벌 뉴스 생성
+  growRivalFame();
+  const rivalNewsBatch = generateRivalNews();
+  if (rivalNewsBatch.length > 0) {
+    G.monthlyNews = G.monthlyNews.concat(rivalNewsBatch.map(x => x.newsItem));
+    // 라이벌 뉴스 팝업은 월말 처리 체인에 큐잉 (중복 팝업 피하도록 간격 둠)
+    const popupLines = rivalNewsBatch
+      .filter(x => x.popupLine)
+      .map(x => ({ line: x.popupLine, rival: x.rival }));
+    if (popupLines.length > 0) {
+      G._rivalNewsPopupQueue = (G._rivalNewsPopupQueue || []).concat(popupLines);
+    }
+  }
   // 어쏘/직원 월간 처리
   const empReports = processEmployeesMonthly();
 
@@ -14884,8 +15167,25 @@ function showMonthSummary(empReports){
   document.getElementById('summary-changes').innerHTML=html;
 }
 
+// 라이벌 뉴스 팝업 큐 순차 소비 (월말 summary 닫기 직후 호출)
+function _drainRivalNewsPopups(onDone) {
+  const q = G._rivalNewsPopupQueue;
+  if (!q || q.length === 0) { onDone(); return; }
+  const { line } = q.shift();
+  gameConfirm(line, () => _drainRivalNewsPopups(onDone), () => _drainRivalNewsPopups(onDone));
+}
+
 function closeSummary(){
   document.getElementById('month-summary').style.display='none';
+  // 라이벌 뉴스 팝업이 대기 중이면 먼저 소비한 뒤 본 처리 (월 전환 로직은 그 뒤에)
+  if (G._rivalNewsPopupQueue && G._rivalNewsPopupQueue.length > 0) {
+    _drainRivalNewsPopups(_closeSummaryBody);
+    return;
+  }
+  _closeSummaryBody();
+}
+
+function _closeSummaryBody(){
   G.monthReviewCount = 0; // 매월 검토 횟수 리셋
   G.monthTossCount = 0; // 매월 토스 건수 리셋
   // 빠른진행 일회성 플래그는 월 전환 시 자동 해제
@@ -17015,7 +17315,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 10;
+const GAME_VERSION = 11;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -17094,7 +17394,18 @@ const MIGRATIONS = {
     if (typeof state.ui.endingStatsMainTitle !== 'string') state.ui.endingStatsMainTitle = '';
     return state;
   },
-  // 향후 업데이트: v11, v12 ... 형태로 추가
+  // v10 → v11 : 라이벌 변호사 시스템. 기존 세이브에는 G.gender 기반으로 2명 자동 생성
+  11: function(state) {
+    if (!Array.isArray(state.rivals) || state.rivals.length === 0) {
+      const pool = (RIVAL_PROFILES[state.gender] || RIVAL_PROFILES.male);
+      state.rivals = pool.map(p => ({
+        ...p, fame: 300, rivalry: 0, encounters: 0,
+      }));
+    }
+    if (!state.rivalNewsSeen || typeof state.rivalNewsSeen !== 'object') state.rivalNewsSeen = {};
+    return state;
+  },
+  // 향후 업데이트: v12, v13 ... 형태로 추가
 };
 
 // ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
@@ -17110,6 +17421,7 @@ function ensureDefaults(state) {
     'hiredAssocs', 'hiredStaff', 'specialLawyer',
     'children', 'schedulePresets', 'diary',
     'monthlyNews', 'nextMonthInvestBias',
+    'rivals',
   ];
   for (const k of arrs) if (!Array.isArray(state[k])) state[k] = [];
 
@@ -17119,6 +17431,7 @@ function ensureDefaults(state) {
     'romanceEvents', 'romanceChoices', 'brokenUp',
     'mainStoryFlag', 'mainStoryOffered',
     'triggeredPlayerNews', 'spouseEvents', 'seasonalEvents',
+    'rivalNewsSeen',
   ];
   for (const k of objs) {
     const v = state[k];
@@ -19761,6 +20074,54 @@ function getEndingDialogues(title) {
   return map[title] || [];
 }
 
+// 엔딩 직전 라이벌·관계 플레이버 대사 (조건부 1~2줄)
+function _buildRivalEpilogueLines() {
+  const lines = [];
+  // 라이벌 언급 (친밀/적대 중 해당되면 1줄)
+  if (Array.isArray(G.rivals) && G.rivals.length > 0) {
+    const friend = G.rivals.find(r => r.rivalry <= -30);
+    const foe    = G.rivals.find(r => r.rivalry >= 50);
+    if (friend) {
+      lines.push({
+        speaker: G.name, face: 'player',
+        text: `돌아보면 ${J(friend.name, '와/과')} 함께 걸어온 길이 길었다. 경쟁자로 시작했지만, 결국 곁에 남은 건 그였다.`,
+      });
+    } else if (foe) {
+      lines.push({
+        speaker: G.name, face: 'player',
+        text: `${J(foe.name, '이/가')} 한때는 높은 벽처럼 느껴졌다. 그 벽을 넘어선 오늘, 나는 조금 다른 사람이 되어 있다.`,
+      });
+    }
+  }
+  // 가족·연인 언급 (해당되면 1줄)
+  try {
+    if (G.isMarried && G.romance && G.romance.dating) {
+      const sp = (typeof getRomanceTargets === 'function')
+        ? getRomanceTargets().find(t => t.id === G.romance.dating) : null;
+      const name = sp ? sp.name : null;
+      if (name) {
+        const hasKids = Array.isArray(G.children) && G.children.length > 0;
+        lines.push({
+          speaker: G.name, face: 'player',
+          text: hasKids
+            ? `${J(name, '와/과')} 함께한 시간, 그리고 아이들까지. 그 모든 선택들이 지금의 나를 만들었다.`
+            : `${J(name, '와/과')} 함께한 시간, 그 모든 선택들이 지금의 나를 만들었다.`,
+        });
+      }
+    } else if (G.romance && G.romance.dating) {
+      const pt = (typeof getRomanceTargets === 'function')
+        ? getRomanceTargets().find(t => t.id === G.romance.dating) : null;
+      if (pt && pt.name) {
+        lines.push({
+          speaker: G.name, face: 'player',
+          text: `${J(pt.name, '이/가')} 곁에 있다는 것. 그것만으로 많은 날들이 덜 외로웠다.`,
+        });
+      }
+    }
+  } catch (e) { /* 엔딩 중 예외 없이 스킵 */ }
+  return lines;
+}
+
 function showEndingVN(ending) {
   // 2. VN 윈도우 설정
   const vnEl = document.getElementById('ending-vn');
@@ -19776,8 +20137,10 @@ function showEndingVN(ending) {
   // 3. VN 윈도우 페이드인
   setTimeout(() => { vnEl.style.opacity = '1'; }, 500);
 
-  // 엔딩 대화 데이터
-  const endingDialogues = getEndingDialogues(ending.title);
+  // 엔딩 대화 데이터 — 기본 대화 뒤에 라이벌·관계 플레이버 조건부 추가
+  const baseDialogues = getEndingDialogues(ending.title);
+  const epilogueLines = _buildRivalEpilogueLines();
+  const endingDialogues = baseDialogues.concat(epilogueLines);
   let dialogueIdx = 0;
 
   // 4. 클릭 흐름: 공통 내레이션 → 주변인물 대화 → 등급 평가 → 크레딧
