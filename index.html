@@ -7,6 +7,68 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 
+/* =====================================================================
+ * 디자인 토큰 (2026-04-24 도입)
+ * 목적: 색상·z-index·여백·반지름 값이 코드 전반에 흩뿌려져 있는 문제를
+ *       한 곳에서 관리하기 위한 기반. 기존 하드코딩 값은 그대로 두고,
+ *       신규 컴포넌트·리팩터 구간부터 점진적으로 var(--...) 로 교체.
+ *
+ * z-index 레이어 정책 (3단계):
+ *   --z-base    : 일반 모달 (메뉴·컴퓨터·쇼핑·저장·서류가방 등)
+ *   --z-overlay : 풀스크린 (엔딩·오프닝·엔딩 갤러리)
+ *   --z-system  : 시스템 팝업 (gameConfirm/alert/prompt — 모든 모달 위)
+ *   --z-toast   : 토스트 (항상 최상단)
+ * ===================================================================== */
+:root {
+  /* ----- Color: Gold family ----- */
+  --color-gold:         #c9a84c;
+  --color-gold-dim:     #a8873a;
+  --color-gold-alpha:   #c9a84c88;
+
+  /* ----- Color: Tan/Brown family (테두리·라벨 계열) ----- */
+  --color-tan:          #8b7355;
+  --color-tan-light:    #c0b090;
+  --color-tan-lighter:  #e0d0a0;
+
+  /* ----- Color: Background ----- */
+  --color-bg:           #0a0a1a;
+  --color-bg-deep:      #0a0a2e;
+  --color-bg-panel:     #1a1a2e;
+  --color-bg-panel-dk:  #12122a;
+  --color-bg-modal:     rgba(20,18,12,0.93);
+
+  /* ----- Color: Overlay ----- */
+  --color-overlay-lt:   rgba(0,0,0,0.45);
+  --color-overlay-md:   rgba(0,0,0,0.6);
+  --color-overlay-dk:   rgba(0,0,0,0.7);
+  --color-overlay-hv:   rgba(0,0,0,0.88);
+
+  /* ----- Color: Border ----- */
+  --color-border:       #8b7355;
+  --color-border-blue:  #444477;
+  --color-border-mid:   #555588;
+
+  /* ----- Color: Text ----- */
+  --color-text:         #e0e0e0;
+  --color-text-dim:     #a09080;
+  --color-text-mute:    #807060;
+
+  /* ----- Radius ----- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+
+  /* ----- z-index layers ----- */
+  --z-base:    100;
+  --z-overlay: 300;
+  --z-system:  700;
+  --z-toast:   9999;
+
+  /* ----- Font ----- */
+  --font-sans: 'Noto Sans KR', sans-serif;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -1426,6 +1488,14 @@ const G = {
   spouseEvents: {},
   // 계절·명절 이벤트 플래그 (v9) — 'YYYY-id' 형태
   seasonalEvents: {},
+  // UI 설정 (v10) — 세이브에 저장되어 세션 간 유지
+  ui: {
+    briefcaseFilter:      { type: 'all', diff: 'all', sort: 'order' },
+    newsFilter:           'all',
+    galleryGender:        'male',
+    endingStatsView:      'main',
+    endingStatsMainTitle: '',
+  },
 };
 
 const STATUS_NAMES = {
@@ -6962,9 +7032,9 @@ function renderNewsEffectBadges(effects) {
   return badges.length ? `<div style="margin-top:4px">${badges.join('')}</div>` : '';
 }
 
-let _newsFilter = 'all';
+// 뉴스 탭 필터 — G.ui.newsFilter에 저장 (세이브에 포함)
 function setNewsFilter(cat) {
-  _newsFilter = cat;
+  G.ui.newsFilter = cat;
   renderNewsModal();
 }
 
@@ -6987,14 +7057,14 @@ function renderNewsModal() {
   const cats = ['all','legal','economy','social','player'];
   const catLabels = {all:'전체', legal:'⚖ 법조', economy:'💹 경제', social:'🗞 시사', player:'⭐ 주인공'};
   const filterBar = cats.map(c => {
-    const active = _newsFilter === c;
+    const active = G.ui.newsFilter === c;
     return `<button onclick="setNewsFilter('${c}')" style="padding:4px 10px;font-size:0.74rem;border-radius:4px;border:1px solid ${active?'#c9a84c':'#5a4a30'};background:${active?'#3a3020':'#1a1810'};color:${active?'#e8d5b5':'#a09080'};cursor:pointer;margin:0 2px">${catLabels[c]}</button>`;
   }).join('');
 
   // 주인공 탭: 모든 주인공 뉴스 기록 표시. 그 외: 가장 최근 배치만.
   // (비주인공 뉴스는 월말에 한 달치만 남기고 정리되므로 그 연월을 기준으로 판별)
   let filtered;
-  if (_newsFilter === 'player') {
+  if (G.ui.newsFilter === 'player') {
     filtered = G.monthlyNews.filter(n => n.category === 'player');
   } else {
     let latestY = 0, latestM = 0;
@@ -7005,10 +7075,10 @@ function renderNewsModal() {
     });
     // 월말 전이라 비주인공 뉴스가 없으면 현재 진행 중인 연월을 기준으로
     if (latestY === 0) { latestY = G.year; latestM = G.month; }
-    if (_newsFilter === 'all') {
+    if (G.ui.newsFilter === 'all') {
       filtered = G.monthlyNews.filter(n => n.year === latestY && n.month === latestM);
     } else {
-      filtered = G.monthlyNews.filter(n => n.category === _newsFilter && n.year === latestY && n.month === latestM);
+      filtered = G.monthlyNews.filter(n => n.category === G.ui.newsFilter && n.year === latestY && n.month === latestM);
     }
   }
   const sorted = [...filtered].sort((a,b) => (b.year - a.year) || (b.month - a.month));
@@ -7035,7 +7105,7 @@ function renderNewsModal() {
       const items = g.items.map(n => {
         const catColor = {legal:'#88aadd', economy:'#88cc88', social:'#ccaa44', player:'#c9a84c'}[n.category] || '#e8d5b5';
         // 전체 탭: 언론사 이름, 카테고리 탭: 카테고리명
-        const labelText = (_newsFilter === 'all')
+        const labelText = (G.ui.newsFilter === 'all')
           ? (n.press || pickPressName())
           : (NEWS_CAT_NAMES[n.category] || '');
         // G.monthlyNews 에서의 실제 인덱스 (클릭 시 팝업용)
@@ -16663,16 +16733,15 @@ function openBriefcase() {
   renderBriefcase();
 }
 
-// 서류가방 필터/정렬 상태 (세션 내 유지)
-let _briefcaseFilter = { type: 'all', diff: 'all', sort: 'order' };
+// 서류가방 필터/정렬 상태 — G.ui.briefcaseFilter에 저장 (세이브에 포함)
 
 function setBriefcaseFilter(key, value) {
-  _briefcaseFilter[key] = value;
+  G.ui.briefcaseFilter[key] = value;
   renderBriefcase();
 }
 
 function resetBriefcaseFilter() {
-  _briefcaseFilter = { type: 'all', diff: 'all', sort: 'order' };
+  G.ui.briefcaseFilter = { type: 'all', diff: 'all', sort: 'order' };
   renderBriefcase();
 }
 
@@ -16692,7 +16761,7 @@ function renderBriefcase() {
   G.caseCards.sort((a,b)=>a.order-b.order);
 
   // 필터 적용
-  const f = _briefcaseFilter;
+  const f = G.ui.briefcaseFilter;
   let filtered = G.caseCards.filter(c => {
     if (f.type !== 'all' && c.typeId !== f.type) return false;
     if (f.diff !== 'all' && c.difficulty !== f.diff) return false;
@@ -16946,7 +17015,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 9;
+const GAME_VERSION = 10;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -17013,7 +17082,19 @@ const MIGRATIONS = {
     if (!state.seasonalEvents || typeof state.seasonalEvents !== 'object') state.seasonalEvents = {};
     return state;
   },
-  // 향후 업데이트: v10, v11 ... 형태로 추가
+  // v9 → v10 : UI 설정을 G.ui 네임스페이스로 묶어 세이브에 포함 (서류가방/뉴스 필터 등)
+  10: function(state) {
+    if (!state.ui || typeof state.ui !== 'object' || Array.isArray(state.ui)) state.ui = {};
+    if (!state.ui.briefcaseFilter || typeof state.ui.briefcaseFilter !== 'object') {
+      state.ui.briefcaseFilter = { type: 'all', diff: 'all', sort: 'order' };
+    }
+    if (typeof state.ui.newsFilter !== 'string') state.ui.newsFilter = 'all';
+    if (typeof state.ui.galleryGender !== 'string') state.ui.galleryGender = 'male';
+    if (typeof state.ui.endingStatsView !== 'string') state.ui.endingStatsView = 'main';
+    if (typeof state.ui.endingStatsMainTitle !== 'string') state.ui.endingStatsMainTitle = '';
+    return state;
+  },
+  // 향후 업데이트: v11, v12 ... 형태로 추가
 };
 
 // ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
@@ -17065,6 +17146,20 @@ function ensureDefaults(state) {
   state.children.forEach(ch => {
     if (ch && (!ch.events || typeof ch.events !== 'object')) ch.events = {};
   });
+
+  // 중첩 객체: ui (v10)
+  if (!state.ui || typeof state.ui !== 'object' || Array.isArray(state.ui)) state.ui = {};
+  if (!state.ui.briefcaseFilter || typeof state.ui.briefcaseFilter !== 'object') {
+    state.ui.briefcaseFilter = { type: 'all', diff: 'all', sort: 'order' };
+  } else {
+    if (typeof state.ui.briefcaseFilter.type !== 'string') state.ui.briefcaseFilter.type = 'all';
+    if (typeof state.ui.briefcaseFilter.diff !== 'string') state.ui.briefcaseFilter.diff = 'all';
+    if (typeof state.ui.briefcaseFilter.sort !== 'string') state.ui.briefcaseFilter.sort = 'order';
+  }
+  if (typeof state.ui.newsFilter !== 'string') state.ui.newsFilter = 'all';
+  if (typeof state.ui.galleryGender !== 'string') state.ui.galleryGender = 'male';
+  if (typeof state.ui.endingStatsView !== 'string') state.ui.endingStatsView = 'main';
+  if (typeof state.ui.endingStatsMainTitle !== 'string') state.ui.endingStatsMainTitle = '';
 
   // 산술 대상 숫자 — undefined면 NaN이 전파되어 자금/스탯이 조용히 오염됨
   const nums = {
@@ -19136,10 +19231,10 @@ function recordEnding(title, gender, grade) {
   }
 }
 
-let _galleryCurrentGender = 'male';
+// 엔딩 갤러리 탭 상태 — G.ui.galleryGender (세이브에 포함)
 
 function openEndingGallery() {
-  _galleryCurrentGender = 'male';
+  G.ui.galleryGender = 'male';
   document.getElementById('ending-gallery').style.display = 'block';
   document.getElementById('gallery-tab-male').classList.add('gallery-tab-active');
   document.getElementById('gallery-tab-female').classList.remove('gallery-tab-active');
@@ -19151,7 +19246,7 @@ function closeEndingGallery() {
 }
 
 function switchGalleryTab(gender) {
-  _galleryCurrentGender = gender;
+  G.ui.galleryGender = gender;
   document.getElementById('gallery-tab-male').classList.toggle('gallery-tab-active', gender === 'male');
   document.getElementById('gallery-tab-female').classList.toggle('gallery-tab-active', gender === 'female');
   renderGallery(gender);
@@ -19812,13 +19907,12 @@ function showFinScreen() {
   requestAnimationFrame(() => { overlay.style.opacity = '1'; finText.style.opacity = '1'; });
 }
 
-let _endingStatsView = 'main';
-let _endingStatsMainTitle = '';
+// 엔딩 통계 뷰 상태 — G.ui.endingStatsView / endingStatsMainTitle (세이브에 포함)
 
 function showEndingStats(ending, gradeLabel) {
   const statsPanel = document.getElementById('ending-stats-panel');
-  _endingStatsMainTitle = ending.title + gradeLabel;
-  _endingStatsView = 'main';
+  G.ui.endingStatsMainTitle = ending.title + gradeLabel;
+  G.ui.endingStatsView = 'main';
   renderEndingMainStats();
   // 토글 버튼 텍스트 초기화
   const tb = document.getElementById('stats-toggle-btn');
@@ -19835,7 +19929,7 @@ function showEndingStats(ending, gradeLabel) {
 }
 
 function renderEndingMainStats() {
-  document.getElementById('ending-stats-title').textContent = _endingStatsMainTitle;
+  document.getElementById('ending-stats-title').textContent = G.ui.endingStatsMainTitle;
   const wr = (G.wins+G.losses)>0 ? Math.round(G.wins/(G.wins+G.losses)*100)+'%' : '-';
   const s = G.stats;
   document.getElementById('ending-stats').innerHTML = [
@@ -19915,13 +20009,13 @@ function renderEndingCumulativeStats() {
 
 function toggleEndingStatsView() {
   const tb = document.getElementById('stats-toggle-btn');
-  if (_endingStatsView === 'main') {
+  if (G.ui.endingStatsView === 'main') {
     renderEndingCumulativeStats();
-    _endingStatsView = 'cumulative';
+    G.ui.endingStatsView = 'cumulative';
     if (tb) tb.textContent = '← 능력치로';
   } else {
     renderEndingMainStats();
-    _endingStatsView = 'main';
+    G.ui.endingStatsView = 'main';
     if (tb) tb.textContent = '📊 누적 통계 보기 →';
   }
 }
