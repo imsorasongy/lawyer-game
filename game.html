@@ -1868,7 +1868,7 @@ function getGeneralEvents() {
     },
     // 18. 로스쿨 특강 요청
     { id:'lectureRequest', prob:0.003, condition:()=>G.phdCompleted,
-      bg:'배경/대학원.webp', face:'캐릭터얼굴/법학교수.webp',
+      bg:'배경/대학원.jpg', face:'캐릭터얼굴/법학교수.webp',
       dialogues: [
         {speaker:'법학교수', text:'{name}변호사, 이번에 우리 로스쿨에서 실무 특강을 해줄 수 있겠나?'},
         {speaker:'{name}', text:'특강이요?'},
@@ -2399,7 +2399,7 @@ function getActionEvents(actionId) {
         // 13. 뜻하지 않은 수임 3 (업계모임) - 공익인권 사건
         { id:'unexpectedCase3', prob:0.02,
           condition:()=>canGetCase,
-          bg:'배경/대학원.webp', faceFn: randomColleagueFace,
+          bg:'배경/대학원.jpg', faceFn: randomColleagueFace,
           dialogues: [
             {speaker:'동료 변호사', text:'{name} 변호사, 공익인권 사건인데 맡아줄 사람이 없어서... 혹시 가능한가?'}
           ],
@@ -2563,7 +2563,7 @@ function getActionEvents(actionId) {
       return [
         { id:'unexpectedCaseGolf', prob:0.05,
           condition:()=>canGetCase,
-          bg:'배경/골프.webp', faceFn: randomColleagueFace,
+          bg:'배경/골프.jpg', faceFn: randomColleagueFace,
           dialogues: [
             {speaker:'골프멤버', text:'{name} 변호사님, 사실 법률 상담 좀 받고 싶었는데... 혹시 사건 좀 맡아주실 수 있나요?'}
           ],
@@ -3026,6 +3026,7 @@ function confirmOpeningCreate() {
   initStats();
   applyMBTIBonus(mbti);
   seedInitialSNSPost();
+  seedInitialNews();
 
   // 오프닝 화면 페이드아웃 (2초)
   const screen = document.getElementById('opening-screen');
@@ -3075,6 +3076,7 @@ function confirmName() {
   initStats();
   applyMBTIBonus(mbti);
   seedInitialSNSPost();
+  seedInitialNews();
   document.getElementById('name-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'block';
   document.getElementById('room-char-img').src = G.gender === 'male' ? '남주인공.webp' : '여주인공.webp';
@@ -5024,11 +5026,20 @@ function seedInitialSNSPost() {
     day: 31,
     icon: '🎊',
     text: pickDiaryText([
-      `내일부터 ${G.firmName||'새 로펌'} 첫 근무 🎉 내 변호사 라이프 시작! #신입변호사 #내일첫출근 #설렘반긴장반`,
-      `드디어 내일이면 ${G.firmName||'새 로펌'} 출근 😮‍💨 변호사 라이프 스타트 #첫출근디데이 #변호사시작`,
-      `${G.firmName||'새 로펌'} 입사 하루 전 ✨ 양복 다려놓고 서류 챙기고... 떨린다 #첫출근준비 #변호사라이프`,
+      `모레부터 ${G.firmName||'새 로펌'} 첫 근무 🎉 내 변호사 라이프 시작! #신입변호사 #첫출근 #설렘반긴장반`,
+      `드디어 모레면 ${G.firmName||'새 로펌'} 출근 😮‍💨 변호사 라이프 스타트 #첫출근디데이 #변호사시작`,
+      `${G.firmName||'새 로펌'} 입사 이틀 전 ✨ 양복 다려놓고 서류 챙기고... 떨린다 #첫출근준비 #변호사라이프`,
     ]),
   });
+}
+
+// 신규 게임 시작 시 2030년 1월 월간 뉴스 미리 생성 (월말에 생성되는 구조라 첫 달 빈 상태 방지).
+// finishMonthFinal의 월말 뉴스 생성은 이번 달 비 플레이어 뉴스가 이미 있으면 스킵됨 → 중복 방지.
+function seedInitialNews() {
+  if (!G.monthlyNews) G.monthlyNews = [];
+  const news = generateMonthlyNews();
+  G.monthlyNews = G.monthlyNews.concat(news);
+  applyNewsEffects(news);
 }
 
 // 변형 중 랜덤 선택 (일기 문체 다양성)
@@ -8502,6 +8513,7 @@ function getPlayerFace() {
 
 // 여주인공일 때 별도 배경 사용
 const FEMALE_BG_MAP = {
+  '배경/방.webp':'배경/방2.webp',
   '배경/업계모임.webp':'배경/업계모임2.webp',
   '배경/와인모임.webp':'배경/와인모임2.webp',
   '배경/야근.webp':'배경/야근2.webp',
@@ -8510,12 +8522,15 @@ const FEMALE_BG_MAP = {
   '배경/스터디.webp':'배경/스터디2.webp',
   '배경/저녁외출.webp':'배경/저녁외출2.webp',
   '배경/법학공부.webp':'배경/법학공부2.webp',
+  '배경/법학강의.webp':'배경/법학강의2.webp',
   '배경/방송국.webp':'배경/방송국2.webp',
-  '배경/골프.webp':'배경/골프2.webp',
+  '배경/골프.jpg':'배경/골프2.webp',
   '배경/pt.webp':'배경/pt2.webp',
   '배경/웅변.webp':'배경/웅변2.webp',
-  '배경/대학원.webp':'배경/대학원2.webp',
-  '배경/변호사협회.webp':'배경/변호사협회2.webp'
+  '배경/대학원.jpg':'배경/대학원2.webp',
+  '배경/변호사협회.webp':'배경/변호사협회2.webp',
+  '배경/드라이브.webp':'배경/드라이브2.webp',
+  '배경/결혼식.png':'배경/결혼식2.jpg'
 };
 function gBg(bg) { return (G.gender==='female' && FEMALE_BG_MAP[bg]) ? FEMALE_BG_MAP[bg] : bg; }
 
@@ -8620,7 +8635,7 @@ const SCENE_DATA = {
     failFemale:'오늘은 좀 힘든 하루였죠? 괜찮아요, 이런 날도 있는 거예요. 다음에 또 힘내봐요!',
   },
   gradSchool: {
-    bg:'배경/대학원.webp', face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수',
+    bg:'배경/대학원.jpg', face:'캐릭터얼굴/법학교수.webp', speaker:'법학교수',
     great:'{name} 변호사, 엄청나게 준비를 잘 해왔구만. 곧 박사되겠어.',
     success:'뭐 오늘은 이 정도인가? 좋았네.',
     fail:'그렇게 해서 언제 졸업하겠나. 공부좀 열심히 하라고!'
@@ -8664,7 +8679,7 @@ const SCENE_DATA = {
     fail:'다음에 또 교육을 해야겠다..'
   },
   golf: {
-    bg:'배경/골프.webp', speaker:'골프멤버',
+    bg:'배경/골프.jpg', speaker:'골프멤버',
     great:'{name}변호사, 오늘 샷 죽이는데?',
     success:'{name}변호사, 나이스샷',
     fail:'{name}변호사, 오늘은 좀 공이 안 맞나봐? 내가 이겼네.'
@@ -9013,7 +9028,7 @@ function getRomanceTargets() {
 function getActionBg(actionId) {
   const bgMap = {
     trial:'배경/재판.webp', studyGroup:'배경/스터디.webp', industryMeet:'배경/업계모임.webp',
-    gradSchool:'배경/대학원.webp', wineMeet:'배경/와인모임.webp', document:'배경/서면.webp',
+    gradSchool:'배경/대학원.jpg', wineMeet:'배경/와인모임.webp', document:'배경/서면.webp',
     consult:'배경/상담.webp', homeRest: G.gender==='male'?'배경/방.webp':'배경/방2.webp',
     publicService:'배경/공익활동.webp', pt:'배경/pt.webp', travel:'배경/저녁외출.webp',
     lectureLaw:G.gender==='female'?'배경/법학강의2.webp':'배경/법학강의.webp', broadcast:'배경/방송국.webp',
@@ -11580,7 +11595,7 @@ function getFemaleRomanceEvents() {
     id:'mingyu1', charId:'mingyu',
     triggerAction:'gradSchool', prob:0.40,
     condition:()=> G.romance.dating===null && !G.brokenUp.mingyu && (G.romance.affection.mingyu||0)>=80 && !G.romanceEvents.mingyu1,
-    bg:'배경/대학원.webp', face:'캐릭터얼굴/상민규.webp',
+    bg:'배경/대학원.jpg', face:'캐릭터얼굴/상민규.webp',
     dialogues:[
       {speaker:'상민규', text:'{name}변호사님, 오늘 발표 정말 잘 하셨어요.'},
       {speaker:'{name}', text:'감사합니다, 상대표님.'},
@@ -11600,7 +11615,7 @@ function getFemaleRomanceEvents() {
     id:'mingyu2', charId:'mingyu',
     triggerAction:'gradSchool', prob:1.0,
     condition:()=> G.romance.dating===null && !G.brokenUp.mingyu && G.romanceEvents.mingyu1pass && !G.romanceEvents.mingyu2,
-    bg:'배경/대학원.webp', face:'캐릭터얼굴/상민규.webp',
+    bg:'배경/대학원.jpg', face:'캐릭터얼굴/상민규.webp',
     dialogues:[
       {speaker:'상민규', text:'{name}변호사님, 발표 도와주셔서 감사합니다. 법률 이야기 많이 배웠습니다.'},
       {speaker:'{name}', text:'저도 사업적인 측면에 대해 많이 배웠습니다.'},
@@ -13079,7 +13094,7 @@ function buildScene(slot) {
       G.phdCompleted=true;
       applyStatR('reputation',50);
       changes.push('박사학위 취득! 명성 +50');
-      sceneMilestone={title:'법학박사 학위 취득',desc:'박사논문이 통과되어 법학박사 학위를 취득하셨습니다!\n명성 +50\n\n이제 법학박사 타이틀이 이름에 표시됩니다.',bg:'배경/대학원.webp',face:'캐릭터얼굴/법학교수.webp',speaker:'법학교수',text:`${G.name} 박사! 축하하네. 드디어 해냈구만. 자네의 논문은 훌륭했어.`};
+      sceneMilestone={title:'법학박사 학위 취득',desc:'박사논문이 통과되어 법학박사 학위를 취득하셨습니다!\n명성 +50\n\n이제 법학박사 타이틀이 이름에 표시됩니다.',bg:'배경/대학원.jpg',face:'캐릭터얼굴/법학교수.webp',speaker:'법학교수',text:`${G.name} 박사! 축하하네. 드디어 해냈구만. 자네의 논문은 훌륭했어.`};
       addDiary('🎓', pickDiaryText([
         `법학박사 취득 🎓✨ 논문 심사 통과! 이제 ${G.name} '박사' 라고 불러주세요 #박사학위 #법학박사 #해냈다`,
         `박사학위 🎓 눈물이 찔끔... 논문 쓰느라 잠 못 잔 밤들이 스쳐간다 #박사 #감격`,
@@ -13246,7 +13261,7 @@ function buildScene(slot) {
       `${J(wName, '와/과')} 부부됨 ✨ 식장 들어서는 순간 꿈같음 #결혼 #영원히`,
       `결혼식 ❤️ ${wName} 웃는 거 보니 이 사람 선택한 게 맞다 싶음 #결혼`,
     ]), slot && slot.day);
-    return {type:'wedding', bg:'배경/결혼식.webp', charFace, wName, wFace, date:dateStr,
+    return {type:'wedding', bg:'배경/결혼식.png', charFace, wName, wFace, date:dateStr,
       dialogues:[
         {speaker:'동료 변호사', face:'캐릭터얼굴/동료남자어쏘.webp', text:`${G.name} 변호사님, 결혼 정말 축하드립니다!`},
         {speaker:'동료 변호사', face:'캐릭터얼굴/동료여자어쏘.webp', text:`${G.name} 변호사님, 축하해요! 너무 잘 어울려요!`},
@@ -13419,7 +13434,7 @@ function buildScene(slot) {
   if(ai.cost>0){G.funds-=ai.cost;statChanges.funds-=ai.cost;}
   if(slot.action==='gradSchool'){G.gradSchoolCount++;
     if(G.gradSchoolCount>=100&&!G.gradSchoolCompleted){G.gradSchoolCompleted=true;applyStatR('mental',10);applyStatR('reputation',10);changes.push('대학원 수료! 멘탈+10, 명성+10');
-      sceneMilestone={title:'대학원 수료',desc:'대학원 과정을 모두 수료하셨습니다!\n멘탈 +10, 명성 +10\n\n이제 박사논문을 작성할 수 있습니다.',bg:'배경/대학원.webp',face:'캐릭터얼굴/법학교수.webp',speaker:'법학교수',text:`${G.name} 변호사, 축하하네! 드디어 수료야. 이제 박사논문을 쓸 차례지.`};
+      sceneMilestone={title:'대학원 수료',desc:'대학원 과정을 모두 수료하셨습니다!\n멘탈 +10, 명성 +10\n\n이제 박사논문을 작성할 수 있습니다.',bg:'배경/대학원.jpg',face:'캐릭터얼굴/법학교수.webp',speaker:'법학교수',text:`${G.name} 변호사, 축하하네! 드디어 수료야. 이제 박사논문을 쓸 차례지.`};
       addDiary('🎓', pickDiaryText([
         `대학원 수료 🎓 드디어 끝났다... 논문 지옥 탈출 #대학원수료 #고생끝`,
         `수료증 받았다 ✨ 이제 박사논문만 남음 #대학원수료 #석사`,
@@ -14678,8 +14693,12 @@ function finishMonthFinal(){
   }
   // 이번 달 월간 뉴스 생성 + 다음달용 효과 설정
   // 지난 달 이전 뉴스는 제거하되, 주인공 뉴스는 모든 기록 보존 (주인공 탭에서 과거 기록 열람)
-  const newNews = generateMonthlyNews();
+  // 게임 시작 시 seedInitialNews로 1월 뉴스를 미리 만들어둔 경우, 월말에 또 생성하면 중복되므로 가드.
   if (!G.monthlyNews) G.monthlyNews = [];
+  const hasThisMonthNonPlayerNews = G.monthlyNews.some(n =>
+    n.category !== 'player' && n.year === G.year && n.month === G.month
+  );
+  const newNews = hasThisMonthNonPlayerNews ? [] : generateMonthlyNews();
   G.monthlyNews = G.monthlyNews.filter(n => n.category === 'player' || (n.year === G.year && n.month === G.month));
   G.monthlyNews = G.monthlyNews.concat(newNews);
   applyNewsEffects(newNews);
@@ -16997,6 +17016,82 @@ const MIGRATIONS = {
   // 향후 업데이트: v10, v11 ... 형태로 추가
 };
 
+// ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
+// 마이그레이션을 깜빡했거나 손상된 세이브를 로드했을 때, 필수 필드가 undefined로
+// 남아 TypeError/NaN 전파가 일어나는 것을 방어. 기존 값이 유효하면 건드리지 않음.
+// 신규 필드 추가 시 MIGRATIONS[vN]과 함께 여기에도 한 줄 추가.
+function ensureDefaults(state) {
+  if (!state || typeof state !== 'object') return state;
+
+  // 배열: forEach/find/length/push 대상 — undefined면 즉시 TypeError
+  const arrs = [
+    'schedule', 'caseCards', 'pendingSchedules',
+    'hiredAssocs', 'hiredStaff', 'specialLawyer',
+    'children', 'schedulePresets', 'diary',
+    'monthlyNews', 'nextMonthInvestBias',
+  ];
+  for (const k of arrs) if (!Array.isArray(state[k])) state[k] = [];
+
+  // 객체: [key] 접근 시 크래시
+  const objs = [
+    'stats', 'proStats', 'inventory', 'youtubeMilestones',
+    'romanceEvents', 'romanceChoices', 'brokenUp',
+    'mainStoryFlag', 'mainStoryOffered',
+    'triggeredPlayerNews', 'spouseEvents', 'seasonalEvents',
+  ];
+  for (const k of objs) {
+    const v = state[k];
+    if (!v || typeof v !== 'object' || Array.isArray(v)) state[k] = {};
+  }
+
+  // 중첩 객체: romance
+  if (!state.romance || typeof state.romance !== 'object' || Array.isArray(state.romance)) {
+    state.romance = { met: { seungha: true }, affection: { seungha: 10 }, dating: null };
+  } else {
+    if (!state.romance.met || typeof state.romance.met !== 'object') state.romance.met = { seungha: true };
+    if (!state.romance.affection || typeof state.romance.affection !== 'object') state.romance.affection = { seungha: 10 };
+    if (!('dating' in state.romance)) state.romance.dating = null;
+  }
+
+  // 중첩 객체: invest
+  if (!state.invest || typeof state.invest !== 'object' || Array.isArray(state.invest)) state.invest = {};
+  for (const k of ['deposit','savings','fund','domesticStock','foreignStock','commodity','venture','ip']) {
+    if (!(k in state.invest)) state.invest[k] = null;
+  }
+  if (!Array.isArray(state.invest.coins)) state.invest.coins = [];
+  if (!Array.isArray(state.invest.realEstate)) state.invest.realEstate = [];
+
+  // 자녀 하위 events 객체
+  state.children.forEach(ch => {
+    if (ch && (!ch.events || typeof ch.events !== 'object')) ch.events = {};
+  });
+
+  // 산술 대상 숫자 — undefined면 NaN이 전파되어 자금/스탯이 조용히 오염됨
+  const nums = {
+    burnout: 0, lossStreak: 0, lastSlumpMonth: 0,
+    _userSNSLastMonth: -1,
+    hoemu_count: 0, hoemu_score: 0,
+    broadcast_count: 0, broadcast_score: 0,
+    overseas_count: 0, heesenRelation: 0, inhouseEval: 0,
+    debtMonths: 0, sickMonths: 0,
+    pregnancyDay: 0, dateCount: 0, marriageMonth: 0,
+    politicsSupport: 0, councilElectedYear: 0,
+    councilActivityCount: 0, politicsOfferedYear: 0,
+    consultQuota: 0, monthReviewCount: 0, monthTossCount: 0,
+    yearCaseSeq: 0, monthCaseFees: 0, monthSuccessFees: 0,
+    yearCases: 0, lastYearCases: 0, statusMonths: 0,
+    caseFeeRate: 0, successFeeRate: 0, caseFeeMultiplier: 1,
+    snsFollowers: 0, youtubeSubscribers: 0,
+    preparation: 0, cases: 0, wins: 0, losses: 0,
+    gradSchoolCount: 0, phdProgress: 0,
+  };
+  for (const k in nums) {
+    if (typeof state[k] !== 'number' || !isFinite(state[k])) state[k] = nums[k];
+  }
+
+  return state;
+}
+
 function migrateSave(saveData) {
   if (!saveData || !saveData.state) {
     return { ok: false, reason: 'corrupt' };
@@ -17015,6 +17110,8 @@ function migrateSave(saveData) {
       }
     }
   }
+  // 마이그레이션 누락·에러 직전 중단 등 어느 경로로 들어와도 최소 보장.
+  state = ensureDefaults(state);
   saveData.state = state;
   saveData.version = GAME_VERSION;
   return { ok: true, saveData, from };
@@ -19241,7 +19338,7 @@ function showEnding(){
     let grade,gradeText;
     if(s.lawKnowledge>=950 && s.reputation>=900) { grade='상'; gradeText='나는 로스쿨의 전설적인 교수가 되었다. 내 수업을 듣기 위해 학생들이 새벽부터 줄을 선다. 논문은 학계에서 인용 수가 가장 높고, 내가 가르친 학생들이 법조계 곳곳에서 활약하고 있다. 그들이 \'교수님 덕분입니다\'라고 할 때, 이 길을 택한 보람을 느낀다.'; }
     else { grade='중'; gradeText='교수 생활은 생각보다 조용하고 단조롭다. 하지만 학생들이 눈을 반짝이며 질문할 때, 변호사 시절의 열정이 되살아나는 기분이다. 내 경험이 이 아이들에게 도움이 되기를 바란다.'; }
-    ending = {title:'로스쿨교수', bg:'배경/대학원.webp', commonText:ct, grade, gradeText};
+    ending = {title:'로스쿨교수', bg:'배경/대학원.jpg', commonText:ct, grade, gradeText};
   }
   // 9. 인권변호사
   if(!ending && G.status!=='suspended' && s.morality>=850 && s.reputation>=500 && G.specialLawyer && G.specialLawyer.includes('publicInterest')) {
@@ -19267,7 +19364,7 @@ function showEnding(){
     let grade,gradeText;
     if(G.funds>=50000000000) { grade='상'; gradeText='이제 변호사 수입은 내 전체 자산에서 극히 일부에 불과하다. 부동산 포트폴리오만 수백억. 가끔 생각한다. 나는 변호사인가, 투자가인가. 어느 쪽이든 상관없다. 돈이 돈을 버는 구조를 만들어낸 것이 내 인생 최고의 판결이었으니까.'; }
     else { grade='중'; gradeText='투자로 상당한 부를 쌓았다. 변호사 업무만으로는 이 정도의 자산을 만들 수 없었을 것이다. 하지만 욕심을 부리지 않으려 한다. 투자의 세계는 한순간에 모든 것을 잃을 수 있는 곳이라는 걸 잘 알고 있으니까.'; }
-    ending = {title:'투자의귀재', bg:'배경/골프.webp', commonText:ct, grade, gradeText};
+    ending = {title:'투자의귀재', bg:'배경/골프.jpg', commonText:ct, grade, gradeText};
   }
   // 12. 너튜버변호사
   if(!ending && G.youtubeSubscribers>=1000000 && s.charm>=800) {
@@ -19646,12 +19743,12 @@ function showEndingVN(ending) {
 function showEndingCredits(ending, gradeLabel) {
   const es = document.getElementById('ending-screen');
   const credits = [
-    {bg:'졸업.webp', title:'Opening', body:'Midnight Bonus Stage'},
-    {bg:'배경/엔딩2.webp', title:'Main BGM', body:'Midnight Bonus Stage(inst.)\nNight Urban Drive\n일과후\n로펌의 오후\nAfter Lawschool'},
-    {bg:'배경/엔딩1.webp', title:'Love Theme', body:'사랑이 다가온 날\n우리 계속'},
-    {bg:'배경/엔딩3.webp', title:'Ending', body:'Gaming Love'},
-    {bg:'배경/엔딩4.webp', title:'기획&제작', body:'박대영'},
-    {bg:'배경/엔딩5.webp', title:'', body:'벼넥시트 - 변호사 생존기 -'},
+    {bg:'배경/엔딩0.jpg', title:'Opening', body:'Midnight Bonus Stage'},
+    {bg:'배경/엔딩2.png', title:'Main BGM', body:'Midnight Bonus Stage(inst.)\nNight Urban Drive\n일과후\n로펌의 오후\nAfter Lawschool'},
+    {bg:'배경/엔딩1.png', title:'Love Theme', body:'사랑이 다가온 날\n우리 계속'},
+    {bg:'배경/엔딩3.jpg', title:'Ending', body:'Gaming Love'},
+    {bg:'배경/엔딩4.jpg', title:'기획&제작', body:'박대영'},
+    {bg:'배경/엔딩5.png', title:'', body:'벼넥시트 - 변호사 생존기 -'},
   ];
 
   // 크레딧용 오버레이 생성
@@ -19835,7 +19932,7 @@ function showWeddingScene(scene, cb) {
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
   resetModalStyle(true);
-  document.getElementById('se-bg').style.backgroundImage = "url('배경/결혼식.webp')";
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/결혼식.png')}')`;
 
   function showWedDlg() {
     if (dlgIdx < scene.dialogues.length) {
