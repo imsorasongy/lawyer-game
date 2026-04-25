@@ -14556,7 +14556,7 @@ function judgeAction(){
   let s=positive-penalty+(Math.random()*30-15);  // 운 폭 ±15
   s=Math.max(0,Math.min(100,s+50));
   if(s>=88&&Math.random()<0.45)return{result:'great',mult:2};
-  if(s>=55)return{result:'success',mult:1};
+  if(s>=51)return{result:'success',mult:1};
   return{result:'fail',mult:0.5};
 }
 function judgeConsult(){
@@ -14566,7 +14566,7 @@ function judgeConsult(){
   let s=positive-penalty+(Math.random()*30-15);
   s=Math.max(0,Math.min(100,s+50));
   if(s>=88&&Math.random()<0.45)return{result:'great',mult:2};
-  if(s>=55)return{result:'success',mult:1};
+  if(s>=51)return{result:'success',mult:1};
   return{result:'fail',mult:0.5};
 }
 
