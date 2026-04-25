@@ -2066,8 +2066,11 @@ function getGeneralEvents() {
       },
       bg: G.gender==='male'?'배경/방.webp':'배경/방2.webp',
       get face(){ ensureRomance(); const t=getRomanceTargets().find(x=>x.id===G.romance.dating); return t?t.face:null; },
-      get dialogues(){ ensureRomance(); const t=getRomanceTargets().find(x=>x.id===G.romance.dating); const sn=t?t.name:'배우자'; const cn=G.children[0].name; return [
-        {speaker: '{name}', text: cn+'아, 밥 먹자~ ... 왜 안 먹어?'},
+      get dialogues(){ ensureRomance(); const t=getRomanceTargets().find(x=>x.id===G.romance.dating); const sn=t?t.name:'배우자';
+        const now=(2029+G.year)*12+G.month;
+        const eligible=(G.children||[]).filter(c=>{ const born=c.birthYear*12+c.birthMonth; return (now-born)>=24; });
+        const target=eligible[0]||G.children[0]; const cn=target.name; return [
+        {speaker: '{name}', text: `${J(cn, '아/야')}, 밥 먹자~ ... 왜 안 먹어?`},
         {speaker: sn, text: '오늘 친구랑 싸웠나봐. 기분이 안 좋은가봐.'},
         {speaker: '{name}', text: '어떡하지...'}
       ]; },
@@ -5760,7 +5763,7 @@ function triggerBurnoutRecoveryVN(kind, onDone) {
     document.getElementById('se-face-img').src = (G.children[0] && G.children[0].birthYear && (2029+G.year - G.children[0].birthYear) <= 1) ? '캐릭터얼굴/아기1.webp' : '캐릭터얼굴/아기2.webp';
     document.getElementById('se-dialog').classList.remove('no-face');
     document.getElementById('se-speaker').textContent = child.name;
-    document.getElementById('se-text').textContent = `(품에 안긴 ${child.name}이(가) 방긋 웃어준다. 세상이 다시 괜찮아 보인다.)`;
+    document.getElementById('se-text').textContent = `(품에 안긴 ${J(child.name, '이/가')} 방긋 웃어준다. 세상이 다시 괜찮아 보인다.)`;
     document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="finishBurnoutRecovery()">다시 힘내자.</button>`;
   }
   window._burnoutRecoveryOnDone = onDone;
@@ -6676,8 +6679,8 @@ function applyAutumnChoice(choice) {
     addDiary('🍁', `단풍 산행 🍁 힘들었지만 뷰 미침 #가을 #단풍`, _ld);
     if (partner) {
       epilogue = [
-        {speaker: partner.name, face: partner.face, text: '정상에서 내려다보는 단풍 진짜 장관이다.'},
-        {speaker: G.name, face: getPlayerFace(), text: '힘들게 올라온 보람이 있네.'}
+        {speaker: partner.name, face: partner.face, text: '중턱에서 내려다보는 단풍 진짜 장관이다.'},
+        {speaker: G.name, face: getPlayerFace(), text: '여기까지 올라온 보람이 있네.'}
       ];
     }
   } else if (choice === 'park') {
@@ -10075,20 +10078,20 @@ const DATE_TONE_DIALOGUES = {
   },
   // ---------- dateReview ----------
   dateReview:{
-    minyoung: d=>({speaker:d.name, text:`오늘도 즐거웠어. ${d.pName}은 어땠어?`}),
-    eunkyung: d=>({speaker:d.name, text:`오늘 데이트 즐거웠어... ${d.pName}은 어땠어?`}),
-    sarang: d=>({speaker:d.name, text:`오늘 좋았어. ${d.pName}은 어땠어?`}),
-    yeona: d=>({speaker:d.name, text:`...오늘 나쁘지 않았어. ${d.pName}은?`}),
+    minyoung: d=>({speaker:d.name, text:`오늘도 즐거웠어. ${J(d.pName,'은/는')} 어땠어?`}),
+    eunkyung: d=>({speaker:d.name, text:`오늘 데이트 즐거웠어... ${J(d.pName,'은/는')} 어땠어?`}),
+    sarang: d=>({speaker:d.name, text:`오늘 좋았어. ${J(d.pName,'은/는')} 어땠어?`}),
+    yeona: d=>({speaker:d.name, text:`...오늘 나쁘지 않았어. ${J(d.pName,'은/는')}?`}),
     seungha: d=>({speaker:d.name, text:`오빠~ 오늘 재밌었다! 오빠는?`}),
-    heesun: d=>({speaker:d.name, text:`오늘 정말 좋았어. ${d.pName}은 어땠어?`}),
-    hyemin: d=>({speaker:d.name, text:`오늘 너무 즐거웠어! ${d.pName}은?!`}),
-    wonhyung: d=>({speaker:d.name, text:`오늘 즐거웠어. ${d.pName}은 어땠어?`}),
+    heesun: d=>({speaker:d.name, text:`오늘 정말 좋았어. ${J(d.pName,'은/는')} 어땠어?`}),
+    hyemin: d=>({speaker:d.name, text:`오늘 너무 즐거웠어! ${J(d.pName,'은/는')}?!`}),
+    wonhyung: d=>({speaker:d.name, text:`오늘 즐거웠어. ${J(d.pName,'은/는')} 어땠어?`}),
     minwoo: d=>({speaker:d.name, text:`오늘 좋았어. ${d.pName}씨는 어땠어?`}),
     changwook: d=>({speaker:d.name, text:`오늘 좋았어. 어땠어?`}),
     jaseong: d=>({speaker:d.name, text:`오늘 진짜 좋았다! ${d.pName}씨는 어땠어?`}),
     mingyu: d=>({speaker:d.name, text:`오늘 좋았어. ${d.pName}씨는?`}),
     yosep: d=>({speaker:d.name, text:`뭐... 나쁘지 않았어. 너는?`}),
-    hyuk: d=>({speaker:d.name, text:`오늘 즐거웠어. ${d.pName}은 어땠어?`})
+    hyuk: d=>({speaker:d.name, text:`오늘 즐거웠어. ${J(d.pName,'은/는')} 어땠어?`})
   },
   // ---------- dateNotice (나 뭐 변한거 없어? - 여성캐릭터만) ----------
   dateNotice:{
@@ -10681,7 +10684,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
   // 4. 데이트 어땠어? (10%)
   if (Math.random() < 0.10) {
     const td = getDateTone('dateReview', datingId);
-    const dlg = td ? td(d) : {speaker:datingName, text:`오늘도 즐거운 데이트였다. ${G.name}은 어땠어?`};
+    const dlg = td ? td(d) : {speaker:datingName, text:`오늘도 즐거운 데이트였다. ${J(G.name,'은/는')} 어땠어?`};
     return {
       id:'dateReview', bg:'배경/식당.webp', face:datingFace,
       dialogues:[dlg],
@@ -11080,10 +11083,10 @@ function getMaleRomanceEvents() {
         {speaker:'박민영', text:'그 말 믿겠습니다. 저도 최선을 다할 테니까, 각오하세요.'}
       ]},
       {text:'대충할 생각은 없지만...', pass:false, rejectDialogues:[
-        {speaker:'박민영', text:'그렇군요. 변호사님은 절 진지하게 생각하지 않았군요..'}
+        {speaker:'박민영', text:'대충할 생각이 없으시면 어떻게 하시겠다는 거예요? 저는 좀 더 분명한 분이 좋아요.'}
       ]},
       {text:'왜요? 좀 봐드릴까요?', pass:false, rejectDialogues:[
-        {speaker:'박민영', text:'그렇군요. 변호사님은 절 진지하게 생각하지 않았군요..'}
+        {speaker:'박민영', text:'농담이세요? 저는 그런 농담 별로 좋아하지 않아요.'}
       ]},
     ]
   });
@@ -13812,9 +13815,9 @@ function buildScene(slot) {
     changes.push(...applyStatR('mental',1*sm));
     changes.push(...applyStatR('stress',5*stm));
     changes.push(...applyStatR('fatigue',5*stm));
-    const income=j.result==='great'?100000:j.result==='fail'?0:50000;
+    const income=100000;
     G.funds+=income;statChanges.funds+=income;
-    if(income>0) changes.push(`자금 +${income/10000}만원`);
+    changes.push(`자금 +${income/10000}만원 (일급)`);
     const sd=SCENE_DATA.partTimeJob;
     return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,
       result:j.result,resultLabel:j.result==='great'?'대성공':j.result==='success'?'성공':'실패',
@@ -15763,7 +15766,7 @@ function showStatusEvent(targetStatus) {
 
   document.getElementById('se-text').textContent = msg;
   document.getElementById('se-choices').innerHTML = `
-    <div style="text-align:center;margin-top:10px;font-size:0.9rem;color:#c9a84c;margin-bottom:8px">${titleKr}가 되겠습니까?</div>
+    <div style="text-align:center;margin-top:10px;font-size:0.9rem;color:#c9a84c;margin-bottom:8px">${J(titleKr,'이/가')} 되겠습니까?</div>
     <button class="event-choice" onclick="acceptPromotion('${targetStatus}')"><span class="choice-label">네</span></button>
     <button class="event-choice" onclick="declinePromotion('${targetStatus}')"><span class="choice-label">아니오</span></button>`;
 }
@@ -16014,7 +16017,7 @@ function executeDivorce(id, name) {
   document.getElementById('se-speaker').textContent = '';
   document.getElementById('se-face').style.display = 'none';
   document.getElementById('se-dialog').classList.add('no-face');
-  document.getElementById('se-text').textContent = `${G.name}변호사와 ${name}은 이혼하였습니다.`;
+  document.getElementById('se-text').textContent = `${G.name} 변호사와 ${J(name,'은/는')} 이혼하였습니다.`;
   document.getElementById('se-choices').innerHTML = `
     <button class="event-choice" onclick="document.getElementById('status-event-modal').style.display='none';updateUI()"><span class="choice-label">확인</span></button>`;
 }
@@ -16301,7 +16304,7 @@ function confirmMarketing(type) {
   const label = type==='sns' ? 'SNS' : '유튜브';
   const cost = type==='sns' ? '20만원' : '50만원';
   let html = `<div class="modal-title">${label} 영업</div>`;
-  html += `<div style="text-align:center;color:#e8d5b5;font-size:0.9rem;line-height:1.7;margin-bottom:16px">${label}를 이용해서 영업을 할까요?<br>비용은 ${cost}이 듭니다.</div>`;
+  html += `<div style="text-align:center;color:#e8d5b5;font-size:0.9rem;line-height:1.7;margin-bottom:16px">${J(label,'을/를')} 이용해서 영업을 할까요?<br>비용은 ${J(cost,'이/가')} 듭니다.</div>`;
   html += `<div style="display:flex;gap:8px;justify-content:center">
     <button class="btn btn-primary" style="padding:8px 30px" onclick="doMarketing('${type}')">네</button>
     <button class="btn btn-secondary" style="padding:8px 30px" onclick="openMarketingMenu()">아니오</button></div>`;
@@ -17886,7 +17889,7 @@ function confirmSaveOverwrite(slot) {
 }
 function confirmSaveDelete(slot, mode) {
   document.getElementById('saveload-modal').style.display = 'none';
-  gameConfirm(`슬롯 ${slot+1}을 삭제하시겠습니까?`, () => { deleteSave(slot); if(mode==='save') openSaveScreen(); else openLoadScreen(); }, () => { if(mode==='save') openSaveScreen(); else openLoadScreen(); });
+  gameConfirm(`슬롯 ${J(String(slot+1),'을/를')} 삭제하시겠습니까?`, () => { deleteSave(slot); if(mode==='save') openSaveScreen(); else openLoadScreen(); }, () => { if(mode==='save') openSaveScreen(); else openLoadScreen(); });
 }
 function saveGame(slot, silent) {
   const saveData = {
