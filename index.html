@@ -5416,12 +5416,12 @@ function pickRandomRival() {
 }
 
 // 라이벌 명성 자연 증가 (월 1회, 월말에 호출)
-// 친근형(이기승·강하주): +4~6 / 경쟁형(안진담·성리나): +3~5
+// 친근형(이기승·강하주, fame 250): +3~8 / 경쟁형(안진담·성리나, fame 300): +3~7
 function growRivalFame() {
   if (!Array.isArray(G.rivals)) return;
   G.rivals.forEach(r => {
-    const base = r.type === 'friendly' ? 4 : 3;
-    r.fame = Math.min(1000, r.fame + base + Math.floor(Math.random() * 3));
+    const range = r.type === 'friendly' ? 6 : 5;  // 0..5 → 3~8 / 0..4 → 3~7
+    r.fame = Math.min(1000, r.fame + 3 + Math.floor(Math.random() * range));
   });
 }
 
