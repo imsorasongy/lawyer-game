@@ -4774,9 +4774,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initStats() {
   const r = () => Math.floor(Math.random() * 101);
+  // 체력·멘탈은 50~100 사이로 시작 (낮은 값에서 무조건 실패하는 상황 방지)
+  const r50 = () => 50 + Math.floor(Math.random() * 51);
   G.stats = {
     lawKnowledge:r(), debate:r(), sales:r(), charm:r(), observation:r(),
-    stamina:r(), mental:r(), morality:r(), sociability:r(), reputation:r(),
+    stamina:r50(), mental:r50(), morality:r(), sociability:r(), reputation:r(),
     stress:0, fatigue:0, karma:0
   };
   G.proStats = {};
