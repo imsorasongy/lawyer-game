@@ -84,7 +84,7 @@ body {
 #title-screen {
   display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
   height: 100vh; position: relative; overflow: hidden;
-  background: url('게임타이틀.webp') center center / cover no-repeat;
+  background: url('게임타이틀2.png') center center / cover no-repeat;
   padding-bottom: 60px;
 }
 .title-btn {
@@ -14095,14 +14095,24 @@ function buildScene(slot) {
 
 function judgeAction(){
   if(G.isSick)return{result:'fail',mult:0.5};
-  let s=(G.stats.stamina*0.03)+(G.stats.mental*0.03)-(G.stats.fatigue*0.2)-(G.stats.stress*0.3)+(Math.random()*20-10);
+  const positive=(G.stats.stamina*0.03)+(G.stats.mental*0.03);
+  const rawPenalty=(G.stats.fatigue*0.2)+(G.stats.stress*0.3);
+  const penalty=Math.min(30,rawPenalty);  // 페널티 캡 30 — 최악 상태에서도 운 보정 여지
+  let s=positive-penalty+(Math.random()*30-15);  // 운 폭 ±15
   s=Math.max(0,Math.min(100,s+50));
-  if(s>=90&&Math.random()<0.5)return{result:'great',mult:2};if(s>=50)return{result:'success',mult:1};return{result:'fail',mult:0.5};
+  if(s>=88&&Math.random()<0.45)return{result:'great',mult:2};
+  if(s>=55)return{result:'success',mult:1};
+  return{result:'fail',mult:0.5};
 }
 function judgeConsult(){
-  let s=(G.stats.sales*0.02)+(G.stats.charm*0.02)-(G.stats.fatigue*0.2)-(G.stats.stress*0.3)+(Math.random()*20-10);
+  const positive=(G.stats.sales*0.02)+(G.stats.charm*0.02);
+  const rawPenalty=(G.stats.fatigue*0.2)+(G.stats.stress*0.3);
+  const penalty=Math.min(30,rawPenalty);
+  let s=positive-penalty+(Math.random()*30-15);
   s=Math.max(0,Math.min(100,s+50));
-  if(s>=90)return{result:'great',mult:2};if(s>=50)return{result:'success',mult:1};return{result:'fail',mult:0.5};
+  if(s>=88&&Math.random()<0.45)return{result:'great',mult:2};
+  if(s>=55)return{result:'success',mult:1};
+  return{result:'fail',mult:0.5};
 }
 
 // Apply stat and return description string
@@ -19808,28 +19818,28 @@ function renderEvidenceCaseNew(caseNum, mc) {
 // 남주=엔딩이름, 여주=엔딩이름2. 인플루언서변호사 여주 상등급만 인플루언서변호사3 사용.
 // 평범한변호사는 파일 없음 → 기존 bg 유지
 const ENDING_BG_MAP = {
-  '전설의 변호사':  { male:'전설의변호사.png',   female:'전설의변호사2.png' },
-  '악덕변호사':     { male:'악덕변호사.png',     female:'악덕변호사2.png' },
-  '정치인':         { male:'정치인.png',         female:'정치인2.jpg' },
-  '판사':           { male:'판사엔딩.png',       female:'판사엔딩2.jpg' },
-  '고위공무원':     { male:'고위공무원.png',     female:'고위공무원2.jpg' },
-  '변호사협회장':   { male:'변호사협회장.png',   female:'변호사협회장2.jpg' },
-  '대표변호사':     { male:'대표변호사.png',     female:'대표변호사2.jpg' },
-  '대형펌 파트너':  { male:'대형펌파트너.png',   female:'대형펌파트너2.jpg' },
-  '로스쿨교수':     { male:'로스쿨교수.png',     female:'로스쿨교수2.jpg' },
-  '인권변호사':     { male:'인권변호사.png',     female:'인권변호사2.jpg' },
-  '대기업임원':     { male:'대기업임원.png',     female:'대기업임원2.jpg' },
-  '투자의귀재':     { male:'투자의귀재.png',     female:'투자의귀재2.jpg' },
-  '너튜버변호사':   { male:'너튜버변호사.png',   female:'너튜버변호사2.jpg' },
-  '인플루언서변호사': { male:'인플루언서변호사.png', female:'인플루언서변호사2.jpg', female_top:'인플루언서변호사3.jpg' },
-  '연예인변호사':   { male:'연예인변호사.png',   female:'연예인변호사2.jpg' },
-  '방송변호사':     { male:'방송변호사.png',     female:'방송변호사2.jpg' },
-  '국제기구활동가': { male:'국제기구활동가.png', female:'국제기구활동가2.jpg' },
-  '동네변호사':     { male:'동네변호사.png',     female:'동네변호사2.jpg' },
-  '학원강사':       { male:'학원강사.png',       female:'학원강사2.jpg' },
-  '결혼/가정':      { male:'결혼가정.png',       female:'결혼가정2.jpg' },
-  '휴업변호사':     { male:'휴업변호사.png',     female:'휴업변호사2.jpg' },
-  '평범한변호사':   { male:'개업변호사.png',     female:'개업변호사2.jpg' },
+  '전설의 변호사':  { male:'전설의변호사.jpg',   female:'전설의변호사2.png' },
+  '악덕변호사':     { male:'악덕변호사.jpg',     female:'악덕변호사2.png' },
+  '정치인':         { male:'정치인.jpg',         female:'정치인2.jpg' },
+  '판사':           { male:'판사엔딩.jpg',       female:'판사엔딩2.jpg' },
+  '고위공무원':     { male:'고위공무원.jpg',     female:'고위공무원2.jpg' },
+  '변호사협회장':   { male:'변호사협회장.jpg',   female:'변호사협회장2.jpg' },
+  '대표변호사':     { male:'대표변호사.jpg',     female:'대표변호사2.jpg' },
+  '대형펌 파트너':  { male:'대형펌파트너.jpg',   female:'대형펌파트너2.jpg' },
+  '로스쿨교수':     { male:'로스쿨교수.jpg',     female:'로스쿨교수2.jpg' },
+  '인권변호사':     { male:'인권변호사.jpg',     female:'인권변호사2.jpg' },
+  '대기업임원':     { male:'대기업임원.jpg',     female:'대기업임원2.jpg' },
+  '투자의귀재':     { male:'투자의귀재.jpg',     female:'투자의귀재2.jpg' },
+  '너튜버변호사':   { male:'너튜버변호사.jpg',   female:'너튜버변호사2.jpg' },
+  '인플루언서변호사': { male:'인플루언서변호사.jpg', female:'인플루언서변호사2.jpg', female_top:'인플루언서변호사3.jpg' },
+  '연예인변호사':   { male:'연예인변호사.jpg',   female:'연예인변호사2.jpg' },
+  '방송변호사':     { male:'방송변호사.jpg',     female:'방송변호사2.jpg' },
+  '국제기구활동가': { male:'국제기구활동가.jpg', female:'국제기구활동가2.jpg' },
+  '동네변호사':     { male:'동네변호사.jpg',     female:'동네변호사2.jpg' },
+  '학원강사':       { male:'학원강사.jpg',       female:'학원강사2.jpg' },
+  '결혼/가정':      { male:'결혼가정.jpg',       female:'결혼가정2.jpg' },
+  '휴업변호사':     { male:'휴업변호사.jpg',     female:'휴업변호사2.jpg' },
+  '평범한변호사':   { male:'개업변호사.jpg',     female:'개업변호사2.jpg' },
 };
 
 function getEndingBg(title, grade) {
