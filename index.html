@@ -9856,16 +9856,16 @@ function getRomanceTargets() {
         {action:'consult', prob:0.05, condition:()=>G.firmId==='atlantic'&&(G.status==='associate'||G.status==='partner')},
       ],
       dialoguesFirst:[
-        {speaker:'추사랑', text:'어머, 새로운 분이시네요? 저는 추사랑이에요. 대서양 소속이에요.'},
+        {speaker:'추사랑', text:'어머, 새로운 사람이네? 난 추사랑이야. 대서양 소속이고.'},
         {speaker:'{name}', text:'안녕하세요, {name}입니다. 처음뵙겠습니다.'},
-        {speaker:'추사랑', text:'아~ 소문 들었어요. 앞으로 잘 부탁드려요!'},
+        {speaker:'추사랑', text:'아~ 소문 들었어. 앞으로 잘 부탁해!'},
       ],
       dialogues:[
-        {speaker:'추사랑', text:'{name} 변호사님, 오늘도 열심히 일하시네요!'},
+        {speaker:'추사랑', text:'{name} 변호사, 오늘도 열심히 일하네!'},
         {speaker:'{name}', text:'추사랑 변호사님도요. 요즘 바쁘시죠?'},
-        {speaker:'추사랑', text:'네~ 그래도 좋은 분들이랑 일하니까 힘이 나요.'},
+        {speaker:'추사랑', text:'응~ 그래도 좋은 사람들이랑 일하니까 힘이 나.'},
       ],
-      farewell:'오늘 즐거웠어요! 내일 사무실에서 봐요~',
+      farewell:'오늘 즐거웠어! 내일 사무실에서 보자~',
       affectionFn:()=>((G.stats.debate+G.stats.sales+G.stats.reputation)/randInt(600,900)),
     });
     targets.push({
