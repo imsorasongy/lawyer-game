@@ -5436,6 +5436,8 @@ const RIVAL_BOND_DATA = {
     stage1_comrade: {
       bg: '배경/식당.webp',
       dialogues: [
+        {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'이기승', text:'마침 잘 만났어. 형사사건 하나 받았는데, 좀 막막해서.'},
         {speaker:'이기승', text:'직접증거가 거의 없는 무죄 다툼이야. 너 형사 감각 좋잖아. 한 번 봐줄 수 있어?'},
       ],
@@ -5448,6 +5450,8 @@ const RIVAL_BOND_DATA = {
     stage1_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'이기승', text:'어쩌다 우리가 이렇게 자주 부딪히게 됐을까.'},
         {speaker:'이기승', text:'솔직히 말할게. 나 이번엔 안 봐줘. 너랑 나 누가 더 강한 변호사인지, 진짜로 한 번 확인해야겠어.'},
       ],
@@ -5474,6 +5478,8 @@ const RIVAL_BOND_DATA = {
     stage2_rival: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'이기승', text:'너 요즘 잘 나가더라. 의뢰가 너한테 자꾸 가는 거 알고 있나.'},
         {speaker:'이기승', text:'솔직히 인정한다. 너랑 나 같은 분야에서 부딪히는 건 시간 문제야. 이번 사건, 양보 못 해.'},
       ],
@@ -5486,11 +5492,13 @@ const RIVAL_BOND_DATA = {
     stage3_comrade: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'이기승', text:'1심 사형선고 받은 사람이 있어. 진범 따로 있다는 정황이 잡혔는데, 혼자 무리야.'},
         {speaker:'이기승', text:'너랑 같이 변호인단으로 들어가자. 동지로서. 사람을 살리는 일이야.'},
       ],
       choices: [
-        {text:'같이 들어간다. 끝까지 함께', pass:true, reply:{speaker:'이기승', text:'살았어! 무죄 판결이다. 너랑 나, 진짜 동지야. 내 인생에서 잊지 않을 거야.'}, effects:{reputation:50, mental:20, sociability:10, funds:50000000}},
+        {text:'같이 들어간다. 끝까지 함께', pass:true, reply:{speaker:'이기승', text:'살았어! 무죄 판결이다. 너랑 나, 진짜 동지야. 내 인생에서 잊지 않을 거야.'}, effects:{reputation:10, mental:3, sociability:2, funds:3000000}},
         {text:'보수가 적은데 안 한다', pass:false, reply:{speaker:'이기승', text:'...너 변했네. 알겠다, 혼자 해볼게.'}, effects:{_rivalry:10}},
         {text:'공동 수임은 부담스러워. 자료만 봐줄게', pass:false, reply:{speaker:'이기승', text:'...그것만으로는 부족해. 동지가 그런 거 아니지.'}, effects:{mental:5, _rivalry:-3}},
       ],
@@ -5498,13 +5506,15 @@ const RIVAL_BOND_DATA = {
     stage3_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'이기승', text:'결국 여기까지 왔네.'},
         {speaker:'이기승', text:'이번 정치 사건, 우리 둘이 정면 대결이야. 한 명만 이긴다. 끝장 보자.'},
       ],
       choices: [
-        {text:'받아들이고 정면으로 간다', pass:true, reply:{speaker:'이기승', text:'...완패다. 내 인생 마지막 라이벌이 너라서 영광이야. 설욕하러 다시 도전하겠어.'}, effects:{reputation:100, fame:30, funds:100000000, mental:30, _rivalFame:-50}},
-        {text:'한 발 물러서 양형 다툼으로 가자', pass:false, reply:{speaker:'이기승', text:'후퇴? ...오늘은 내가 이겼어. 다음엔 너답게 와라.'}, effects:{reputation:-50, mental:-30, stress:30}},
-        {text:'합의 제안하자', pass:false, reply:{speaker:'이기승', text:'합의? ...네가 그런 말 할 줄은 몰랐다. 됐어, 내가 가져간다.'}, effects:{reputation:-30, mental:-20}},
+        {text:'받아들이고 정면으로 간다', pass:true, reply:{speaker:'이기승', text:'...완패다. 내 인생 마지막 라이벌이 너라서 영광이야. 설욕하러 다시 도전하겠어.'}, effects:{reputation:20, fame:5, funds:5000000, mental:5, _rivalFame:-15}},
+        {text:'한 발 물러서 양형 다툼으로 가자', pass:false, reply:{speaker:'이기승', text:'후퇴? ...오늘은 내가 이겼어. 다음엔 너답게 와라.'}, effects:{reputation:-10, mental:-5, stress:5}},
+        {text:'합의 제안하자', pass:false, reply:{speaker:'이기승', text:'합의? ...네가 그런 말 할 줄은 몰랐다. 됐어, 내가 가져간다.'}, effects:{reputation:-7, mental:-3}},
       ],
     },
   },
@@ -5513,6 +5523,7 @@ const RIVAL_BOND_DATA = {
       bg: '배경/식당.webp',
       dialogues: [
         {speaker:'강하주', text:'어머, 마침 잘 만났어! 부탁할 게 있는데 시간 좀 내줄 수 있어?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'강하주', text:'이혼 사건인데 의뢰인 마음이 너무 흔들려서... 너랑 같이 의논하고 싶어.'},
       ],
       choices: [
@@ -5524,6 +5535,8 @@ const RIVAL_BOND_DATA = {
     stage1_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'강하주', text:'{name}~ 잠깐 시간 좀 내줄 수 있어? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'강하주', text:'우리 이렇게 부딪히는 거, 자주 있는 일은 아닌데...'},
         {speaker:'강하주', text:'그래도 한 번은 제대로 붙어봐야겠지? 너랑 진심으로 한 번 붙어보고 싶었어.'},
       ],
@@ -5536,6 +5549,8 @@ const RIVAL_BOND_DATA = {
     stage2_comrade: {
       bg: '배경/식당.webp',
       dialogues: [
+        {speaker:'강하주', text:'{name}~ 잠깐 시간 좀 내줄 수 있어? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'강하주', text:'며칠 전에 내 의뢰인이... 자살을 시도했어. 다행히 살아났는데...'},
         {speaker:'강하주', text:'사람을 살리는 게 우리 일인지, 사건을 이기는 게 우리 일인지 모르겠어.'},
       ],
@@ -5548,6 +5563,8 @@ const RIVAL_BOND_DATA = {
     stage2_rival: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'강하주', text:'{name}~ 잠깐 시간 좀 내줄 수 있어? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'강하주', text:'너 요즘 가사사건 너무 잘 잡더라. 우리 의뢰인이 너한테 가는 일도 있었고.'},
         {speaker:'강하주', text:'솔직히 짜증 나. 이번 사건은 양보 못 해.'},
       ],
@@ -5560,11 +5577,13 @@ const RIVAL_BOND_DATA = {
     stage3_comrade: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'강하주', text:'{name}~ 잠깐 시간 좀 내줄 수 있어? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'강하주', text:'5살 아이가 의붓아빠한테 학대당하는 사건이 들어왔어.'},
         {speaker:'강하주', text:'너랑 같이 들어가야 해. 아이 옆을 지켜줄 변호인이 둘은 있어야 해.'},
       ],
       choices: [
-        {text:'같이 한다. 그 아이 우리가 지키자', pass:true, reply:{speaker:'강하주', text:'우리가 그 아이 살린 거야. 너랑 나, 평생 동지야.'}, effects:{reputation:50, mental:20, sociability:10, funds:50000000}},
+        {text:'같이 한다. 그 아이 우리가 지키자', pass:true, reply:{speaker:'강하주', text:'우리가 그 아이 살린 거야. 너랑 나, 평생 동지야.'}, effects:{reputation:10, mental:3, sociability:2, funds:3000000}},
         {text:'너 혼자도 충분히 잘할 수 있어', pass:false, reply:{speaker:'강하주', text:'...너 혼자가는 사람이었구나. 알았어.'}, effects:{_rivalry:5}},
         {text:'보수가 너무 적어서 안 돼', pass:false, reply:{speaker:'강하주', text:'...그 말이 너무 차가워. 됐어.'}, effects:{_rivalry:10}},
       ],
@@ -5572,12 +5591,14 @@ const RIVAL_BOND_DATA = {
     stage3_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'강하주', text:'{name}~ 잠깐 시간 좀 내줄 수 있어? 할 얘기가 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'강하주', text:'결국 대법원까지 왔네. 너랑 나, 누가 진짜인지 가리자.'},
       ],
       choices: [
-        {text:'끝까지 정면 대결한다', pass:true, reply:{speaker:'강하주', text:'인정. 너 진짜 무서운 변호사야. 다음엔 안 봐줘.'}, effects:{reputation:100, fame:30, funds:100000000, mental:30, _rivalFame:-50}},
+        {text:'끝까지 정면 대결한다', pass:true, reply:{speaker:'강하주', text:'인정. 너 진짜 무서운 변호사야. 다음엔 안 봐줘.'}, effects:{reputation:20, fame:5, funds:5000000, mental:5, _rivalFame:-15}},
         {text:'합의 제안한다', pass:false, reply:{speaker:'강하주', text:'합의? ...너 진심이야? 됐어, 내가 가져간다.'}, effects:{reputation:-50, mental:-30}},
-        {text:'양형 다툼으로 빠진다', pass:false, reply:{speaker:'강하주', text:'...실망이야. 다음엔 더 잘해서 와.'}, effects:{reputation:-30, mental:-20}},
+        {text:'양형 다툼으로 빠진다', pass:false, reply:{speaker:'강하주', text:'...실망이야. 다음엔 더 잘해서 와.'}, effects:{reputation:-7, mental:-3}},
       ],
     },
   },
@@ -5586,6 +5607,7 @@ const RIVAL_BOND_DATA = {
       bg: '배경/식당.webp',
       dialogues: [
         {speaker:'안진담', text:'...할 말 있어. 잠깐 시간 돼?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'안진담', text:'회사법 사건인데 내가 놓친 부분이 있는 것 같다. 너라면 다른 시각을 줄 수 있을지도 모르겠어.'},
       ],
       choices: [
@@ -5597,6 +5619,8 @@ const RIVAL_BOND_DATA = {
     stage1_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'안진담', text:'{name}, 할 말이 있어. 잠깐 시간 돼?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'안진담', text:'...의뢰인이 자꾸 우리 사이에 끼어 있다는 거 모르지 않잖아.'},
         {speaker:'안진담', text:'한 번에 결판내자. 이번엔 한 발도 양보 안 한다.'},
       ],
@@ -5609,6 +5633,8 @@ const RIVAL_BOND_DATA = {
     stage2_comrade: {
       bg: '배경/식당.webp',
       dialogues: [
+        {speaker:'안진담', text:'{name}, 할 말이 있어. 잠깐 시간 돼?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'안진담', text:'이런 얘기 하기 싫지만... 회사 내부 정치가 너무 심해.'},
         {speaker:'안진담', text:'위에서 일부러 까다로운 의뢰인을 붙여. 솔직히, 이직을 고민 중이야.'},
       ],
@@ -5621,6 +5647,8 @@ const RIVAL_BOND_DATA = {
     stage2_rival: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'안진담', text:'{name}, 할 말이 있어. 잠깐 시간 돼?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'안진담', text:'이번 합병 건, 우리 둘이 정면이야.'},
         {speaker:'안진담', text:'한 발도 양보 안 한다. 미리 분명히 해두자.'},
       ],
@@ -5633,11 +5661,13 @@ const RIVAL_BOND_DATA = {
     stage3_comrade: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'안진담', text:'{name}, 할 말이 있어. 잠깐 시간 돼?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'안진담', text:'우리 회사 의뢰가 아닌, 반대편 사건이야.'},
         {speaker:'안진담', text:'내부고발자를 보호해야 해. 회사를 거스르는 일이지만, 옳은 일이야. 같이 하겠어?'},
       ],
       choices: [
-        {text:'같이 한다. 회사를 잃어도 옳은 일이니', pass:true, reply:{speaker:'안진담', text:'...너와 함께 한 일이라 자랑스럽다. 동지라고 부르겠다.'}, effects:{reputation:50, mental:20, sociability:10, funds:50000000}},
+        {text:'같이 한다. 회사를 잃어도 옳은 일이니', pass:true, reply:{speaker:'안진담', text:'...너와 함께 한 일이라 자랑스럽다. 동지라고 부르겠다.'}, effects:{reputation:10, mental:3, sociability:2, funds:3000000}},
         {text:'회사 잃을 위험이 너무 커', pass:false, reply:{speaker:'안진담', text:'...실리적이네. 알았다, 혼자 가겠다.'}, effects:{_rivalry:5}},
         {text:'비밀로 자료만 넘겨줄게', pass:false, reply:{speaker:'안진담', text:'비밀? ...그건 동지가 아니지. 됐다.'}, effects:{_rivalry:10}},
       ],
@@ -5645,11 +5675,13 @@ const RIVAL_BOND_DATA = {
     stage3_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'안진담', text:'{name}, 할 말이 있어. 잠깐 시간 돼?'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'안진담', text:'결국 마주 앉았네.'},
         {speaker:'안진담', text:'이 사건이 우리 둘 중 한 사무소의 명운이 걸린 건이야. 끝장 보자.'},
       ],
       choices: [
-        {text:'정면으로 결판낸다', pass:true, reply:{speaker:'안진담', text:'...완패다. 너를 인정한다. 다시 도전할 거다.'}, effects:{reputation:100, fame:30, funds:100000000, mental:30, _rivalFame:-50}},
+        {text:'정면으로 결판낸다', pass:true, reply:{speaker:'안진담', text:'...완패다. 너를 인정한다. 다시 도전할 거다.'}, effects:{reputation:20, fame:5, funds:5000000, mental:5, _rivalFame:-15}},
         {text:'합의 제안한다', pass:false, reply:{speaker:'안진담', text:'합의? ...너답지 않네. 됐다, 내가 가져간다.'}, effects:{reputation:-50, mental:-30}},
         {text:'양형 다툼으로 후퇴한다', pass:false, reply:{speaker:'안진담', text:'...실망이다. 약한 모습이네.'}, effects:{reputation:-30}},
       ],
@@ -5659,6 +5691,8 @@ const RIVAL_BOND_DATA = {
     stage1_comrade: {
       bg: '배경/식당.webp',
       dialogues: [
+        {speaker:'성리나', text:'{name}, 잠깐 시간 좀 내줘. 할 말이 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'성리나', text:'...어쩌다 보니 너랑 자주 얘기하게 되네.'},
         {speaker:'성리나', text:'이번 합병 사건이 이상해. 객관적으로 봐줄 사람이 필요해.'},
       ],
@@ -5671,6 +5705,8 @@ const RIVAL_BOND_DATA = {
     stage1_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'성리나', text:'{name}, 잠깐 시간 좀 내줘. 할 말이 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'성리나', text:'우리 둘 다 이렇게 자주 마주칠 거면, 차라리 정정당당히 한 번 붙는 게 깔끔하지 않을까?'},
       ],
       choices: [
@@ -5682,6 +5718,8 @@ const RIVAL_BOND_DATA = {
     stage2_comrade: {
       bg: '배경/식당.webp',
       dialogues: [
+        {speaker:'성리나', text:'{name}, 잠깐 시간 좀 내줘. 할 말이 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'성리나', text:'부모님이 변호사 일 그만두고 빨리 결혼하라고 매일 닦달이야.'},
         {speaker:'성리나', text:'솔직히, 이렇게 변호사 일 계속해서 행복할까 자꾸 의문이 들어. 넌 어때?'},
       ],
@@ -5694,6 +5732,8 @@ const RIVAL_BOND_DATA = {
     stage2_rival: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'성리나', text:'{name}, 잠깐 시간 좀 내줘. 할 말이 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'성리나', text:'요즘 회사법 시장 흔들고 있다는 거 잘 알아.'},
         {speaker:'성리나', text:'이번 인수 건은 내 거야. 한 발도 양보 안 한다.'},
       ],
@@ -5706,11 +5746,13 @@ const RIVAL_BOND_DATA = {
     stage3_comrade: {
       bg: '배경/상담.webp',
       dialogues: [
+        {speaker:'성리나', text:'{name}, 잠깐 시간 좀 내줘. 할 말이 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'성리나', text:'화학회사 폐수로 마을 전체가 병들었어. 회사는 우리 둘이 맡고 있는 회사야.'},
         {speaker:'성리나', text:'둘이 사임하고, 피해자 측 변호인으로 들어가자.'},
       ],
       choices: [
-        {text:'같이 가자. 옳은 일이니까', pass:true, reply:{speaker:'성리나', text:'...우리가 옳은 일을 했어. 너와 함께라서 가능했어. 동지로 인정할게.'}, effects:{reputation:50, mental:20, sociability:10, funds:50000000}},
+        {text:'같이 가자. 옳은 일이니까', pass:true, reply:{speaker:'성리나', text:'...우리가 옳은 일을 했어. 너와 함께라서 가능했어. 동지로 인정할게.'}, effects:{reputation:10, mental:3, sociability:2, funds:3000000}},
         {text:'그건 변호사윤리에도 위반되고.. 위험이 너무 커', pass:false, reply:{speaker:'성리나', text:'...실리적이네. 혼자 갈게.'}, effects:{_rivalry:5}},
         {text:'너 혼자 가도 충분히 잘할 거야', pass:false, reply:{speaker:'성리나', text:'떠넘기는 거네. 됐어.'}, effects:{_rivalry:10}},
       ],
@@ -5718,11 +5760,13 @@ const RIVAL_BOND_DATA = {
     stage3_rival: {
       bg: '배경/재판.webp',
       dialogues: [
+        {speaker:'성리나', text:'{name}, 잠깐 시간 좀 내줘. 할 말이 있어.'},
+        {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'성리나', text:'결국 마지막이네.'},
         {speaker:'성리나', text:'이 사건이 우리 둘 중 누가 진짜인지 정해줄 거야.'},
       ],
       choices: [
-        {text:'정면 대결한다', pass:true, reply:{speaker:'성리나', text:'...완벽한 패배야. 너를 인정해. 하지만 끝이 아니야.'}, effects:{reputation:100, fame:30, funds:100000000, mental:30, _rivalFame:-50}},
+        {text:'정면 대결한다', pass:true, reply:{speaker:'성리나', text:'...완벽한 패배야. 너를 인정해. 하지만 끝이 아니야.'}, effects:{reputation:20, fame:5, funds:5000000, mental:5, _rivalFame:-15}},
         {text:'합의 제안할게', pass:false, reply:{speaker:'성리나', text:'합의? ...너답지 않네. 됐어, 내가 가져갈게.'}, effects:{reputation:-50, mental:-30}},
         {text:'양보할게', pass:false, reply:{speaker:'성리나', text:'...너무 약해졌네. 다음을 기다릴게.'}, effects:{reputation:-30}},
       ],
