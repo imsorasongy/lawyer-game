@@ -21474,13 +21474,16 @@ function showBirthdayEvent(cb) {
     giftItem = unownedItems[Math.floor(Math.random()*unownedItems.length)];
   }
 
-  // BGM 변경
+  // BGM 변경 (G.bgmOn 체크 — OFF면 새 오디오를 만들지 않음)
   const prevBgm = bgmAudio;
-  if (bgmAudio) { bgmAudio.pause(); }
-  const birthdayBgm = new Audio('bgm/lovetheme2.mp3');
-  birthdayBgm.volume = 0.4;
-  birthdayBgm.play().catch(()=>{});
-  bgmAudio = birthdayBgm;
+  let birthdayBgm = null;
+  if (G.bgmOn) {
+    if (bgmAudio) { bgmAudio.pause(); }
+    birthdayBgm = new Audio('bgm/lovetheme2.mp3');
+    birthdayBgm.volume = G.bgmVolume;
+    birthdayBgm.play().catch(()=>{});
+    bgmAudio = birthdayBgm;
+  }
 
   const dialogues = [
     {speaker:datingName, face:datingFace, text:G.name+' 생일축하합니다~!'},
