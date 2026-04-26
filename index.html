@@ -5830,17 +5830,17 @@ function _resolveRivalBond(rivalId, stage, path, choice) {
     if (stage === 3) {
       if (path === 'comrade') {
         bond.finalState = 'comrade';
-        if (typeof addDiary === 'function') addDiary('🤝', `${r.name}${J(r.name,'와/과')} 동지가 됐다 🤝 #라이벌 #동지`);
+        if (typeof addDiary === 'function') addDiary('🤝', `우리 동기 ${J(r.name,'와/과')} 동지가 됐다 🤝 #라이벌 #동지`);
       } else {
         bond.finalState = 'destined_win';
-        if (typeof addDiary === 'function') addDiary('⚔', `${r.name}${J(r.name,'와/과')} 숙명의 결투에서 승리 ⚔ #숙명의라이벌 #승리`);
+        if (typeof addDiary === 'function') addDiary('⚔', `라이벌 ${J(r.name,'와/과')} 숙명의 결투에서 승리 ⚔ #숙명의라이벌 #승리`);
       }
     }
   } else if (stage === 3 && path === 'rival') {
     // 라이벌 path Stage 3 fail = 패자 칭호 부여(끝장)
     bond.stage = 3;
     bond.finalState = 'destined_lose';
-    if (typeof addDiary === 'function') addDiary('💀', `${r.name}${J(r.name,'에게/한테')} 숙명의 결투 패배 💀 #설욕`);
+    if (typeof addDiary === 'function') addDiary('💀', `라이벌 ${J(r.name,'에게/한테')} 숙명의 결투 패배 💀 #설욕`);
   }
   // 그 외 fail → stage 머무름, 6개월 쿨다운 후 재시도
 }
