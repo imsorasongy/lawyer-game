@@ -3499,6 +3499,7 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
   const shuffledEvidence = _shuffleArray([...allEvidence]);
   const needed = evStep.count || 1;
   let selected = [];
+  let descOpen = {};
 
   function renderBtns() {
     let html = `<div style="font-size:0.75rem;color:#c9a84c;margin-bottom:6px">증거를 ${needed}개 선택하세요 (선택: ${selected.length}/${needed})</div>`;
@@ -3507,7 +3508,16 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
     } else {
       shuffledEvidence.forEach(ev => {
         const isSel = selected.includes(ev.id);
-        html += `<button class="event-choice" style="${isSel?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleSubEv('${ev.id}')"><span class="choice-label">${isSel?'✓':' '}</span> ${ev.name}</button>`;
+        const isOpen = !!descOpen[ev.id];
+        html += `<div style="margin-bottom:4px">`;
+        html += `<div style="display:flex;gap:4px">`;
+        html += `<button class="event-choice" style="flex:1;margin:0;${isSel?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleSubEv('${ev.id}')"><span class="choice-label">${isSel?'✓':' '}</span> ${ev.name}</button>`;
+        html += `<button class="event-choice" style="width:52px;margin:0;padding:0;font-size:0.8rem;flex:none;${isOpen?'border-color:#c9a84c;background:rgba(201,168,76,0.15)':''}" onclick="window._toggleSubEvDesc('${ev.id}')" title="상세보기">${isOpen?'닫기':'보기'}</button>`;
+        html += `</div>`;
+        if (isOpen) {
+          html += `<div style="padding:6px 10px;margin-top:3px;background:#1a1810;border:1px solid #3a3020;border-radius:4px;color:#c0b090;font-size:0.75rem;line-height:1.5;white-space:pre-line">${ev.desc||''}</div>`;
+        }
+        html += `</div>`;
       });
     }
     if (selected.length === needed) {
@@ -3521,6 +3531,11 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
   window._toggleSubEv = function(id) {
     if (selected.includes(id)) selected = selected.filter(x=>x!==id);
     else if (selected.length < needed) selected.push(id);
+    renderBtns();
+  };
+
+  window._toggleSubEvDesc = function(id) {
+    descOpen[id] = !descOpen[id];
     renderBtns();
   };
 
