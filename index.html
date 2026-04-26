@@ -12342,6 +12342,17 @@ function checkMaleRomanceEvents(slot, vnScenes) {
       if (Math.random() >= 0.5) continue;
     }
 
+    // B안: 동월에 이미 큐에 들어간 stage4(dating 결정) 이벤트가 있으면 스킵 — 충돌 방지
+    const _isDatingEvt = Array.isArray(evt.choices) && evt.choices.some(c => c && c.dating);
+    if (_isDatingEvt) {
+      const _alreadyQueuedDating = vnScenes.some(s =>
+        (s.type === 'maleRomanceEvent' || s.type === 'femaleRomanceEvent') &&
+        s.eventData && Array.isArray(s.eventData.choices) &&
+        s.eventData.choices.some(c => c && c.dating)
+      );
+      if (_alreadyQueuedDating) continue;
+    }
+
     // 이벤트 삽입 + 즉시 마킹 (빌드 타임 중복 방지)
     G.romanceEvents[evt.id] = true;
     vnScenes.push({ type: 'maleRomanceEvent', eventData: evt, day: slot.day });
@@ -13050,6 +13061,17 @@ function checkFemaleRomanceEvents(slot, vnScenes) {
     // 승소 요구 체크
     if (evt.requireWin) {
       if (Math.random() >= 0.5) continue;
+    }
+
+    // B안: 동월에 이미 큐에 들어간 stage4(dating 결정) 이벤트가 있으면 스킵 — 충돌 방지
+    const _isDatingEvt = Array.isArray(evt.choices) && evt.choices.some(c => c && c.dating);
+    if (_isDatingEvt) {
+      const _alreadyQueuedDating = vnScenes.some(s =>
+        (s.type === 'maleRomanceEvent' || s.type === 'femaleRomanceEvent') &&
+        s.eventData && Array.isArray(s.eventData.choices) &&
+        s.eventData.choices.some(c => c && c.dating)
+      );
+      if (_alreadyQueuedDating) continue;
     }
 
     // 이벤트 삽입 + 즉시 마킹 (빌드 타임 중복 방지)
@@ -14780,6 +14802,12 @@ function _renderVNScene(idx) {
 
   // Handle male romance event type
   if (scene.type === 'maleRomanceEvent') {
+    // A안: 재생 시점 재검증 — 같은 달 다른 이벤트로 상태(dating 등)가 바뀌었으면 스킵
+    if (scene.eventData && scene.eventData.condition && !scene.eventData.condition()) {
+      delete G.romanceEvents[scene.eventData.id]; // 다음 달 재시도 위해 빌드 시 마킹 해제
+      showVNScene(idx + 1);
+      return;
+    }
     playBGM('love');
     _currentRomanceDay = scene.day || null;
     showMaleRomanceEvent(scene.eventData, () => { _currentRomanceDay = null; playBGM('normal'); showVNScene(idx + 1); });
@@ -14788,6 +14816,11 @@ function _renderVNScene(idx) {
 
   // Handle female romance event type (재사용: 같은 표시/처리 함수)
   if (scene.type === 'femaleRomanceEvent') {
+    if (scene.eventData && scene.eventData.condition && !scene.eventData.condition()) {
+      delete G.romanceEvents[scene.eventData.id];
+      showVNScene(idx + 1);
+      return;
+    }
     playBGM('love');
     _currentRomanceDay = scene.day || null;
     showMaleRomanceEvent(scene.eventData, () => { _currentRomanceDay = null; playBGM('normal'); showVNScene(idx + 1); });
