@@ -8709,6 +8709,20 @@ function openActionModal(dayIdx) {
           <div class="cost">무료</div></div>`;
       }
     }
+    // 메인스토리 사건 검토 (저녁 - 어쏘/사내변, 12번째 달 제외)
+    if(ck==='study' && (G.status==='associate' || isInhouse())) {
+      const mcNumE = getMainCaseNum();
+      if (mcNumE > 0) {
+        const mcE = getMainCaseObj(mcNumE);
+        const mcElapsedE = (G.year - mcE.startYear) * 12 + (G.month - mcE.startMonth) + 1;
+        if (mcElapsedE < 12) {
+          const revLabelE = mcNumE>=3 ? '준비도 상승, 증거 의미 해석 가능' : '준비도 상승, 증거 발견 가능';
+          html += `<div class="action-option" onclick="selectAction('review${mcNumE}')">
+            <div><div class="name">사건 검토</div><div class="effects">${revLabelE} (준비도: ${mcE.preparation.toFixed(0)})</div></div>
+            <div class="cost">무료</div></div>`;
+        }
+      }
+    }
     if(ck==='social' && G.gradSchoolCompleted && !G.phdCompleted) {
       html += `<div class="action-option" onclick="selectAction('phdThesis')">
         <div><div class="name">박사논문</div><div class="effects">박사논문 진척도 +3, 스트레스 +3, 피로도 +5 (진척도: ${G.phdProgress.toFixed(0)}/100)</div></div>
