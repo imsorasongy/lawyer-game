@@ -5320,7 +5320,7 @@ function _buildRivalTrialBriefEvent(r) {
     face: '캐릭터얼굴/동료남자어쏘.webp',
     dialogues: [{ speaker: '동료 변호사', text: line }],
     choices: [
-      { text: '그렇군요', effects: {} },
+      { text: '그렇군요', effects: {}, silent: true },
     ],
   };
 }
@@ -15417,6 +15417,11 @@ function applyEventChoice(choiceIdx) {
 }
 
 function showEventResult(evtDef, choice, changeList) {
+  // silent 플래그: 결과 화면 없이 바로 다음 씬으로 (라이벌 잡담·약식 정보 알림 등)
+  if (choice && choice.silent) {
+    closeEventResult();
+    return;
+  }
   // 라이벌 이벤트: 주인공 선행 대사 → 라이벌 응답 2단계로 표시
   let speakerName = G.name;
   let speakerFace = getPlayerFace();
