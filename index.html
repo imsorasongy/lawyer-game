@@ -14802,11 +14802,19 @@ function _renderVNScene(idx) {
 
   // Handle male romance event type
   if (scene.type === 'maleRomanceEvent') {
-    // A안: 재생 시점 재검증 — 같은 달 다른 이벤트로 상태(dating 등)가 바뀌었으면 스킵
-    if (scene.eventData && scene.eventData.condition && !scene.eventData.condition()) {
-      delete G.romanceEvents[scene.eventData.id]; // 다음 달 재시도 위해 빌드 시 마킹 해제
-      showVNScene(idx + 1);
-      return;
+    // A안: 재생 시점 재검증. 빌드 때 G.romanceEvents[evt.id]=true로 마킹해 두므로
+    // condition의 "!G.romanceEvents.evtId" 체크가 항상 false가 되지 않게, 자기 자신 마킹을 잠시 해제 후 재평가.
+    if (scene.eventData && scene.eventData.condition) {
+      const _eid = scene.eventData.id;
+      const _wasMarked = !!G.romanceEvents[_eid];
+      if (_wasMarked) delete G.romanceEvents[_eid];
+      const _stillValid = scene.eventData.condition();
+      if (_wasMarked) G.romanceEvents[_eid] = true; // 평가 후 복원
+      if (!_stillValid) {
+        delete G.romanceEvents[_eid]; // 실패 → 다음 달 재시도 위해 마킹 해제
+        showVNScene(idx + 1);
+        return;
+      }
     }
     playBGM('love');
     _currentRomanceDay = scene.day || null;
@@ -14816,10 +14824,17 @@ function _renderVNScene(idx) {
 
   // Handle female romance event type (재사용: 같은 표시/처리 함수)
   if (scene.type === 'femaleRomanceEvent') {
-    if (scene.eventData && scene.eventData.condition && !scene.eventData.condition()) {
-      delete G.romanceEvents[scene.eventData.id];
-      showVNScene(idx + 1);
-      return;
+    if (scene.eventData && scene.eventData.condition) {
+      const _eid = scene.eventData.id;
+      const _wasMarked = !!G.romanceEvents[_eid];
+      if (_wasMarked) delete G.romanceEvents[_eid];
+      const _stillValid = scene.eventData.condition();
+      if (_wasMarked) G.romanceEvents[_eid] = true;
+      if (!_stillValid) {
+        delete G.romanceEvents[_eid];
+        showVNScene(idx + 1);
+        return;
+      }
     }
     playBGM('love');
     _currentRomanceDay = scene.day || null;
