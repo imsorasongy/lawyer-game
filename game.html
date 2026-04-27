@@ -260,8 +260,8 @@ body {
 .bc-title { font-size: 0.8rem; color: #c0a878; line-height: 1.4; }
 .bc-extra { font-size: 0.72rem; color: #a09080; margin-top: 3px; font-style: italic; }
 .bc-corner {
-  position: absolute; bottom: 10px; right: 14px;
-  font-size: 0.66rem; color: #8a7a60; text-align: right; line-height: 1.5;
+  font-size: 0.66rem; color: #8a7a60; text-align: right; line-height: 1.4;
+  margin-top: 4px; flex-shrink: 0;
 }
 
 /* 명함 신분별 배경색 티어 (기본=gold: 다크 브라운) */
@@ -5440,7 +5440,7 @@ function renderBusinessCardInner() {
       ${extras.length ? `<div class="bc-extra">${extras.join(' · ')}</div>` : ''}
     </div>
     <div class="bc-corner">
-      ${G.mbti ? 'MBTI · ' + G.mbti : ''}${office ? (G.mbti?'<br>':'') + office.name : ''}
+      ${office ? office.name : ''}
     </div>`;
 }
 
@@ -8690,7 +8690,7 @@ function renderNewsModal() {
   const catLabels = {all:'전체', legal:'⚖ 법조', economy:'💹 경제', social:'🗞 시사', player:'⭐ 주인공'};
   const filterBar = cats.map(c => {
     const active = G.ui.newsFilter === c;
-    return `<button onclick="setNewsFilter('${c}')" style="padding:4px 10px;font-size:0.74rem;border-radius:4px;border:1px solid ${active?'#c9a84c':'#5a4a30'};background:${active?'#5a3528':'#1a1810'};color:${active?'#e8d5b5':'#a09080'};cursor:pointer;margin:0 2px">${catLabels[c]}</button>`;
+    return `<button onclick="setNewsFilter('${c}')" style="padding:4px 10px;font-size:0.74rem;border-radius:4px;border:1px solid ${active?'#c9a84c':'#5a3528'};background:${active?'rgba(201,168,76,0.18)':'#1e110a'};color:${active?'#f0c850':'#a09080'};font-weight:${active?'700':'500'};cursor:pointer;margin:0 2px">${catLabels[c]}</button>`;
   }).join('');
 
   // 주인공 탭: 모든 주인공 뉴스 기록 표시. 그 외: 가장 최근 배치만.
@@ -8746,7 +8746,7 @@ function renderNewsModal() {
         const faceHtml = face
           ? `<img src="${face.src}" alt="${face.caption}" style="width:44px;height:44px;border-radius:4px;object-fit:cover;border:1px solid #5a3528;flex-shrink:0" onerror="this.style.display='none'">`
           : '';
-        return `<div style="background:#1a1610;border:1px solid #5a3528;border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:flex-start" onmouseover="this.style.background='#241e16'" onmouseout="this.style.background='#1a1610'" onclick="openNewsArticleModal(${realIdx})">
+        return `<div style="background:#331e16;border:1px solid #5a3528;border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:flex-start" onmouseover="this.style.background='#4a2820';this.style.borderColor='#c9a84c'" onmouseout="this.style.background='#331e16';this.style.borderColor='#5a3528'" onclick="openNewsArticleModal(${realIdx})">
           ${faceHtml}
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
@@ -8769,7 +8769,7 @@ function renderNewsModal() {
   overlay.innerHTML = `<div style="background:linear-gradient(rgba(30,18,12,0.55), rgba(20,10,8,0.65)), url('UI/테두리/가죽타일.png') 0 0 / 160px 160px repeat;border:24px solid transparent;border-image:url('UI/테두리/모달_trim.png') 110 stretch;border-image-width:24px;border-radius:0;padding:12px 16px;width:540px;max-width:92vw;height:620px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.6)">
     <div style="font-size:1.1rem;font-weight:700;color:#c9a84c;text-align:center;margin-bottom:10px;letter-spacing:2px">📰 뉴스</div>
     <div style="text-align:center;margin-bottom:12px">${filterBar}</div>
-    <div style="flex:1;overflow-y:auto;padding:4px 12px 4px 8px;margin-bottom:14px;min-height:240px;background:rgba(40,22,16,0.4);border-radius:6px">${bodyHtml}</div>
+    <div style="flex:1;overflow-y:auto;padding:8px 12px;margin-bottom:14px;min-height:240px;background:rgba(20,12,8,0.45);border:1px solid #5a3528;border-radius:6px">${bodyHtml}</div>
     <div style="display:flex;gap:8px;justify-content:center">
       <button class="btn btn-secondary" onclick="document.getElementById('news-modal').style.display='none'">닫기</button>
     </div>
@@ -8816,7 +8816,7 @@ function openNewsArticleModal(idx) {
         </div>
       </div>`
     : '';
-  overlay.innerHTML = `<div style="background:linear-gradient(rgba(30,18,12,0.55), rgba(20,10,8,0.65)), url('UI/테두리/가죽타일.png') 0 0 / 160px 160px repeat;border:2px solid #5a3528;border-radius:10px;padding:24px 28px;width:560px;max-width:92vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,0.7);font-family:serif">
+  overlay.innerHTML = `<div style="background:linear-gradient(rgba(30,18,12,0.55), rgba(20,10,8,0.65)), url('UI/테두리/가죽타일.png') 0 0 / 160px 160px repeat;border:24px solid transparent;border-image:url('UI/테두리/모달_trim.png') 110 stretch;border-image-width:24px;border-radius:0;padding:18px 22px;width:560px;max-width:92vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,0.7);font-family:serif;box-sizing:border-box">
     <div style="color:#b39460;font-size:0.75rem;margin-bottom:8px;letter-spacing:0.5px">${press} · ${reporter} · ${dayStr}</div>
     <div style="color:#e8d5b5;font-size:1.15rem;font-weight:700;line-height:1.5;margin-bottom:10px">${n.title}</div>
     <hr style="border:none;border-top:1px solid #5a4a30;margin:0 0 14px">
@@ -14748,12 +14748,12 @@ function buildScene(slot) {
             `첫 판결 받아냄 🔥 이긴 쪽에 내가 있다는 게 실감 안 남 #첫승소`,
           ]), slot.day);
         }
-        return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,result:'great',resultLabel:'승소',
+        return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,result:'info',resultLabel:'재판',
           text:t(sd.win),changes:[caseLabel,`명성 +1`,proLabel,rwLabel]};
       } else {G.losses++;G.lossStreak=(G.lossStreak||0)+1;applyStatR('mental',1);G.preparation=0;
         if(trialCase.typeId&&G.proStats[trialCase.typeId]!==undefined){G.proStats[trialCase.typeId]=Math.min(100,G.proStats[trialCase.typeId]+0.5);}
         const proLabel=trialCase.typeName+' +0.5';
-        return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,result:'fail',resultLabel:'패소',
+        return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,result:'info',resultLabel:'재판',
           text:t(sd.lose),changes:[caseLabel,'멘탈 +1',proLabel]};}
     }
     return {bg:sd.bg,face:sd.face,speaker:sd.speaker,date:dateStr,result:'info',resultLabel:'속행',text:t(sd.cont),changes:[]};
@@ -17173,17 +17173,17 @@ function openMenu() {
 
   let html = '';
 
-  const ic = (e) => `<span style="font-size:1.3rem;margin-right:10px;width:24px;text-align:center;display:inline-block">${e}</span>`;
+  const ic = (path) => `<img src="${path}" style="width:32px;height:32px;margin-right:10px;flex-shrink:0;vertical-align:middle">`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openSaveScreen()">
-    ${ic('💾')}<div style="flex:1"><div class="name">저장하기</div><div class="effects">게임을 저장합니다</div></div></div>`;
+    ${ic('UI/아이콘/시스템/저장하기.png')}<div style="flex:1"><div class="name">저장하기</div><div class="effects">게임을 저장합니다</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openLoadScreen()">
-    ${ic('📂')}<div style="flex:1"><div class="name">불러오기</div><div class="effects">저장된 게임을 불러옵니다</div></div></div>`;
+    ${ic('UI/아이콘/시스템/불러오기.png')}<div style="flex:1"><div class="name">불러오기</div><div class="effects">저장된 게임을 불러옵니다</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openSettings()">
-    ${ic('⚙')}<div style="flex:1"><div class="name">설정</div><div class="effects">BGM, 자동넘김, 자동저장</div></div></div>`;
+    ${ic('UI/아이콘/시스템/설정.png')}<div style="flex:1"><div class="name">설정</div><div class="effects">BGM, 자동넘김, 자동저장</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openHelpModal()">
-    ${ic('📖')}<div style="flex:1"><div class="name">도움말</div><div class="effects">게임 플레이 안내</div></div></div>`;
+    ${ic('UI/아이콘/시스템/도움말.png')}<div style="flex:1"><div class="name">도움말</div><div class="effects">게임 플레이 안내</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';gameConfirm('타이틀 화면으로 돌아가시겠습니까?\\n저장하지 않은 진행상황은 사라집니다.',()=>{location.reload();})">
-    ${ic('🏠')}<div style="flex:1"><div class="name">처음으로</div><div class="effects">타이틀 화면으로 돌아갑니다</div></div></div>`;
+    ${ic('UI/아이콘/시스템/처음으로.png')}<div style="flex:1"><div class="name">처음으로</div><div class="effects">타이틀 화면으로 돌아갑니다</div></div></div>`;
 
   document.getElementById('menu-items').innerHTML = html;
 }
@@ -17205,42 +17205,44 @@ function openChangeMenu() {
   const relSec = [];
   const jobSec = [];
 
+  const _chgIc = (p) => `<img src="UI/아이콘/신상관리/${p}.png" style="width:32px;height:32px;margin-right:10px;flex-shrink:0">`;
+
   // 관계
   if (G.isMarried) {
     const contraLabel = G.contraception ? '피임 해제' : '피임 설정';
     relSec.push(`<div class="action-option" onclick="G.contraception=!G.contraception;showToast(G.contraception?'피임을 시작합니다.':'피임을 해제합니다.');openChangeMenu()">
-      <div><div class="name" style="color:#88aacc">🛡 ${contraLabel}</div>
+      ${_chgIc('피임설정해제')}<div style="flex:1"><div class="name" style="color:#88aacc">${contraLabel}</div>
       <div class="effects">${G.contraception?'현재 피임 중입니다':'현재 피임을 하지 않고 있습니다'}</div></div></div>`);
   }
   if (G.romance.dating && !G.isMarried) {
     const datingTarget = getRomanceTargets().find(t=>t.id===G.romance.dating);
     const datingName = datingTarget ? datingTarget.name : '연인';
     relSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmBreakup()">
-      <div><div class="name" style="color:#cc6666">💔 이별</div>
+      ${_chgIc('이별')}<div style="flex:1"><div class="name" style="color:#cc6666">이별</div>
       <div class="effects">${J(datingName, '와/과')} 헤어집니다</div></div></div>`);
   }
   if (G.isMarried && G.romance.dating) {
     const divorceTarget = getRomanceTargets().find(t=>t.id===G.romance.dating);
     const divorceName = divorceTarget ? divorceTarget.name : '배우자';
     relSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmDivorce()">
-      <div><div class="name" style="color:#cc6666">📜 이혼</div>
+      ${_chgIc('이혼')}<div style="flex:1"><div class="name" style="color:#cc6666">이혼</div>
       <div class="effects">${J(divorceName, '와/과')} 이혼합니다</div></div></div>`);
   }
 
   // 직장·계약
   if (G.status === 'associate' || G.status === 'partner' || G.status === 'senior' || isInhouse()) {
     jobSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmResign()">
-      <div><div class="name" style="color:#cc6666">🚪 사직</div>
+      ${_chgIc('사직')}<div style="flex:1"><div class="name" style="color:#cc6666">사직</div>
       <div class="effects">현재 직장을 그만두고 개업 또는 휴업</div></div></div>`);
   }
   if (G.isLecturer) {
     jobSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmQuitLecturer()">
-      <div><div class="name" style="color:#cc6666">📚 강의중단</div>
+      ${_chgIc('강의중단')}<div style="flex:1"><div class="name" style="color:#cc6666">강의중단</div>
       <div class="effects">법학강의를 그만둡니다</div></div></div>`);
   }
   if (G.status === 'solo') {
     jobSec.push(`<div class="action-option" onclick="confirmCloseOffice()">
-      <div><div class="name" style="color:#cc6666">🏚 폐업</div>
+      ${_chgIc('폐업')}<div style="flex:1"><div class="name" style="color:#cc6666">폐업</div>
       <div class="effects">사무소를 폐업하고 휴업변호사로 전환</div></div></div>`);
   }
 
@@ -17442,65 +17444,72 @@ function resignAndSuspend() {
 
 // ==================== ITEM/SHOP DATA ====================
 const SHOP_ITEMS = [
-  {id:'premiumPC',name:'고급컴퓨터',icon:'🖥️',desc:'고급컴퓨터, 업무효율이 올라간다.',price:3000000,max:1,category:'etc',
+  {id:'premiumPC',name:'고급컴퓨터',icon:'🖥️',iconImg:'ui/쇼핑/차와기타/고급컴퓨터.png',desc:'고급컴퓨터, 업무효율이 올라간다.',price:3000000,max:1,category:'etc',
     effects:{sales:10,debate:10}},
-  {id:'lawBook',name:'기본서',icon:'📕',desc:'법학에 대한 기초를 다시 다져줄 수 있게 만드는 책.',price:50000,max:10,category:'book',
+  {id:'lawBook',name:'기본서',icon:'📕',iconImg:'ui/쇼핑/책/기본서.png',desc:'법학에 대한 기초를 다시 다져줄 수 있게 만드는 책.',price:50000,max:10,category:'book',
     effects:{lawKnowledge:2}},
-  {id:'practiceBook',name:'실무제요',icon:'📗',desc:'소송 실무에 대해 확실히 공부할 수 있는 책.',price:100000,max:10,category:'book',
+  {id:'practiceBook',name:'실무제요',icon:'📗',iconImg:'ui/쇼핑/책/실무제요.png',desc:'소송 실무에 대해 확실히 공부할 수 있는 책.',price:100000,max:10,category:'book',
     effects:{lawKnowledge:2,debate:2}},
-  {id:'lawCode',name:'법전',icon:'📘',desc:'별 쓸모는 없지만 있어 보이는 책.',price:100000,max:5,category:'book',
+  {id:'lawCode',name:'법전',icon:'📘',iconImg:'ui/쇼핑/책/법전.png',desc:'별 쓸모는 없지만 있어 보이는 책.',price:100000,max:5,category:'book',
     effects:{lawKnowledge:1,sales:3}},
-  {id:'caseBook',name:'판례집',icon:'📙',desc:'법원의 판례경향을 파악할 수 있는 책.',price:150000,max:10,category:'book',
+  {id:'caseBook',name:'판례집',icon:'📙',iconImg:'ui/쇼핑/책/판례집.png',desc:'법원의 판례경향을 파악할 수 있는 책.',price:150000,max:10,category:'book',
     effects:{lawKnowledge:3,debate:3}},
-  {id:'itBook',name:'IT 서적',icon:'💻',desc:'IT 시대에 살아남기 위해 꼭 필요한 책.',price:50000,max:10,category:'book',
+  {id:'itBook',name:'IT 서적',icon:'💻',iconImg:'ui/쇼핑/책/IT서적.png',desc:'IT 시대에 살아남기 위해 꼭 필요한 책.',price:50000,max:10,category:'book',
     effects:{},proEffect:{itLaw:2},statEffects:{sales:1}},
-  {id:'vitaminC',name:'비타민C',icon:'💊',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:10000,max:20,category:'drink',
+  {id:'vitaminC',name:'비타민C',icon:'💊',iconImg:'ui/쇼핑/음료/비타민C.png',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:10000,max:20,category:'drink',
     useEffects:{fatigue:-2}},
-  {id:'energyDrink',name:'에너지드링크',icon:'🥤',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:20000,max:20,category:'drink',
+  {id:'energyDrink',name:'에너지드링크',icon:'🥤',iconImg:'ui/쇼핑/음료/에너지드링크.png',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:20000,max:20,category:'drink',
     useEffects:{fatigue:-3,stress:-1}},
-  {id:'expensiveWine',name:'고가와인',icon:'🍷',desc:'이베리아 반도의 탱고추는 여인이 떠오르는 고급 와인. 매우 맛있다.',price:300000,max:10,category:'drink',
+  {id:'expensiveWine',name:'고가와인',icon:'🍷',iconImg:'ui/쇼핑/음료/고급와인.png',desc:'이베리아 반도의 탱고추는 여인이 떠오르는 고급 와인. 매우 맛있다.',price:300000,max:10,category:'drink',
     useEffects:{stress:-10,fatigue:1}},
-  {id:'cheapWine',name:'저가와인',icon:'🍶',desc:'동네 마트에서 파는 싸구려 와인. 건강에는 좋지 않을 것 같다.',price:20000,max:10,category:'drink',
+  {id:'cheapWine',name:'소주',icon:'🍶',iconImg:'ui/쇼핑/음료/소주.png',desc:'동네 마트에서 파는 한국인의 술. 한 병 비우면 시름이 잠깐은<br>잊힌다.',price:20000,max:10,category:'drink',
     useEffects:{stress:-5,fatigue:2}},
-  {id:'premiumSuit',name:'고급 정장',icon:'👔',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'male',
+  {id:'premiumSuit',name:'고급 정장',icon:'👔',iconImg:'ui/쇼핑/옷/남자고급정장.png',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'male',
     effects:{charm:5,sales:5}},
-  {id:'premiumDress',name:'고급 원피스',icon:'👗',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'female',
+  {id:'premiumDress',name:'고급 원피스',icon:'👗',iconImg:'ui/쇼핑/옷/여자고급원피스.png',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'female',
     effects:{charm:5,sales:5}},
-  {id:'luxurySuit',name:'명품 정장',icon:'🤵',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'male',
+  {id:'luxurySuit',name:'명품 정장',icon:'🤵',iconImg:'ui/쇼핑/옷/남자명품정장.png',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'male',
     effects:{charm:15,sales:15}},
-  {id:'luxuryDress',name:'명품 원피스',icon:'👘',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'female',
+  {id:'luxuryDress',name:'명품 원피스',icon:'👘',iconImg:'ui/쇼핑/옷/여자명품원피스.png',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'female',
     effects:{charm:15,sales:15}},
-  {id:'lawyerBag',name:'변호사 가방',icon:'💼',desc:'변호사협회에서 기념품으로 주는 가방. 변호사 마크가 붙어있어 살짝 민망하다.',price:0,max:1,category:'clothes',
+  {id:'lawyerBag',name:'변호사 가방',icon:'💼',iconImg:'ui/쇼핑/옷/변호사가방.png',desc:'변호사협회에서 기념품으로 주는 가방. 변호사 마크가 붙어있어 살짝 민망하다.',price:0,max:1,category:'clothes',
     effects:{sales:1}},
-  {id:'luxuryBag',name:'명품 가방',icon:'👜',desc:'큰맘먹고 산 가방. 들고 나가면 사람들이 관심을 보인다.',price:5000000,max:1,category:'clothes',
+  {id:'luxuryBag',name:'명품 가방',icon:'👜',iconImg:'ui/쇼핑/옷/명품가방.png',desc:'큰맘먹고 산 가방. 들고 나가면 사람들이 관심을 보인다.',price:5000000,max:1,category:'clothes',
     effects:{charm:10,sales:10}},
-  {id:'luxWatch',name:'명품 시계',icon:'⌚',desc:'변호사에게 시계는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'male',
+  {id:'luxWatch',name:'명품 시계',icon:'⌚',iconImg:'ui/쇼핑/옷/명품시계.png',desc:'변호사에게 시계는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'male',
     effects:{sales:30}},
-  {id:'luxAccessory',name:'명품 악세사리',icon:'💎',desc:'변호사에게 악세사리는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'female',
+  {id:'luxAccessory',name:'명품 악세사리',icon:'💎',iconImg:'ui/쇼핑/옷/명품악세사리.png',desc:'변호사에게 악세사리는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'female',
     effects:{sales:30}},
-  {id:'casualWear',name:'캐주얼복',icon:'👚',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'female',
+  {id:'casualWear',name:'캐주얼복',icon:'👚',iconImg:'ui/쇼핑/옷/여자캐주얼.png',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'female',
     effects:{stamina:5}},
-  {id:'partyDress',name:'파티드레스',icon:'✨',desc:'화려한 파티용 드레스. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'female',
+  {id:'partyDress',name:'파티드레스',icon:'✨',iconImg:'ui/쇼핑/옷/여자파티드레스.png',desc:'화려한 파티용 드레스. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'female',
     effects:{charm:50,sales:50}},
-  {id:'casualWearM',name:'캐주얼복',icon:'👕',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'male',
+  {id:'casualWearM',name:'캐주얼복',icon:'👕',iconImg:'ui/쇼핑/옷/남자캐주얼.png',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'male',
     effects:{stamina:5}},
-  {id:'tailcoat',name:'연미복',icon:'🎩',desc:'화려한 연미복. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'male',
+  {id:'tailcoat',name:'연미복',icon:'🎩',iconImg:'ui/쇼핑/옷/남자연미복.png',desc:'화려한 연미복. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'male',
     effects:{charm:50,sales:50}},
-  {id:'proBook',name:'전문서적',icon:'📚',desc:'전문분야의 실력을 높여줄 수 있는 전문서적.',price:50000,max:10,category:'book',
+  {id:'proBook',name:'전문서적',icon:'📚',iconImg:'ui/쇼핑/책/특별법.png',desc:'전문분야의 실력을 높여줄 수 있는 전문서적.',price:50000,max:10,category:'book',
     effects:{},isProBook:true},
-  {id:'historyBook',name:'역사책',icon:'📖',desc:'역사를 알면 세상을 보는 눈이 달라진다.',price:50000,max:10,category:'book',
+  {id:'historyBook',name:'역사책',icon:'📖',iconImg:'ui/쇼핑/책/역사.png',desc:'역사를 알면 세상을 보는 눈이 달라진다.',price:50000,max:10,category:'book',
     effects:{observation:1}},
-  {id:'philosophyBook',name:'철학책',icon:'📕',desc:'철학을 읽으면 도덕적 감수성이 높아진다.',price:30000,max:10,category:'book',
+  {id:'philosophyBook',name:'철학책',icon:'📕',iconImg:'ui/쇼핑/책/철학.png',desc:'철학을 읽으면 도덕적 감수성이 높아진다.',price:30000,max:10,category:'book',
     effects:{morality:1}},
-  {id:'kcar',name:'경차',icon:'🚗',desc:'경제적인 경차. 영업에 약간 도움이 된다.',price:20000000,max:1,category:'car',
+  {id:'kcar',name:'경차',icon:'🚗',iconImg:'ui/쇼핑/차와기타/경차.png',desc:'경제적인 경차. 영업에 약간 도움이 된다.',price:20000000,max:1,category:'car',
     carBonus:5},
-  {id:'midcar',name:'중형차',icon:'🚙',desc:'무난한 중형차. 영업에 도움이 된다.',price:50000000,max:1,category:'car',
+  {id:'midcar',name:'중형차',icon:'🚙',iconImg:'ui/쇼핑/차와기타/중형차.png',desc:'무난한 중형차. 영업에 도움이 된다.',price:50000000,max:1,category:'car',
     carBonus:10},
-  {id:'luxcar',name:'고급외제차',icon:'🏎️',desc:'누가 봐도 성공한 변호사의 차. 영업력이 크게 오른다.',price:200000000,max:1,category:'car',
+  {id:'luxcar',name:'고급외제차',icon:'🏎️',iconImg:'ui/쇼핑/차와기타/고급외제차.png',desc:'누가 봐도 성공한 변호사의 차. 영업력이 크게 오른다.',price:200000000,max:1,category:'car',
     carBonus:30},
 ];
 
 function getItemCount(itemId) { return G.inventory[itemId] || 0; }
+
+function _itemIconHtml(item) {
+  if (item && item.iconImg) {
+    return `<img src="${item.iconImg}" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">`;
+  }
+  return `<span style="font-size:1.5rem;margin-right:8px">${(item && item.icon) || ''}</span>`;
+}
 
 // ==================== COMPUTER SYSTEM ====================
 function openComputer() {
@@ -17752,7 +17761,7 @@ function openShopping() {
       const full = owned >= item.max;
       const priceStr = item.price > 0 ? `${(item.price/10000)}만원` : '무료';
       html += `<div class="action-option" onclick="${full?'':`buyItem('${item.id}')`}" style="${full?'background:#1e110a;border-color:#3a2018;opacity:0.55;cursor:default':''}">
-        <span style="font-size:1.5rem;margin-right:8px">${item.icon||''}</span>
+        ${_itemIconHtml(item)}
         <div style="flex:1"><div class="name">${item.name} ${full?'(보유중)':owned>0?`(${owned}/${item.max})`:''}</div>
         <div class="effects">${item.desc}</div></div>
         <div class="cost">${priceStr}</div></div>`;
@@ -17768,7 +17777,7 @@ function openShopping() {
       const isCurrent = G.currentCar === item.id;
       const priceStr = `${(item.price/10000).toLocaleString()}만원`;
       html += `<div class="action-option" onclick="${isCurrent?'':`buyItem('${item.id}')`}" style="${isCurrent?'background:#1e110a;border-color:#3a2018;opacity:0.55;cursor:default':''}">
-        <span style="font-size:1.5rem;margin-right:8px">${item.icon||''}</span>
+        ${_itemIconHtml(item)}
         <div style="flex:1"><div class="name">${item.name} ${isCurrent?'(보유중)':''}</div>
         <div class="effects">${item.desc}</div></div>
         <div class="cost">${priceStr}</div></div>`;
@@ -17854,7 +17863,7 @@ function openFridge() {
     const cnt = getItemCount(item.id);
     const effStr = Object.entries(item.useEffects).map(([k,v])=>`${STAT_NAMES[k]||k} ${v>0?'+':''}${v}`).join(', ');
     html += `<div class="action-option" onclick="useDrink('${item.id}')">
-      <span style="font-size:1.5rem;margin-right:8px">${item.icon}</span>
+      ${_itemIconHtml(item)}
       <div style="flex:1"><div class="name">${item.name} (${cnt}개)</div>
       <div class="effects">${item.desc}</div>
       <div class="effects" style="color:#66cc88">효과: ${effStr}</div></div>
@@ -17892,7 +17901,7 @@ function openBookshelf() {
     if(item.proEffect) effStr += (effStr?', ':'')+Object.entries(item.proEffect).map(([k,v])=>`${PRO_NAMES[k]||k} +${v}`).join(', ');
     if(item.statEffects) effStr += (effStr?', ':'')+Object.entries(item.statEffects).map(([k,v])=>`${STAT_NAMES[k]||k} +${v}`).join(', ');
     html += `<div class="action-option" style="cursor:default">
-      <span style="font-size:1.5rem;margin-right:8px">${item.icon}</span>
+      ${_itemIconHtml(item)}
       <div style="flex:1"><div class="name">${item.name} (${cnt}권)</div>
       <div class="effects">${item.desc}</div>
       <div class="effects" style="color:#66cc88">구매 시 효과: ${effStr}</div></div></div>`;
@@ -17916,8 +17925,9 @@ function openCloset() {
 
   // 일반 복장 (현재 다른 옷 입고 있을 때만 표시)
   if (G.currentOutfit !== 'default') {
+    const defaultImg = G.gender === 'male' ? 'ui/쇼핑/옷/남자기본.png' : 'ui/쇼핑/옷/여자기본.png';
     html += `<div class="action-option" onclick="confirmEquip('default')">
-      <span style="font-size:1.5rem;margin-right:8px">👕</span>
+      <img src="${defaultImg}" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
       <div style="flex:1"><div class="name">일반 복장</div>
       <div class="effects">기본 복장으로 갈아입기</div></div>
       <div class="cost" style="color:#c9a84c">갈아입기</div></div>`;
@@ -17931,21 +17941,21 @@ function openCloset() {
 
     if (canWear && !isWearing) {
       html += `<div class="action-option" onclick="confirmEquip('${item.id}')">
-        <span style="font-size:1.5rem;margin-right:8px">${item.icon}</span>
+        ${_itemIconHtml(item)}
         <div style="flex:1"><div class="name">${item.name}</div>
         <div class="effects">${item.desc}</div>
         <div class="effects" style="color:#66cc88">착용 효과: ${effStr}</div></div>
         <div class="cost" style="color:#c9a84c">갈아입기</div></div>`;
     } else if (canWear && isWearing) {
       html += `<div class="action-option" style="opacity:0.6;cursor:default">
-        <span style="font-size:1.5rem;margin-right:8px">${item.icon}</span>
+        ${_itemIconHtml(item)}
         <div style="flex:1"><div class="name">${item.name} <span style="color:#c9a84c">(착용중)</span></div>
         <div class="effects">${item.desc}</div>
         <div class="effects" style="color:#66cc88">착용 효과: ${effStr}</div></div></div>`;
     } else {
       // 가방 등 비착용 아이템
       html += `<div class="action-option" style="cursor:default">
-        <span style="font-size:1.5rem;margin-right:8px">${item.icon}</span>
+        ${_itemIconHtml(item)}
         <div style="flex:1"><div class="name">${item.name}</div>
         <div class="effects">${item.desc}</div>
         <div class="effects" style="color:#66cc88">효과: ${effStr}</div></div></div>`;
@@ -18273,93 +18283,97 @@ function renderInvestMenu() {
   });
   html += '</div>';
 
+  const _ivIc = (p) => `<img src="UI/아이콘/재테크/${p}.png" style="width:32px;height:32px;margin-right:10px;flex-shrink:0">`;
+
   if (_investTab === 'savings') {
     // 예금
     if (iv.deposit) {
-      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">💰 예금 (${iv.deposit.monthsLeft}개월 남음)</div>
+      html += `<div class="action-option" style="cursor:default">${_ivIc('예금')}<div style="flex:1"><div class="name">예금 (${iv.deposit.monthsLeft}개월 남음)</div>
         <div class="effects">원금 ${f(iv.deposit.amount)} | 만기 시 +3.5%</div></div>
         ${iv.deposit.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureDeposit()">만료해지</div>`:''}
       </div>`;
     } else {
-      html += `<div class="action-option" onclick="investInput('deposit')"><div><div class="name">💰 예금 가입</div><div class="effects">1000만~10억 | 1년 후 +3.5%</div></div></div>`;
+      html += `<div class="action-option" onclick="investInput('deposit')">${_ivIc('예금')}<div style="flex:1"><div class="name">예금 가입</div><div class="effects">1000만~50억 | 1년 후 +3.5%</div></div></div>`;
     }
     // 적금
     if (iv.savings) {
-      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">💳 적금 (${iv.savings.monthsLeft}개월 남음)</div>
+      html += `<div class="action-option" style="cursor:default">${_ivIc('적금')}<div style="flex:1"><div class="name">적금 (${iv.savings.monthsLeft}개월 남음)</div>
         <div class="effects">월 ${f(iv.savings.monthly)} | 납입 ${f(iv.savings.totalPaid)} | 만기 시 +2.5%</div></div>
         ${iv.savings.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureSavings()">만료해지</div>`:''}
       </div>`;
     } else {
-      html += `<div class="action-option" onclick="investInput('savings')"><div><div class="name">💳 적금 가입</div><div class="effects">월 30만~1000만 | 1년 후 +2.5%</div></div></div>`;
+      html += `<div class="action-option" onclick="investInput('savings')">${_ivIc('적금')}<div style="flex:1"><div class="name">적금 가입</div><div class="effects">월 30만~1000만 | 1년 후 +2.5%</div></div></div>`;
     }
   } else if (_investTab === 'market') {
+    // 국내주식
+    if (iv.domesticStock) {
+      html += `<div class="action-option">${_ivIc('국내주식')}<div style="flex:1"><div class="name">국내주식</div>
+        <div class="effects">투자 ${f(iv.domesticStock.amount)} → 현재 ${f(iv.domesticStock.currentValue)} (${pct(iv.domesticStock.currentValue,iv.domesticStock.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('domestic')">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('domesticStock')">${_ivIc('국내주식')}<div style="flex:1"><div class="name">국내주식 투자</div><div class="effects">1000만~10억 | 매월 -30%~+50% 변동</div></div></div>`;
+    }
+    // 해외주식
+    if (iv.foreignStock) {
+      html += `<div class="action-option">${_ivIc('해외주식')}<div style="flex:1"><div class="name">해외주식</div>
+        <div class="effects">투자 ${f(iv.foreignStock.amount)} → 현재 ${f(iv.foreignStock.currentValue)} (${pct(iv.foreignStock.currentValue,iv.foreignStock.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('foreign')">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('foreignStock')">${_ivIc('해외주식')}<div style="flex:1"><div class="name">해외주식 투자</div><div class="effects">1000만~10억 | 매월 -15%~+30% 변동</div></div></div>`;
+    }
+    // 코인
+    iv.coins.forEach((c,i)=>{
+      html += `<div class="action-option">${_ivIc('코인')}<div style="flex:1"><div class="name">코인 #${i+1}</div>
+        <div class="effects">투자 ${f(c.amount)} → 현재 ${f(c.currentValue)} (${pct(c.currentValue,c.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCoin(${i})">판매</div></div>`;
+    });
+    if (iv.coins.length < 2) html += `<div class="action-option" onclick="investInput('coin')">${_ivIc('코인')}<div style="flex:1"><div class="name">코인 투자</div><div class="effects">1000만~10억 | 매월 -95%~+200% 변동</div></div></div>`;
+    // 현물
+    if (iv.commodity) {
+      html += `<div class="action-option">${_ivIc('현물(금)')}<div style="flex:1"><div class="name">현물</div>
+        <div class="effects">투자 ${f(iv.commodity.amount)} → 현재 ${f(iv.commodity.currentValue)} (${pct(iv.commodity.currentValue,iv.commodity.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCommodity()">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('commodity')">${_ivIc('현물(금)')}<div style="flex:1"><div class="name">현물 투자</div><div class="effects">1000만~10억 | 매월 -40%~+60% 변동</div></div></div>`;
+    }
+  } else if (_investTab === 'longterm') {
     // 펀드
     if (iv.fund) {
-      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">📊 펀드 (${iv.fund.monthsLeft}개월 남음)</div>
+      html += `<div class="action-option" style="cursor:default">${_ivIc('펀드')}<div style="flex:1"><div class="name">펀드 (${iv.fund.monthsLeft}개월 남음)</div>
         <div class="effects">원금 ${f(iv.fund.amount)} | 만기 시 -10%~+20%</div></div>
         ${iv.fund.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureFund()">만료해지</div>`:''}
       </div>`;
     } else {
-      html += `<div class="action-option" onclick="investInput('fund')"><div><div class="name">📊 펀드 가입</div><div class="effects">1000만~10억 | 1년 후 -10%~+20%</div></div></div>`;
+      html += `<div class="action-option" onclick="investInput('fund')">${_ivIc('펀드')}<div style="flex:1"><div class="name">펀드 가입</div><div class="effects">1000만~10억 | 1년 후 -10%~+20%</div></div></div>`;
     }
-    // 국내주식
-    if (iv.domesticStock) {
-      html += `<div class="action-option"><div style="flex:1"><div class="name">📈 국내주식</div>
-        <div class="effects">투자 ${f(iv.domesticStock.amount)} → 현재 ${f(iv.domesticStock.currentValue)} (${pct(iv.domesticStock.currentValue,iv.domesticStock.amount)})</div></div>
-        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('domestic')">판매</div></div>`;
-    } else {
-      html += `<div class="action-option" onclick="investInput('domesticStock')"><div><div class="name">📈 국내주식 투자</div><div class="effects">1000만~10억 | 매월 -30%~+50% 변동</div></div></div>`;
-    }
-    // 해외주식
-    if (iv.foreignStock) {
-      html += `<div class="action-option"><div style="flex:1"><div class="name">🌐 해외주식</div>
-        <div class="effects">투자 ${f(iv.foreignStock.amount)} → 현재 ${f(iv.foreignStock.currentValue)} (${pct(iv.foreignStock.currentValue,iv.foreignStock.amount)})</div></div>
-        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('foreign')">판매</div></div>`;
-    } else {
-      html += `<div class="action-option" onclick="investInput('foreignStock')"><div><div class="name">🌐 해외주식 투자</div><div class="effects">1000만~10억 | 매월 -15%~+30% 변동</div></div></div>`;
-    }
-    // 코인
-    iv.coins.forEach((c,i)=>{
-      html += `<div class="action-option"><div style="flex:1"><div class="name">💎 코인 #${i+1}</div>
-        <div class="effects">투자 ${f(c.amount)} → 현재 ${f(c.currentValue)} (${pct(c.currentValue,c.amount)})</div></div>
-        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCoin(${i})">판매</div></div>`;
-    });
-    if (iv.coins.length < 2) html += `<div class="action-option" onclick="investInput('coin')"><div><div class="name">💎 코인 투자</div><div class="effects">1000만~10억 | 매월 -95%~+200% 변동</div></div></div>`;
-    // 현물
-    if (iv.commodity) {
-      html += `<div class="action-option"><div style="flex:1"><div class="name">🥇 현물</div>
-        <div class="effects">투자 ${f(iv.commodity.amount)} → 현재 ${f(iv.commodity.currentValue)} (${pct(iv.commodity.currentValue,iv.commodity.amount)})</div></div>
-        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCommodity()">판매</div></div>`;
-    } else {
-      html += `<div class="action-option" onclick="investInput('commodity')"><div><div class="name">🥇 현물 투자</div><div class="effects">1000만~10억 | 매월 -40%~+60% 변동</div></div></div>`;
-    }
-  } else if (_investTab === 'longterm') {
     // 벤처
     if (iv.venture) {
-      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">🚀 벤처캐피탈 (${iv.venture.monthsLeft}개월 남음)</div>
+      html += `<div class="action-option" style="cursor:default">${_ivIc('벤처캐피탈')}<div style="flex:1"><div class="name">벤처캐피탈 (${iv.venture.monthsLeft}개월 남음)</div>
         <div class="effects">투자 ${f(iv.venture.amount)} | 만기 시 -90%~+300%</div></div>
         ${iv.venture.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureVenture()">투자회수</div>`:''}
       </div>`;
     } else {
-      html += `<div class="action-option" onclick="investInput('venture')"><div><div class="name">🚀 벤처캐피탈</div><div class="effects">1000만~10억 | 1년 후 -90%~+300%</div></div></div>`;
+      html += `<div class="action-option" onclick="investInput('venture')">${_ivIc('벤처캐피탈')}<div style="flex:1"><div class="name">벤처캐피탈</div><div class="effects">1000만~10억 | 1년 후 -90%~+300%</div></div></div>`;
     }
     // 지식재산권
     if (iv.ip) {
-      html += `<div class="action-option"><div style="flex:1"><div class="name">💡 지식재산권</div>
-        <div class="effects">투자 ${f(iv.ip.amount)} | 매월 0.1~2% 수익</div></div>
+      const months = iv.ip.monthsHeld||0;
+      const penaltyNote = months<6 ? ` <span style="color:#cc8844">(조기 매도 -10%)</span>` : '';
+      html += `<div class="action-option">${_ivIc('지식재산권')}<div style="flex:1"><div class="name">지식재산권 (${months}개월 보유)</div>
+        <div class="effects">투자 ${f(iv.ip.amount)} | 매월 0~1% 수익${penaltyNote}</div></div>
         <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellIP()">판매</div></div>`;
     } else {
-      html += `<div class="action-option" onclick="investInput('ip')"><div><div class="name">💡 지식재산권 투자</div><div class="effects">1000만~10억 | 매월 0.1~2% 수익, 원금 회수 가능</div></div></div>`;
+      html += `<div class="action-option" onclick="investInput('ip')">${_ivIc('지식재산권')}<div style="flex:1"><div class="name">지식재산권 투자</div><div class="effects">1000만~10억 | 6개월 미만 매도 시 원금 90% 회수</div></div></div>`;
     }
   } else if (_investTab === 'realestate') {
     iv.realEstate.forEach((r,i)=>{
       const canSell = r.monthsOwned >= 24;
-      html += `<div class="action-option"><div style="flex:1"><div class="name">🏠 ${r.name}</div>
+      html += `<div class="action-option">${_ivIc('부동산')}<div style="flex:1"><div class="name">${r.name}</div>
         <div class="effects">매입 ${f(r.buyPrice)} → 시세 ${f(r.currentValue)} (${pct(r.currentValue,r.buyPrice)}) | ${r.monthsOwned}개월 보유${canSell?'':' (2년 후 매도 가능)'}</div></div>
         ${canSell?`<div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellRealEstate(${i})">매도</div>`:''}
       </div>`;
     });
-    html += `<div class="action-option" onclick="openRealEstateMenu()"><div><div class="name">🏠 부동산 매입</div><div class="effects">빌라/구축/재건축/신축 아파트</div></div></div>`;
+    html += `<div class="action-option" onclick="openRealEstateMenu()">${_ivIc('부동산')}<div style="flex:1"><div class="name">부동산 매입</div><div class="effects">빌라/구축/재건축/신축 아파트</div></div></div>`;
     if (iv.realEstate.length === 0) {
       html += `<div style="text-align:center;color:#8a7a60;padding:20px 16px;font-size:0.78rem">아직 보유한 부동산이 없습니다.</div>`;
     }
@@ -18376,7 +18390,8 @@ function rr(min,max){return min+Math.random()*(max-min);}
 function investInput(type){
   let title,minV,maxV,unit='원';
   if(type==='savings'){title='적금 - 월 납입액 입력';minV=300000;maxV=10000000;}
-  else{title={deposit:'예금',fund:'펀드',coin:'코인',domesticStock:'국내주식',foreignStock:'해외주식',commodity:'현물',venture:'벤처캐피탈',ip:'지식재산권'}[type]+' - 투자금액 입력';minV=10000000;maxV=1000000000;}
+  else if(type==='deposit'){title='예금 - 투자금액 입력';minV=10000000;maxV=5000000000;}
+  else{title={fund:'펀드',coin:'코인',domesticStock:'국내주식',foreignStock:'해외주식',commodity:'현물',venture:'벤처캐피탈',ip:'지식재산권'}[type]+' - 투자금액 입력';minV=10000000;maxV=1000000000;}
   let html=`<div class="modal-title">${title}</div>
     <div style="text-align:center;font-size:0.78rem;color:#a09080;margin-bottom:10px">최소 ${f(minV)} ~ 최대 ${f(maxV)}</div>
     <input type="text" id="invest-amount" class="name-input" style="width:100%;margin-bottom:12px;letter-spacing:1px" value="${minV.toLocaleString()}" oninput="formatInvestInput(this)">
@@ -18395,7 +18410,7 @@ function formatInvestInput(el){
 function confirmInvest(type){
   const amt=parseInt(document.getElementById('invest-amount').value.replace(/[^0-9]/g,''));
   let minV=type==='savings'?300000:10000000;
-  let maxV=type==='savings'?10000000:1000000000;
+  let maxV=type==='savings'?10000000:(type==='deposit'?5000000000:1000000000);
   if(!amt||amt<minV||amt>maxV){showToast(`${f(minV)}~${f(maxV)} 사이로 입력하세요.`);return;}
   if(type!=='savings'&&G.funds<amt){showToast('자금이 부족합니다.');return;}
   if(type==='savings'&&G.funds<amt){showToast('첫 달 납입금이 부족합니다.');return;}
@@ -18409,7 +18424,7 @@ function confirmInvest(type){
   else if(type==='foreignStock'){G.funds-=amt;iv.foreignStock={amount:amt,currentValue:amt};}
   else if(type==='commodity'){G.funds-=amt;iv.commodity={amount:amt,currentValue:amt};}
   else if(type==='venture'){G.funds-=amt;iv.venture={amount:amt,monthsLeft:12};}
-  else if(type==='ip'){G.funds-=amt;iv.ip={amount:amt};}
+  else if(type==='ip'){G.funds-=amt;iv.ip={amount:amt,monthsHeld:0};}
 
   showToast('투자 완료!');updateUI();openInvestMenu();
 }
@@ -18424,7 +18439,21 @@ function matureVenture(){const v=G.invest.venture;const rate=Math.random()<0.5?-
 function sellCoin(i){const c=G.invest.coins.splice(i,1)[0];G.funds+=Math.max(0,Math.floor(c.currentValue));showToast(`코인 판매! ${f(Math.floor(c.currentValue))}`);updateUI();openInvestMenu();}
 function sellStock(type){const key=type==='domestic'?'domesticStock':'foreignStock';const s=G.invest[key];G.funds+=Math.max(0,Math.floor(s.currentValue));G.invest[key]=null;showToast(`주식 판매! ${f(Math.floor(s.currentValue))}`);updateUI();openInvestMenu();}
 function sellCommodity(){const c=G.invest.commodity;G.funds+=Math.max(0,Math.floor(c.currentValue));G.invest.commodity=null;showToast(`현물 판매! ${f(Math.floor(c.currentValue))}`);updateUI();openInvestMenu();}
-function sellIP(){G.funds+=G.invest.ip.amount;G.invest.ip=null;showToast('지식재산권 판매! (원금 회수)');updateUI();openInvestMenu();}
+function sellIP(){
+  const ip=G.invest.ip;
+  const months=ip.monthsHeld||0;
+  if(months<6){
+    const refund=Math.floor(ip.amount*0.9);
+    G.funds+=refund;
+    G.invest.ip=null;
+    showToast(`지식재산권 조기 매도! (${months}개월 보유, 원금 90% 회수: ${f(refund)})`);
+  } else {
+    G.funds+=ip.amount;
+    G.invest.ip=null;
+    showToast('지식재산권 판매! (원금 100% 회수)');
+  }
+  updateUI();openInvestMenu();
+}
 function sellRealEstate(i){const r=G.invest.realEstate.splice(i,1)[0];G.funds+=Math.max(0,Math.floor(r.currentValue));showToast(`${r.name} 매도! ${f(Math.floor(r.currentValue))}`);updateUI();openInvestMenu();}
 
 // 부동산 매입
@@ -18477,8 +18506,12 @@ function processInvestmentsMonthly(){
   if(iv.foreignStock){const fd=getInvestDownThreshold('foreignStock');const rate=Math.random()<fd?-Math.random()*0.15:Math.random()*0.3;iv.foreignStock.currentValue=Math.max(0,Math.floor(iv.foreignStock.currentValue*(1+rate)));}
   // 현물 변동 (기본 50% 하락 0~-40%, 50% 상승 0~+60%)
   if(iv.commodity){const cd=getInvestDownThreshold('commodity');const rate=Math.random()<cd?-Math.random()*0.4:Math.random()*0.6;iv.commodity.currentValue=Math.max(0,Math.floor(iv.commodity.currentValue*(1+rate)));}
-  // 지식재산권 수익
-  if(iv.ip){const income=Math.floor(iv.ip.amount*rr(0.001,0.02));G.funds+=income;}
+  // 지식재산권 수익 (매월 0~1%, 평균 0.5%) + 보유 개월 카운트
+  if(iv.ip){
+    const income=Math.floor(iv.ip.amount*Math.random()*0.01);
+    G.funds+=income;
+    iv.ip.monthsHeld=(iv.ip.monthsHeld||0)+1;
+  }
   // 부동산 보유기간
   iv.realEstate.forEach(r=>{r.monthsOwned++;});
 }
@@ -19084,7 +19117,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 13;
+const GAME_VERSION = 14;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -19193,7 +19226,16 @@ const MIGRATIONS = {
     if (typeof state.playTimeSec !== 'number' || !isFinite(state.playTimeSec)) state.playTimeSec = 0;
     return state;
   },
-  // 향후 업데이트: v14, v15 ... 형태로 추가
+  // v13 → v14 : 지식재산권 보유 개월 수 (조기 매도 페널티용). 기존 보유는 페널티 면제(6 부여).
+  14: function(state) {
+    if (state.invest && state.invest.ip && typeof state.invest.ip === 'object') {
+      if (typeof state.invest.ip.monthsHeld !== 'number' || !isFinite(state.invest.ip.monthsHeld)) {
+        state.invest.ip.monthsHeld = 6;
+      }
+    }
+    return state;
+  },
+  // 향후 업데이트: v15, v16 ... 형태로 추가
 };
 
 // ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
@@ -19261,6 +19303,12 @@ function ensureDefaults(state) {
   }
   if (!Array.isArray(state.invest.coins)) state.invest.coins = [];
   if (!Array.isArray(state.invest.realEstate)) state.invest.realEstate = [];
+  // 지재권 보유 개월수 보강 (없으면 페널티 면제 = 6)
+  if (state.invest.ip && typeof state.invest.ip === 'object') {
+    if (typeof state.invest.ip.monthsHeld !== 'number' || !isFinite(state.invest.ip.monthsHeld)) {
+      state.invest.ip.monthsHeld = 6;
+    }
+  }
 
   // 자녀 하위 events 객체
   state.children.forEach(ch => {
@@ -22519,7 +22567,7 @@ function showEndingCustom(title,desc){
 const _HL = (t) => `<b style="color:#f0c850;letter-spacing:1px;font-size:0.86rem">▸ ${t}</b>`;
 const HELP_CATEGORIES = [
   {
-    id: 'basics', icon: '📘', title: '게임 기초',
+    id: 'basics', icon: 'UI/아이콘/도움말/게임기초.png', title: '게임 기초',
     content:
 `<b>변호사 생존기</b>는 변호사 시뮬레이션 게임입니다.
 신입 변호사로 시작해 <b>10년(120개월)</b> 동안 커리어를 쌓아보세요.
@@ -22550,7 +22598,7 @@ ${_HL('오른쪽 메뉴')}
 - <b>재테크</b> — 저축/단기/장기/부동산`
   },
   {
-    id: 'stats', icon: '📊', title: '능력치',
+    id: 'stats', icon: 'UI/아이콘/도움말/능력치.png', title: '능력치',
     content:
 `능력치는 사건 승패와 이벤트 결과를 좌우합니다. 매 활동의 효과는 사건/이벤트마다 다르게 적용돼요.
 
@@ -22577,7 +22625,7 @@ ${_HL('관리 팁')}
 - 검토·증거제출이 능력치 부족을 보완`
   },
   {
-    id: 'career', icon: '💼', title: '신분·커리어',
+    id: 'career', icon: 'UI/아이콘/도움말/신분커리어.png', title: '신분·커리어',
     content:
 `초기 신분은 <b>어쏘변호사</b> (법무법인 대영). 이후 다양한 경로로 전환됩니다.
 
@@ -22607,7 +22655,7 @@ ${_HL('강사 겸직')}
 법학강의는 별도 계약. 변호사 본업과 동시 운영. 신상관리 → 강의중단으로 해제 가능.`
   },
   {
-    id: 'cases', icon: '⚖', title: '사건·재판',
+    id: 'cases', icon: 'UI/아이콘/도움말/사건재판.png', title: '사건·재판',
     content:
 `사건은 메인스토리(주축)와 서브스토리(보조), 일반 사건카드로 나뉩니다.
 
@@ -22638,7 +22686,7 @@ ${_HL('토스')}
 효율적이지만 본인 명성 상승은 적음.`
   },
   {
-    id: 'relations', icon: '💝', title: '인간관계',
+    id: 'relations', icon: 'UI/아이콘/도움말/인간관계.png', title: '인간관계',
     content:
 `연애 14명 + 라이벌 2명. 매월 만남 이벤트가 자동으로 진행됩니다.
 
@@ -22669,7 +22717,7 @@ ${_HL('이별·이혼')}
 신상관리에서 처리. 호감도 -20 페널티, 다시 쌓아야 재연애. 이혼 시 재산 분할 발생 가능.`
   },
   {
-    id: 'invest', icon: '💰', title: '재테크',
+    id: 'invest', icon: 'UI/아이콘/도움말/재테크.png', title: '재테크',
     content:
 `컴퓨터 → 재테크. 4탭으로 분류 (저축/단기투자/장기투자/부동산).
 
@@ -22700,7 +22748,7 @@ ${_HL('전략 팁')}
 - 결혼 후 배우자 수입(월 0~1000만)도 자금에 합산`
   },
   {
-    id: 'systems', icon: '🔧', title: '시스템',
+    id: 'systems', icon: 'UI/아이콘/도움말/시스템.png', title: '시스템',
     content:
 `게임 진행 도중 자동 작동하는 시스템들.
 
@@ -22738,7 +22786,7 @@ ${_HL('SNS·유튜브')}
 - 구독자 100만 → 주인공 뉴스 트리거`
   },
   {
-    id: 'keys', icon: '⌨', title: '단축키·엔딩',
+    id: 'keys', icon: 'UI/아이콘/도움말/단축키엔딩.png', title: '단축키·엔딩',
     content:
 `${_HL('키보드 단축키')}
 - <b>Esc</b> — 열린 모달 닫기
@@ -22808,15 +22856,15 @@ function renderHelpPage() {
   // 사이드바
   const sidebar = HELP_CATEGORIES.map(c => {
     const active = c.id === helpCategoryId;
-    const style = `padding:8px 10px;font-size:0.78rem;cursor:pointer;border:1px solid ${active?'#c9a84c':'#5a3528'};background:${active?'rgba(201,168,76,0.18)':'#1e110a'};color:${active?'#f0c850':'#a09080'};font-weight:${active?'700':'500'};border-radius:4px;letter-spacing:0.5px;text-align:left;font-family:inherit;width:100%`;
-    return `<button style="${style}" onclick="changeHelpCategory('${c.id}')">${c.icon} ${c.title}</button>`;
+    const style = `padding:6px 10px;font-size:0.78rem;cursor:pointer;border:1px solid ${active?'#c9a84c':'#5a3528'};background:${active?'rgba(201,168,76,0.18)':'#1e110a'};color:${active?'#f0c850':'#a09080'};font-weight:${active?'700':'500'};border-radius:4px;letter-spacing:0.5px;text-align:left;font-family:inherit;width:100%;display:flex;align-items:center;gap:6px`;
+    return `<button style="${style}" onclick="changeHelpCategory('${c.id}')"><img src="${c.icon}" style="width:22px;height:22px;flex-shrink:0">${c.title}</button>`;
   }).join('');
   document.getElementById('help-sidebar').innerHTML = sidebar;
   // 본문 — 원본 \n은 white-space:pre-line으로 줄바꿈 유지. `- `는 시각적으로 좀 더 부드러운 `•`로 치환.
   const html = cat.content
     .replace(/^- /gm, '• ')
     .trim();
-  document.getElementById('help-title').textContent = cat.icon + '  ' + cat.title;
+  document.getElementById('help-title').innerHTML = `<img src="${cat.icon}" style="width:24px;height:24px;vertical-align:middle;margin-right:8px">${cat.title}`;
   document.getElementById('help-content').innerHTML = html;
   document.getElementById('help-content-wrap').scrollTop = 0;
 }

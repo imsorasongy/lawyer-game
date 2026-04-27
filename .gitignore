@@ -9,6 +9,8 @@ node_modules/
 package.json
 package-lock.json
 *.png
+!ui/쇼핑/**/*.png
+!UI/쇼핑/**/*.png
 
 # Tauri 빌드 산출물
 /dist/
