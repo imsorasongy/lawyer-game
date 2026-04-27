@@ -238,6 +238,11 @@ body {
   color: #e8d5b5; font-family: 'Times New Roman', 'Noto Serif KR', serif;
   display: flex; flex-direction: column;
   overflow: hidden;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+}
+.business-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(201,168,76,0.35), inset 0 0 30px rgba(139,115,85,0.12);
 }
 .business-card::before {
   content: '';
@@ -281,6 +286,68 @@ body {
 .business-card.bc-tier-beige .bc-title { color: #5a3a18; }
 .business-card.bc-tier-beige .bc-extra { color: #6a4a28; }
 .business-card.bc-tier-beige .bc-corner { color: #7a5a38; }
+
+.business-card.bc-tier-navy {
+  background: linear-gradient(135deg, #1a2535 0%, #243248 50%, #1a2535 100%);
+  border-color: #4a6080; color: #e8d5b5;
+}
+.business-card.bc-tier-navy .bc-firm { color: #b0c8e0; }
+.business-card.bc-tier-navy .bc-firm-sep { background: #4a6080; }
+.business-card.bc-tier-navy .bc-name { color: #f0d68a; }
+.business-card.bc-tier-navy .bc-title { color: #c0d0e0; }
+.business-card.bc-tier-navy .bc-extra { color: #a0b0c8; }
+.business-card.bc-tier-navy .bc-corner { color: #80a0c0; }
+
+.business-card.bc-tier-black {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  border-color: #c9a84c; color: #c9a84c;
+}
+.business-card.bc-tier-black .bc-firm { color: #f0c850; }
+.business-card.bc-tier-black .bc-firm-sep { background: #c9a84c; }
+.business-card.bc-tier-black .bc-name { color: #ffe070; }
+.business-card.bc-tier-black .bc-title { color: #d8c8a8; }
+.business-card.bc-tier-black .bc-extra { color: #b0a070; }
+.business-card.bc-tier-black .bc-corner { color: #a09060; }
+
+/* 명함 디자이너 옵션 버튼 */
+.card-opt-btn {
+  padding: 5px 10px; border: 1px solid #5a3528; background: #1e110a;
+  color: #a09080; border-radius: 4px; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 0.78rem;
+  font-weight: 500; transition: all 0.15s;
+}
+.card-opt-btn:hover { border-color: #8a6038; color: #d8c8a8; }
+.card-opt-btn.active {
+  border-color: #c9a84c; background: rgba(201,168,76,0.18);
+  color: #f0c850; font-weight: 700;
+}
+.card-opt-btn.tone-btn {
+  display: flex; align-items: center; gap: 6px;
+}
+.card-opt-btn.tone-btn .tone-swatch {
+  display: inline-block; width: 12px; height: 12px;
+  border-radius: 3px; border: 1px solid #5a3528;
+}
+.card-opt-btn.logo-btn {
+  width: 38px; height: 38px; padding: 0;
+  font-size: 1.2rem; color: #e8d5b5;
+}
+
+/* 명함 보더 스타일 */
+.business-card.bc-border-double { border-width: 5px; border-style: double; }
+.business-card.bc-border-dashed { border-style: dashed; }
+
+/* 명함 폰트 */
+.business-card.bc-font-serif { font-family: 'Times New Roman', 'Noto Serif KR', serif; }
+.business-card.bc-font-sans  { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
+.business-card.bc-font-round { font-family: 'Gulim', 'Noto Sans KR', sans-serif; }
+
+/* 명함 정렬 */
+.business-card.bc-align-left   .bc-middle { text-align: left;   align-items: flex-start; }
+.business-card.bc-align-center .bc-middle { text-align: center; align-items: center; }
+.business-card.bc-align-right  .bc-middle { text-align: right;  align-items: flex-end; }
+.business-card.bc-align-center .bc-firm-sep { margin-left: auto; margin-right: auto; }
+.business-card.bc-align-right  .bc-firm-sep { margin-left: auto; }
 
 /* 엔딩 갤러리 */
 .gallery-tab {
@@ -1271,7 +1338,7 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
   </div>
 
   <!-- 좌측 상단 명함 (독립 배치) -->
-  <div id="player-business-card" class="business-card"></div>
+  <div id="player-business-card" class="business-card" onclick="openCardDesigner()" title="클릭하여 명함 디자인"></div>
 
   <!-- 우측 상단 스탯 카드 (명함과 대칭) -->
   <div id="player-stat-card" class="stat-card">
@@ -1681,6 +1748,19 @@ const G = {
   rivals: [],
   rivalNewsSeen: {},     // 라이벌 뉴스 중복 방지: 'rivalId-newsKey' → true
   rivalBigDuelDone: {},  // 본격 대결 이벤트 발동 기록: 'rivalId' → true
+  // 명함 커스터마이징 (Phase 1+2)
+  businessCardCustom: {
+    enabled: false,        // false면 신분 기반 자동
+    tone: 'beige',         // white/beige/gold/navy/black
+    logo: '⚖',             // 로고 심볼
+    border: 'simple',      // simple/double/dashed
+    font: 'serif',         // serif/sans/round
+    align: 'left',         // left/center/right
+    showFirm: true,
+    showPhd: true,
+    showCouncil: true,
+    showSpecial: true,
+  },
 };
 
 const STATUS_NAMES = {
@@ -5009,12 +5089,21 @@ function updateUI() {
   const card = document.getElementById('player-business-card');
   if (card) {
     card.innerHTML = renderBusinessCardInner();
-    const whiteTier = ['associate','inhouse','suspended'];
-    const beigeTier = ['partner','inhouseTeam'];
-    let tier = 'gold';
-    if (whiteTier.includes(G.status)) tier = 'white';
-    else if (beigeTier.includes(G.status)) tier = 'beige';
-    card.className = 'business-card bc-tier-' + tier;
+    const cust = G.businessCardCustom || {};
+    let tier;
+    if (cust.enabled && cust.tone) {
+      tier = cust.tone;
+    } else {
+      const whiteTier = ['associate','inhouse','suspended'];
+      const beigeTier = ['partner','inhouseTeam'];
+      tier = 'gold';
+      if (whiteTier.includes(G.status)) tier = 'white';
+      else if (beigeTier.includes(G.status)) tier = 'beige';
+    }
+    const border = (cust.enabled && cust.border) ? cust.border : 'simple';
+    const font = (cust.enabled && cust.font) ? cust.font : 'serif';
+    const align = (cust.enabled && cust.align) ? cust.align : 'left';
+    card.className = `business-card bc-tier-${tier} bc-border-${border} bc-font-${font} bc-align-${align}`;
   }
   document.getElementById('top-date').textContent = `${2029+G.year}년 ${G.month}월 (${G.year}년차)`;
   document.getElementById('top-funds').textContent = formatMoney(G.funds);
@@ -5084,16 +5173,239 @@ function renderTopCard() {
 }
 
 // 명함 내부 콘텐츠만 반환 (#player-business-card가 .business-card 래퍼 역할)
+// ===== 명함 디자인 모달 (Phase 1) =====
+const CARD_TONES = [
+  {key:'auto',  label:'자동 (신분 기준)', preview:'#3a2f1f'},
+  {key:'white', label:'화이트',          preview:'#f5f0e8'},
+  {key:'beige', label:'베이지',          preview:'#5a4a30'},
+  {key:'gold',  label:'골드',            preview:'#c9a84c'},
+  {key:'navy',  label:'다크 네이비',     preview:'#243248'},
+  {key:'black', label:'블랙 (럭셔리)',   preview:'#1a1a1a'},
+];
+const CARD_LOGOS = ['⚖','✦','🏛','📜','❖','🎓','★','◈','法','律'];
+
+function openCardDesigner() {
+  let overlay = document.getElementById('card-designer-modal');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'card-designer-modal';
+    overlay.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'none'; };
+    document.body.appendChild(overlay);
+  }
+  renderCardDesigner();
+  overlay.style.display = 'flex';
+}
+
+function renderCardDesigner() {
+  const overlay = document.getElementById('card-designer-modal');
+  if (!overlay) return;
+
+  // 톤 옵션 (auto 포함)
+  const toneBtns = CARD_TONES.map(t =>
+    `<button class="card-opt-btn tone-btn" data-card-key="tone" data-card-value="${t.key}" onclick="setCardTone('${t.key}')">
+      <span class="tone-swatch" style="background:${t.preview}"></span>${t.label}
+    </button>`
+  ).join('');
+
+  // 로고 옵션
+  const logoBtns = CARD_LOGOS.map(l =>
+    `<button class="card-opt-btn logo-btn" data-card-key="logo" data-card-value="${l}" onclick="setCardLogo('${l}')">${l}</button>`
+  ).join('');
+
+  // 보더·폰트·정렬
+  const borderOpts = [{k:'simple',l:'단순'},{k:'double',l:'이중'},{k:'dashed',l:'점선'}];
+  const fontOpts   = [{k:'serif',l:'명조'},{k:'sans',l:'고딕'},{k:'round',l:'굴림'}];
+  const alignOpts  = [{k:'left',l:'좌측'},{k:'center',l:'가운데'},{k:'right',l:'우측'}];
+  const optGroup = (key, opts) => opts.map(o =>
+    `<button class="card-opt-btn" data-card-key="${key}" data-card-value="${o.k}" onclick="setCardField('${key}','${o.k}')">${o.l}</button>`
+  ).join('');
+
+  // 표시 토글
+  const toggles = [
+    {k:'showFirm',    l:'법인명'},
+    {k:'showSpecial', l:'전문분야'},
+    {k:'showPhd',     l:'법학박사'},
+    {k:'showCouncil', l:'시의원'},
+  ];
+  const toggleBtns = toggles.map(t =>
+    `<label style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;color:#d8c8a8;cursor:pointer">
+      <input type="checkbox" data-card-toggle="${t.k}" onchange="setCardField('${t.k}',this.checked)" style="cursor:pointer">
+      ${t.l}
+    </label>`
+  ).join('');
+
+  overlay.innerHTML = `
+    <div class="modal-content" style="max-width:560px;width:94%;max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="document.getElementById('card-designer-modal').style.display='none'">&times;</button>
+      <div class="modal-title">명함 디자인</div>
+
+      <div id="card-preview-wrap" style="background:#2a1812;border:1px solid #5a3528;border-radius:6px;padding:18px;margin-bottom:12px;display:flex;justify-content:center;align-items:center;min-height:170px">
+        <div id="card-preview" class="business-card" style="position:relative;top:auto;left:auto;width:280px"></div>
+      </div>
+
+      <div style="font-size:0.78rem;color:#c9a84c;margin-bottom:5px;font-weight:700">색상 톤</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${toneBtns}</div>
+
+      <div style="font-size:0.78rem;color:#c9a84c;margin-bottom:5px;font-weight:700">로고</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px">${logoBtns}</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
+        <span style="font-size:0.74rem;color:#a09080">직접 입력:</span>
+        <input type="text" id="card-logo-input" maxlength="2" placeholder="한자/이모지"
+          style="flex:1;padding:5px 10px;background:#1e110a;border:1px solid #5a3528;color:#e8d5b5;border-radius:4px;font-size:0.95rem;text-align:center"
+          oninput="setCardLogoFromInput(this.value)">
+      </div>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+        <div>
+          <div style="font-size:0.78rem;color:#c9a84c;margin-bottom:4px;font-weight:700">보더</div>
+          <div style="display:flex;gap:4px">${optGroup('border', borderOpts)}</div>
+        </div>
+        <div>
+          <div style="font-size:0.78rem;color:#c9a84c;margin-bottom:4px;font-weight:700">폰트</div>
+          <div style="display:flex;gap:4px">${optGroup('font', fontOpts)}</div>
+        </div>
+        <div>
+          <div style="font-size:0.78rem;color:#c9a84c;margin-bottom:4px;font-weight:700">정렬</div>
+          <div style="display:flex;gap:4px">${optGroup('align', alignOpts)}</div>
+        </div>
+      </div>
+
+      <div style="font-size:0.78rem;color:#c9a84c;margin-bottom:5px;font-weight:700">표시 항목</div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px;padding:8px 10px;background:#1e110a;border:1px solid #3a2018;border-radius:4px">
+        ${toggleBtns}
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:space-between;border-top:1px solid #5a3528;padding-top:10px">
+        <button class="btn btn-secondary" onclick="resetCardDesign()">기본으로 ↺</button>
+        <button class="btn btn-primary" onclick="document.getElementById('card-designer-modal').style.display='none'">완료</button>
+      </div>
+    </div>
+  `;
+  // 첫 표시 시 미리보기·활성 표시 초기화
+  updateCardDesignerUI();
+}
+
+// 미리보기 + 활성 버튼 표시 갱신만 (DOM 재생성 X)
+function updateCardDesignerUI() {
+  const overlay = document.getElementById('card-designer-modal');
+  if (!overlay) return;
+  const cust = G.businessCardCustom || {};
+  const enabled = !!cust.enabled;
+
+  // 미리보기 명함
+  const preview = overlay.querySelector('#card-preview');
+  if (preview) {
+    let tier;
+    if (enabled && cust.tone) {
+      tier = cust.tone;
+    } else {
+      const whiteTier = ['associate','inhouse','suspended'];
+      const beigeTier = ['partner','inhouseTeam'];
+      tier = 'gold';
+      if (whiteTier.includes(G.status)) tier = 'white';
+      else if (beigeTier.includes(G.status)) tier = 'beige';
+    }
+    const border = (enabled && cust.border) ? cust.border : 'simple';
+    const font = (enabled && cust.font) ? cust.font : 'serif';
+    const align = (enabled && cust.align) ? cust.align : 'left';
+    preview.className = `business-card bc-tier-${tier} bc-border-${border} bc-font-${font} bc-align-${align}`;
+    preview.innerHTML = renderBusinessCardInner();
+  }
+
+  // 옵션 버튼 활성 표시
+  overlay.querySelectorAll('[data-card-key]').forEach(btn => {
+    const key = btn.dataset.cardKey;
+    const val = btn.dataset.cardValue;
+    let active = false;
+    if (key === 'tone' && val === 'auto') active = !enabled;
+    else if (key === 'tone') active = enabled && cust.tone === val;
+    else if (key === 'logo') active = enabled && cust.logo === val;
+    else active = enabled && cust[key] === val;
+    btn.classList.toggle('active', active);
+  });
+
+  // 체크박스
+  overlay.querySelectorAll('[data-card-toggle]').forEach(cb => {
+    const key = cb.dataset.cardToggle;
+    cb.checked = !enabled || cust[key] !== false;
+  });
+
+  // 직접 입력 input — 포커스 보존을 위해 값 갱신은 건드리지 않음 (사용자가 입력 중)
+  // 단, 외부 변경 (프리셋 클릭 등)으로 logo 바뀐 경우 input이 비어 있거나 다른 값이면 갱신
+  const input = overlay.querySelector('#card-logo-input');
+  if (input && document.activeElement !== input) {
+    const wantVal = enabled ? (cust.logo || '') : '';
+    if (input.value !== wantVal) input.value = wantVal;
+  }
+}
+
+function setCardField(key, value) {
+  if (!G.businessCardCustom) G.businessCardCustom = { enabled: false, tone: 'beige', logo: '⚖' };
+  G.businessCardCustom.enabled = true;
+  G.businessCardCustom[key] = value;
+  updateUI();
+  updateCardDesignerUI();
+}
+
+// input 이벤트로 호출 (포커스 보존)
+function setCardLogoFromInput(value) {
+  if (!G.businessCardCustom) G.businessCardCustom = { enabled: false, tone: 'beige', logo: '⚖' };
+  G.businessCardCustom.enabled = true;
+  G.businessCardCustom.logo = value || '⚖';
+  updateUI();
+  // 미리보기 + 옵션 활성 표시만 갱신 (input 자체는 안 건드림)
+  updateCardDesignerUI();
+}
+
+function setCardTone(toneKey) {
+  if (!G.businessCardCustom) G.businessCardCustom = { enabled: false, tone: 'beige', logo: '⚖' };
+  if (toneKey === 'auto') {
+    G.businessCardCustom.enabled = false;
+  } else {
+    G.businessCardCustom.enabled = true;
+    G.businessCardCustom.tone = toneKey;
+  }
+  updateUI();
+  updateCardDesignerUI();
+}
+
+function setCardLogo(logo) {
+  if (!G.businessCardCustom) G.businessCardCustom = { enabled: false, tone: 'beige', logo: '⚖' };
+  if (!G.businessCardCustom.enabled) G.businessCardCustom.enabled = true;
+  G.businessCardCustom.logo = logo;
+  updateUI();
+  updateCardDesignerUI();
+}
+
+function resetCardDesign() {
+  G.businessCardCustom = {
+    enabled: false, tone: 'beige', logo: '⚖',
+    border: 'simple', font: 'serif', align: 'left',
+    showFirm: true, showPhd: true, showCouncil: true, showSpecial: true,
+  };
+  updateUI();
+  updateCardDesignerUI();
+}
+
 function renderBusinessCardInner() {
+  const cust = G.businessCardCustom || {};
+  const isCust = !!cust.enabled;
+  // 표시 토글 (커스텀 활성화 시에만 적용, 그 외 자동)
+  const showFirm    = !isCust || cust.showFirm !== false;
+  const showSpecial = !isCust || cust.showSpecial !== false;
+  const showPhd     = !isCust || cust.showPhd !== false;
+  const showCouncil = !isCust || cust.showCouncil !== false;
+
   const firmName = G.status === 'solo' ? (G.officeName || '개인 사무소')
     : G.status === 'suspended' ? '휴업 중'
     : (G.firmName || '');
   const statusName = STATUS_NAMES[G.status] || G.status || '';
   const office = getOffice();
 
-  // 전문분야 (CASE_TYPES에서 이름 매핑)
+  // 전문분야
   let titleLine = statusName;
-  if (G.specialLawyer && G.specialLawyer.length > 0) {
+  if (showSpecial && G.specialLawyer && G.specialLawyer.length > 0) {
     const names = G.specialLawyer.map(id => {
       const t = CASE_TYPES.find(c => c.id === id);
       return t ? t.name : id;
@@ -5103,14 +5415,17 @@ function renderBusinessCardInner() {
 
   // 추가 직함
   const extras = [];
-  if (G.phdCompleted) extras.push('법학박사');
-  if (G.isCityCouncil) extras.push('시의원');
+  if (showPhd && G.phdCompleted) extras.push('법학박사');
+  if (showCouncil && G.isCityCouncil) extras.push('시의원');
+
+  // 로고
+  const logo = isCust && cust.logo ? cust.logo : '⚖️';
 
   return `<div class="bc-top">
-      <span class="bc-logo">⚖️</span>
-      <span class="bc-firm">${firmName||'—'}</span>
+      <span class="bc-logo">${logo}</span>
+      ${showFirm ? `<span class="bc-firm">${firmName||'—'}</span>` : ''}
     </div>
-    <div class="bc-firm-sep"></div>
+    ${showFirm ? '<div class="bc-firm-sep"></div>' : ''}
     <div class="bc-middle">
       <div class="bc-name">${G.name || '변호사'}</div>
       <div class="bc-title">${titleLine}</div>
@@ -13960,88 +14275,135 @@ const FRIEND_EVENTS = {
 };
 
 // 인간관계 패널
+let _relationshipTab = 'inyeon';
+
 function openRelationshipPanel() {
   ensureRomance();
-  const targets = getRomanceTargets();
-  const metTargets = targets.filter(t => G.romance.met[t.id]);
-
   const modal = document.getElementById('storage-modal');
   modal.style.display = 'flex';
   document.getElementById('storage-title').textContent = '인간관계';
+  renderRelationshipPanel();
+}
 
-  if (metTargets.length === 0) {
-    document.getElementById('storage-list').innerHTML = '<div style="text-align:center;color:#8a7a60;padding:20px">아직 만난 사람이 없습니다.</div>';
-    return;
+function _renderInyeonItem(target) {
+  const aff = G.romance.affection[target.id] || 0;
+  let relation, relColor;
+  if (G.brokenUp && G.brokenUp[target.id]) {
+    relation = '헤어진 사이'; relColor = '#666666';
+  } else if (G.romance.dating === target.id && G.isMarried) {
+    relation = G.gender === 'male' ? '부인' : '남편'; relColor = '#ff6688';
+  } else if (G.romance.dating === target.id) {
+    relation = '연인 사이'; relColor = '#ff8888';
+  } else if (aff >= 80) {
+    relation = '썸타는 사이'; relColor = '#ffaa88';
+  } else if (aff >= 40) {
+    relation = '친한 사이'; relColor = '#88cc88';
+  } else {
+    relation = '잘 모르는 사이'; relColor = '#a09080';
   }
+  return `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,35,25,0.6);border-radius:6px;border:1px solid #5a3528">
+    <img src="${target.face}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #5a3528" onerror="this.style.display='none'">
+    <div style="flex:1">
+      <div style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${target.name}${target.birthday ? ' <span style="font-size:0.68rem;color:#8a7a60;font-weight:400">('+target.birthday.replace('-','월 ')+'일)</span>' : ''}</div>
+      <div style="font-size:0.8rem;color:${relColor};margin-top:3px">${relation}</div>
+    </div>
+  </div>`;
+}
 
-  let html = '';
-  metTargets.forEach(target => {
-    const aff = G.romance.affection[target.id] || 0;
-    let relation, relColor;
-    if (G.brokenUp && G.brokenUp[target.id]) {
-      relation = '헤어진 사이'; relColor = '#666666';
-    } else if (G.romance.dating === target.id && G.isMarried) {
-      relation = G.gender === 'male' ? '부인' : '남편'; relColor = '#ff6688';
-    } else if (G.romance.dating === target.id) {
-      relation = '연인 사이'; relColor = '#ff8888';
-    } else if (aff >= 80) {
-      relation = '썸타는 사이'; relColor = '#ffaa88';
-    } else if (aff >= 40) {
-      relation = '친한 사이'; relColor = '#88cc88';
-    } else {
-      relation = '잘 모르는 사이'; relColor = '#a09080';
-    }
-    html += `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,35,25,0.6);border-radius:6px;border:1px solid #5a3528">
-      <img src="${target.face}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #5a3528" onerror="this.style.display='none'">
-      <div style="flex:1">
-        <div style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${target.name}${target.birthday ? ' <span style="font-size:0.68rem;color:#8a7a60;font-weight:400">('+target.birthday.replace('-','월 ')+'일)</span>' : ''}</div>
-        <div style="font-size:0.8rem;color:${relColor};margin-top:3px">${relation}</div>
+function _renderChildItem(child) {
+  const childAge = (2029+G.year) - child.birthYear + (G.month >= child.birthMonth ? 0 : -1);
+  const babyFace = childAge <= 1 ? '캐릭터얼굴/아기1.webp' : '캐릭터얼굴/아기2.webp';
+  return `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,35,25,0.6);border-radius:6px;border:1px solid #5a3528">
+    <img src="${babyFace}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #5a3528" onerror="this.style.display='none'">
+    <div style="flex:1">
+      <div style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${child.name}</div>
+      <div style="font-size:0.8rem;color:#ffcc88;margin-top:3px">자녀 (${childAge}세)</div>
+    </div>
+  </div>`;
+}
+
+function _renderRivalItem(r) {
+  const fameLabel  = getRivalFameLabel(r.fame);
+  const relLabel   = getRivalRivalryLabel(r.rivalry);
+  const relColor   = r.rivalry <= -10 ? '#88cc88' : r.rivalry >= 50 ? '#e68080' : r.rivalry >= 10 ? '#e0c070' : '#a09080';
+  const typeLabel  = r.type === 'friendly' ? '동기' : '경쟁 상대';
+  const specName   = (typeof PRO_NAMES !== 'undefined' && PRO_NAMES[r.specialty]) || r.specialty;
+  const famePct    = Math.min(100, Math.round(r.fame / 10));
+  const bondLabel  = (typeof getRivalBondLabel === 'function') ? getRivalBondLabel(r.id) : null;
+  const bondHtml   = bondLabel ? `<span style="font-size:0.7rem;font-weight:700;color:${bondLabel.color};margin-left:6px;padding:1px 6px;border:1px solid ${bondLabel.color};border-radius:3px">${bondLabel.text}</span>` : '';
+  return `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,30,25,0.6);border-radius:6px;border:1px solid #4a3020">
+    <img src="${r.face}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #5a3528" onerror="this.style.display='none';this.style.visibility='hidden'">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap">
+        <span style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${r.name}</span>
+        <span style="font-size:0.7rem;color:#a09080">${typeLabel} · ${specName} 전문</span>
+        ${bondHtml}
       </div>
-    </div>`;
+      <div style="font-size:0.74rem;color:${relColor};margin-top:2px">${relLabel} · ${fameLabel}${r.encounters > 0 ? ' · 만남 '+r.encounters+'회' : ''}</div>
+      <div style="margin-top:5px;height:4px;background:#2a1f15;border-radius:2px;overflow:hidden">
+        <div style="width:${famePct}%;height:100%;background:linear-gradient(90deg,#5a3528,#c9a84c);transition:width .3s"></div>
+      </div>
+      <div style="font-size:0.66rem;color:#8a7a60;margin-top:2px">명성 ${r.fame}/1000</div>
+    </div>
+  </div>`;
+}
+
+function renderRelationshipPanel() {
+  const targets = getRomanceTargets();
+  const metTargets = targets.filter(t => G.romance.met[t.id]);
+  const children = G.children || [];
+  const rivals = Array.isArray(G.rivals) ? G.rivals : [];
+  const inyeonCount = metTargets.length;
+  const childCount = children.length;
+  const rivalCount = rivals.length;
+
+  // 현재 탭이 비어있고 다른 탭에 콘텐츠가 있으면 자동 전환
+  const currentCount = _relationshipTab === 'inyeon' ? inyeonCount
+                     : _relationshipTab === 'child'  ? childCount
+                     : rivalCount;
+  if (currentCount === 0) {
+    if (inyeonCount > 0) _relationshipTab = 'inyeon';
+    else if (childCount > 0) _relationshipTab = 'child';
+    else if (rivalCount > 0) _relationshipTab = 'rival';
+  }
+
+  let html = '<div style="height:440px;overflow-y:auto">';
+
+  // 탭 버튼 (3개)
+  const tabs = [
+    {key:'inyeon', label:`인연 (${inyeonCount})`},
+    {key:'child',  label:`자녀 (${childCount})`},
+    {key:'rival',  label:`라이벌 (${rivalCount})`},
+  ];
+  html += '<div style="display:flex;gap:6px;margin-bottom:12px;justify-content:center">';
+  tabs.forEach(t => {
+    const isActive = _relationshipTab === t.key;
+    const style = `width:108px;padding:6px 0;font-size:0.82rem;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#5a3528'};background:${isActive?'rgba(201,168,76,0.18)':'#1e110a'};color:${isActive?'#f0c850':'#a09080'};font-weight:${isActive?'700':'500'};border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:1px;text-align:center`;
+    html += `<button style="${style}" onclick="_relationshipTab='${t.key}';renderRelationshipPanel()">${t.label}</button>`;
   });
-  // 자녀 표시
-  if (G.children && G.children.length > 0) {
-    G.children.forEach(child => {
-      const childAge = (2029+G.year) - child.birthYear + (G.month >= child.birthMonth ? 0 : -1);
-      const babyFace = childAge <= 1 ? '캐릭터얼굴/아기1.webp' : '캐릭터얼굴/아기2.webp';
-      html += `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,35,25,0.6);border-radius:6px;border:1px solid #5a3528">
-        <img src="${babyFace}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #5a3528" onerror="this.style.display='none'">
-        <div style="flex:1">
-          <div style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${child.name}</div>
-          <div style="font-size:0.8rem;color:#ffcc88;margin-top:3px">자녀</div>
-        </div>
-      </div>`;
-    });
+  html += '</div>';
+
+  if (_relationshipTab === 'inyeon') {
+    if (inyeonCount === 0) {
+      html += `<div style="text-align:center;color:#8a7a60;padding:30px 16px;font-size:0.85rem">아직 만난 사람이 없습니다.<br><span style="font-size:0.75rem">스케줄을 진행하다 보면 사람들을 만나게 됩니다</span></div>`;
+    } else {
+      metTargets.forEach(t => { html += _renderInyeonItem(t); });
+    }
+  } else if (_relationshipTab === 'child') {
+    if (childCount === 0) {
+      html += `<div style="text-align:center;color:#8a7a60;padding:30px 16px;font-size:0.85rem">자녀가 없습니다.</div>`;
+    } else {
+      children.forEach(c => { html += _renderChildItem(c); });
+    }
+  } else {
+    if (rivalCount === 0) {
+      html += `<div style="text-align:center;color:#8a7a60;padding:30px 16px;font-size:0.85rem">라이벌이 없습니다.</div>`;
+    } else {
+      rivals.forEach(r => { html += _renderRivalItem(r); });
+    }
   }
-  // 라이벌 변호사 표시 (v11)
-  if (Array.isArray(G.rivals) && G.rivals.length > 0) {
-    html += `<div style="margin-top:14px;padding:4px 2px;border-top:1px dashed #5a4a30;color:#a89880;font-size:0.74rem;letter-spacing:2px">⚔ 라이벌</div>`;
-    G.rivals.forEach(r => {
-      const fameLabel  = getRivalFameLabel(r.fame);
-      const relLabel   = getRivalRivalryLabel(r.rivalry);
-      const relColor   = r.rivalry <= -10 ? '#88cc88' : r.rivalry >= 50 ? '#e68080' : r.rivalry >= 10 ? '#e0c070' : '#a09080';
-      const typeLabel  = r.type === 'friendly' ? '동기' : '경쟁 상대';
-      const specName   = (typeof PRO_NAMES !== 'undefined' && PRO_NAMES[r.specialty]) || r.specialty;
-      const famePct    = Math.min(100, Math.round(r.fame / 10));
-      const bondLabel  = (typeof getRivalBondLabel === 'function') ? getRivalBondLabel(r.id) : null;
-      const bondHtml   = bondLabel ? `<span style="font-size:0.7rem;font-weight:700;color:${bondLabel.color};margin-left:6px;padding:1px 6px;border:1px solid ${bondLabel.color};border-radius:3px">${bondLabel.text}</span>` : '';
-      html += `<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:4px;background:rgba(40,30,25,0.6);border-radius:6px;border:1px solid #4a3020">
-        <img src="${r.face}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #5a3528" onerror="this.style.display='none';this.style.visibility='hidden'">
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap">
-            <span style="font-size:0.88rem;font-weight:700;color:#e8d5b5">${r.name}</span>
-            <span style="font-size:0.7rem;color:#a09080">${typeLabel} · ${specName} 전문</span>
-            ${bondHtml}
-          </div>
-          <div style="font-size:0.74rem;color:${relColor};margin-top:2px">${relLabel} · ${fameLabel}${r.encounters > 0 ? ' · 만남 '+r.encounters+'회' : ''}</div>
-          <div style="margin-top:5px;height:4px;background:#2a1f15;border-radius:2px;overflow:hidden">
-            <div style="width:${famePct}%;height:100%;background:linear-gradient(90deg,#5a3528,#c9a84c);transition:width .3s"></div>
-          </div>
-          <div style="font-size:0.66rem;color:#8a7a60;margin-top:2px">명성 ${r.fame}/1000</div>
-        </div>
-      </div>`;
-    });
-  }
+
+  html += '</div>';
   document.getElementById('storage-list').innerHTML = html;
 }
 
@@ -18778,6 +19140,25 @@ function ensureDefaults(state) {
   for (const k of objs) {
     const v = state[k];
     if (!v || typeof v !== 'object' || Array.isArray(v)) state[k] = {};
+  }
+
+  // 중첩 객체: businessCardCustom (Phase 1+2)
+  if (!state.businessCardCustom || typeof state.businessCardCustom !== 'object' || Array.isArray(state.businessCardCustom)) {
+    state.businessCardCustom = { enabled: false, tone: 'beige', logo: '⚖',
+      border: 'simple', font: 'serif', align: 'left',
+      showFirm: true, showPhd: true, showCouncil: true, showSpecial: true };
+  } else {
+    const c = state.businessCardCustom;
+    if (typeof c.enabled !== 'boolean') c.enabled = false;
+    if (typeof c.tone !== 'string') c.tone = 'beige';
+    if (typeof c.logo !== 'string') c.logo = '⚖';
+    if (typeof c.border !== 'string') c.border = 'simple';
+    if (typeof c.font !== 'string') c.font = 'serif';
+    if (typeof c.align !== 'string') c.align = 'left';
+    if (typeof c.showFirm !== 'boolean') c.showFirm = true;
+    if (typeof c.showPhd !== 'boolean') c.showPhd = true;
+    if (typeof c.showCouncil !== 'boolean') c.showCouncil = true;
+    if (typeof c.showSpecial !== 'boolean') c.showSpecial = true;
   }
 
   // 중첩 객체: romance
