@@ -986,24 +986,25 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
 #ending-screen .ending-stats-panel {
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #0a0a2e 0%, #1a1a3e 50%, #0a0a2e 100%);
+  background: linear-gradient(rgba(20,12,8,0.92), rgba(12,8,6,0.95)), url('UI/테두리/가죽타일.png') 0 0 / 200px 200px repeat;
   opacity: 0; transition: opacity 1.5s; z-index: 10; pointer-events: none;
 }
 #ending-screen .ending-stats-panel.visible { opacity: 1; pointer-events: auto; }
 #ending-screen .ending-stats-title {
   font-size: 2rem; font-weight: 900; color: #c9a84c; margin-bottom: 24px;
+  letter-spacing: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 .ending-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 36px; max-width: 500px; width: 90%; }
-.ending-stat { background: #1a1a3e; border: 1px solid #333366; border-radius: 8px; padding: 14px; }
-.ending-stat .label { font-size: 0.78rem; color: #8899bb; }
-.ending-stat .value { font-size: 1.2rem; font-weight: 700; color: #e0d0a0; }
+.ending-stat { background: rgba(50,30,22,0.85); border: 1px solid #5a3528; border-radius: 8px; padding: 14px; }
+.ending-stat .label { font-size: 0.78rem; color: #a09080; letter-spacing: 1px; }
+.ending-stat .value { font-size: 1.2rem; font-weight: 700; color: #f0d68a; margin-top: 4px; }
 #ending-screen .ending-buttons { display: flex; gap: 12px; margin-top: 12px; }
 #ending-screen .ending-buttons button {
   padding: 10px 24px; border-radius: 6px; font-size: 0.9rem; cursor: pointer;
-  border: 1px solid #5a3528; background: #1a1a3e; color: #e8d5b5;
-  transition: background 0.3s;
+  border: 1px solid #5a3528; background: rgba(50,30,22,0.9); color: #e8d5b5;
+  transition: all 0.3s; letter-spacing: 1px;
 }
-#ending-screen .ending-buttons button:hover { background: #2a2a4e; }
+#ending-screen .ending-buttons button:hover { background: rgba(74,40,32,0.95); border-color: #c9a84c; color: #f0d68a; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
@@ -1594,6 +1595,7 @@ document.addEventListener('touchstart', enterMobileFullscreen, { once: false });
 const G = {
   gender: null, name: '', birthday: '', mbti: '',
   year: 1, month: 1, totalMonths: 0,
+  playTimeSec: 0,
   stats: {}, proStats: {},
   funds: 10000000, cases: 0, wins: 0, losses: 0,
   preparation: 0, schedule: [],
@@ -3434,6 +3436,8 @@ function confirmName() {
   document.getElementById('room-char-img').src = G.gender === 'male' ? '남주인공.webp' : '여주인공.webp';
   playBGM('normal');
   updateUI();
+  G.playTimeSec = 0;
+  _sessionStart = Date.now();
   showTutorialDialog();
 }
 
@@ -16780,31 +16784,51 @@ function finishMonthFinal(){
 
 function showMonthSummary(empReports){
   document.getElementById('month-summary').style.display='flex';
-  document.getElementById('summary-title').textContent=`${G.year}년차 ${G.month}월 결산`;
+  const actualYear = 2029 + G.year;
+  document.getElementById('summary-title').innerHTML = `${G.year}년차 ${G.month}월 결산<div style="font-size:0.7rem;color:#a09080;font-weight:400;margin-top:4px;letter-spacing:1px">${actualYear}년 ${G.month}월</div>`;
+
+  const sectionHeader = (label) => `<div style="font-size:0.7rem;color:#a09060;letter-spacing:2px;font-weight:700;padding:8px 0 4px;margin-top:6px;border-bottom:1px solid #5a3528">${label}</div>`;
+
   let html='';
+
+  // 능력치 변화
+  const statRows = [];
   for(const k in STAT_NAMES){const c=statChanges[k]||0;if(Math.abs(c)>=0.1){
     const cls=(k==='stress'||k==='fatigue'||k==='karma')?(c>0?'sneg':'spos'):(c>0?'spos':'sneg');
-    html+=`<div class="summary-row"><span class="sname">${STAT_NAMES[k]}</span><span class="schange ${cls}">${c>0?'+':''}${c.toFixed(1)}</span></div>`;
+    statRows.push(`<div class="summary-row"><span class="sname">${STAT_NAMES[k]}</span><span class="schange ${cls}">${c>0?'+':''}${c.toFixed(1)}</span></div>`);
   }}
-  // 수입/지출 상세
-  if(G.status!=='suspended'&&G.status!=='solo'&&G.salary>0) html+=`<div class="summary-row"><span class="sname">월급</span><span class="schange spos">+${G.salary.toLocaleString()}원</span></div>`;
-  if(G.isCityCouncil) html+=`<div class="summary-row"><span class="sname">시의원 수당</span><span class="schange spos">+4,000,000원</span></div>`;
-  html+=`<div class="summary-row"><span class="sname">고정지출</span><span class="schange sneg">-${G.fixedExpense.toLocaleString()}원</span></div>`;
-  if(statChanges.funds){const cls=statChanges.funds>0?'spos':'sneg';
-    html+=`<div class="summary-row" style="border-top:1px solid #5a3528;padding-top:4px"><span class="sname" style="font-weight:700">자금 합계</span><span class="schange ${cls}" style="font-weight:700">${statChanges.funds>0?'+':''}${statChanges.funds.toLocaleString()}원</span></div>`;}
-  if(statChanges.preparation){html+=`<div class="summary-row"><span class="sname">준비도</span><span class="schange spos">+${statChanges.preparation.toFixed(1)}</span></div>`;}
+  if(statChanges.preparation){
+    statRows.push(`<div class="summary-row"><span class="sname">준비도</span><span class="schange spos">+${statChanges.preparation.toFixed(1)}</span></div>`);
+  }
+  if (statRows.length) {
+    html += sectionHeader('능력치 변화') + statRows.join('');
+  }
+
+  // 수입·지출
+  const moneyRows = [];
+  if(G.status!=='suspended'&&G.status!=='solo'&&G.salary>0) moneyRows.push(`<div class="summary-row"><span class="sname">월급</span><span class="schange spos">+${G.salary.toLocaleString()}원</span></div>`);
+  if(G.isCityCouncil) moneyRows.push(`<div class="summary-row"><span class="sname">시의원 수당</span><span class="schange spos">+4,000,000원</span></div>`);
+  moneyRows.push(`<div class="summary-row"><span class="sname">고정지출</span><span class="schange sneg">-${G.fixedExpense.toLocaleString()}원</span></div>`);
+  html += sectionHeader('수입 · 지출') + moneyRows.join('');
+  if(statChanges.funds){
+    const cls=statChanges.funds>0?'spos':'sneg';
+    html+=`<div style="margin-top:6px;padding:8px 10px;background:rgba(201,168,76,0.08);border:1px solid #5a3528;border-radius:6px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#e8d5b5;font-weight:700;font-size:0.9rem">자금 합계</span>
+      <span class="${cls}" style="font-weight:900;font-size:1.05rem">${statChanges.funds>0?'+':''}${statChanges.funds.toLocaleString()}원</span></div>`;
+  }
+
   // 어쏘/직원 요약 리포트
   if (empReports) {
     const {assocWins, assocLosses, assocReward, staffCases, staffFees} = empReports;
     if (assocWins + assocLosses > 0) {
-      html += `<div style="border-top:1px solid #5a3528;margin-top:8px;padding-top:6px;font-size:0.72rem;font-weight:700;color:#a09060;margin-bottom:4px">어쏘 재판 결과</div>`;
-      html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">승소 ${assocWins}건 / 패소 ${assocLosses}건</span></div>`;
-      if (assocReward > 0) html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">성공보수</span><span class="schange spos" style="font-size:0.72rem">+${assocReward.toLocaleString()}원</span></div>`;
+      html += sectionHeader('어쏘 재판 결과');
+      html += `<div class="summary-row"><span class="sname" style="font-size:0.78rem">승소 ${assocWins}건 / 패소 ${assocLosses}건</span></div>`;
+      if (assocReward > 0) html += `<div class="summary-row"><span class="sname" style="font-size:0.78rem">성공보수</span><span class="schange spos" style="font-size:0.78rem">+${assocReward.toLocaleString()}원</span></div>`;
     }
     if (staffCases > 0) {
-      html += `<div style="border-top:1px solid #5a3528;margin-top:8px;padding-top:6px;font-size:0.72rem;font-weight:700;color:#a09060;margin-bottom:4px">직원 수임 결과</div>`;
-      html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">수임 ${staffCases}건</span></div>`;
-      if (staffFees > 0) html += `<div class="summary-row"><span class="sname" style="font-size:0.72rem">수임료</span><span class="schange spos" style="font-size:0.72rem">+${staffFees.toLocaleString()}원</span></div>`;
+      html += sectionHeader('직원 수임 결과');
+      html += `<div class="summary-row"><span class="sname" style="font-size:0.78rem">수임 ${staffCases}건</span></div>`;
+      if (staffFees > 0) html += `<div class="summary-row"><span class="sname" style="font-size:0.78rem">수임료</span><span class="schange spos" style="font-size:0.78rem">+${staffFees.toLocaleString()}원</span></div>`;
     }
   }
   document.getElementById('summary-changes').innerHTML=html;
@@ -17145,16 +17169,17 @@ function openMenu() {
 
   let html = '';
 
+  const ic = (e) => `<span style="font-size:1.3rem;margin-right:10px;width:24px;text-align:center;display:inline-block">${e}</span>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openSaveScreen()">
-    <div><div class="name">저장하기</div><div class="effects">게임을 저장합니다</div></div></div>`;
+    ${ic('💾')}<div style="flex:1"><div class="name">저장하기</div><div class="effects">게임을 저장합니다</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openLoadScreen()">
-    <div><div class="name">불러오기</div><div class="effects">저장된 게임을 불러옵니다</div></div></div>`;
+    ${ic('📂')}<div style="flex:1"><div class="name">불러오기</div><div class="effects">저장된 게임을 불러옵니다</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openSettings()">
-    <div><div class="name">설정</div><div class="effects">BGM, 자동넘김, 자동저장</div></div></div>`;
+    ${ic('⚙')}<div style="flex:1"><div class="name">설정</div><div class="effects">BGM, 자동넘김, 자동저장</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';openHelpModal()">
-    <div><div class="name">도움말</div><div class="effects">게임 플레이 안내</div></div></div>`;
+    ${ic('📖')}<div style="flex:1"><div class="name">도움말</div><div class="effects">게임 플레이 안내</div></div></div>`;
   html += `<div class="action-option" onclick="document.getElementById('menu-modal').style.display='none';gameConfirm('타이틀 화면으로 돌아가시겠습니까?\\n저장하지 않은 진행상황은 사라집니다.',()=>{location.reload();})">
-    <div><div class="name">처음으로</div><div class="effects">타이틀 화면으로 돌아갑니다</div></div></div>`;
+    ${ic('🏠')}<div style="flex:1"><div class="name">처음으로</div><div class="effects">타이틀 화면으로 돌아갑니다</div></div></div>`;
 
   document.getElementById('menu-items').innerHTML = html;
 }
@@ -17170,55 +17195,57 @@ function confirmQuitLecturer() {
 function openChangeMenu() {
   document.getElementById('storage-modal').style.display = 'flex';
   document.getElementById('storage-title').textContent = '신상관리';
-  let html = '';
-
-  // 피임 토글 (결혼 상태일 때)
   ensureRomance();
+
+  // 섹션별 항목 수집
+  const relSec = [];
+  const jobSec = [];
+
+  // 관계
   if (G.isMarried) {
     const contraLabel = G.contraception ? '피임 해제' : '피임 설정';
-    html += `<div class="action-option" onclick="G.contraception=!G.contraception;showToast(G.contraception?'피임을 시작합니다.':'피임을 해제합니다.');openChangeMenu()">
-      <div><div class="name" style="color:#88aacc">${contraLabel}</div>
-      <div class="effects">${G.contraception?'현재 피임 중입니다':'현재 피임을 하지 않고 있습니다'}</div></div></div>`;
+    relSec.push(`<div class="action-option" onclick="G.contraception=!G.contraception;showToast(G.contraception?'피임을 시작합니다.':'피임을 해제합니다.');openChangeMenu()">
+      <div><div class="name" style="color:#88aacc">🛡 ${contraLabel}</div>
+      <div class="effects">${G.contraception?'현재 피임 중입니다':'현재 피임을 하지 않고 있습니다'}</div></div></div>`);
   }
-
-  // 사직 (어쏘/파트너/대표/사내변호사)
-  if (G.status === 'associate' || G.status === 'partner' || G.status === 'senior' || isInhouse()) {
-    html += `<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmResign()">
-      <div><div class="name" style="color:#cc6666">사직</div>
-      <div class="effects">현재 직장을 그만두고 개업 또는 휴업</div></div></div>`;
-  }
-
-  // 강의중단 (강사일 때)
-  if (G.isLecturer) {
-    html += `<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmQuitLecturer()">
-      <div><div class="name" style="color:#cc6666">강의중단</div>
-      <div class="effects">법학강의를 그만둡니다</div></div></div>`;
-  }
-
-  // 폐업 (개업변호사)
-  if (G.status === 'solo') {
-    html += `<div class="action-option" onclick="confirmCloseOffice()">
-      <div><div class="name" style="color:#cc6666">폐업</div>
-      <div class="effects">사무소를 폐업하고 휴업변호사로 전환</div></div></div>`;
-  }
-
-  // 이별 (연인이 있고 결혼하지 않았을 때)
-  ensureRomance();
   if (G.romance.dating && !G.isMarried) {
     const datingTarget = getRomanceTargets().find(t=>t.id===G.romance.dating);
     const datingName = datingTarget ? datingTarget.name : '연인';
-    html += `<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmBreakup()">
-      <div><div class="name" style="color:#cc6666">이별</div>
-      <div class="effects">${J(datingName, '와/과')} 헤어집니다</div></div></div>`;
+    relSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmBreakup()">
+      <div><div class="name" style="color:#cc6666">💔 이별</div>
+      <div class="effects">${J(datingName, '와/과')} 헤어집니다</div></div></div>`);
   }
-
-  // 이혼 (결혼 상태일 때만 활성화)
   if (G.isMarried && G.romance.dating) {
     const divorceTarget = getRomanceTargets().find(t=>t.id===G.romance.dating);
     const divorceName = divorceTarget ? divorceTarget.name : '배우자';
-    html += `<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmDivorce()">
-      <div><div class="name" style="color:#cc6666">이혼</div>
-      <div class="effects">${J(divorceName, '와/과')} 이혼합니다</div></div></div>`;
+    relSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmDivorce()">
+      <div><div class="name" style="color:#cc6666">📜 이혼</div>
+      <div class="effects">${J(divorceName, '와/과')} 이혼합니다</div></div></div>`);
+  }
+
+  // 직장·계약
+  if (G.status === 'associate' || G.status === 'partner' || G.status === 'senior' || isInhouse()) {
+    jobSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmResign()">
+      <div><div class="name" style="color:#cc6666">🚪 사직</div>
+      <div class="effects">현재 직장을 그만두고 개업 또는 휴업</div></div></div>`);
+  }
+  if (G.isLecturer) {
+    jobSec.push(`<div class="action-option" onclick="document.getElementById('storage-modal').style.display='none';confirmQuitLecturer()">
+      <div><div class="name" style="color:#cc6666">📚 강의중단</div>
+      <div class="effects">법학강의를 그만둡니다</div></div></div>`);
+  }
+  if (G.status === 'solo') {
+    jobSec.push(`<div class="action-option" onclick="confirmCloseOffice()">
+      <div><div class="name" style="color:#cc6666">🏚 폐업</div>
+      <div class="effects">사무소를 폐업하고 휴업변호사로 전환</div></div></div>`);
+  }
+
+  let html = '';
+  const sectionHeader = (label) => `<div style="font-size:0.72rem;color:#a09080;letter-spacing:2px;font-weight:700;padding:8px 4px 4px;border-bottom:1px solid #5a3528;margin-bottom:4px">${label}</div>`;
+  if (relSec.length) html += sectionHeader('관계') + relSec.join('');
+  if (jobSec.length) html += (relSec.length?'<div style="height:8px"></div>':'') + sectionHeader('직장·계약') + jobSec.join('');
+  if (!html) {
+    html = `<div style="text-align:center;color:#8a7a60;padding:24px 16px;font-size:0.78rem">현재 처리할 신상관리 항목이 없습니다.</div>`;
   }
 
   document.getElementById('storage-list').innerHTML = html;
@@ -17817,7 +17844,8 @@ function openFridge() {
   if (!drinks.length) { showToast('냉장고에 아무것도 없습니다.'); return; }
   document.getElementById('storage-modal').style.display = 'flex';
   document.getElementById('storage-title').textContent = '냉장고';
-  let html = '';
+  const totalCount = drinks.reduce((s,i)=>s+getItemCount(i.id), 0);
+  let html = `<div style="text-align:center;font-size:0.78rem;color:#a09080;margin-bottom:10px">총 <span style="color:#c9a84c;font-weight:700">${totalCount}개</span> 보관 중 · ${drinks.length}종</div>`;
   drinks.forEach(item => {
     const cnt = getItemCount(item.id);
     const effStr = Object.entries(item.useEffects).map(([k,v])=>`${STAT_NAMES[k]||k} ${v>0?'+':''}${v}`).join(', ');
@@ -17851,7 +17879,8 @@ function openBookshelf() {
   if (!books.length) { showToast('책장이 비어있습니다.'); return; }
   document.getElementById('storage-modal').style.display = 'flex';
   document.getElementById('storage-title').textContent = '책장';
-  let html = '';
+  const totalCount = books.reduce((s,i)=>s+getItemCount(i.id), 0);
+  let html = `<div style="text-align:center;font-size:0.78rem;color:#a09080;margin-bottom:10px">총 <span style="color:#c9a84c;font-weight:700">${totalCount}권</span> 보유 · ${books.length}종</div>`;
   books.forEach(item => {
     const cnt = getItemCount(item.id);
     let effStr = '';
@@ -18189,105 +18218,151 @@ function equipOutfit(itemId) {
 }
 
 // ==================== INVEST ====================
+let _investTab = 'savings';
+
 function openInvestMenu() {
   document.getElementById('storage-modal').style.display='flex';
   document.getElementById('storage-title').textContent='재테크';
-  const iv=G.invest;
-  let html='';
+  renderInvestMenu();
+}
 
-  // 예금
-  if(iv.deposit){
-    html+=`<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">💰 예금 (${iv.deposit.monthsLeft}개월 남음)</div>
-      <div class="effects">원금 ${f(iv.deposit.amount)} | 만기 시 +3.5%</div></div>
-      ${iv.deposit.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureDeposit()">만료해지</div>`:''}
-    </div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('deposit')"><div><div class="name">💰 예금 가입</div><div class="effects">1000만~10억 | 1년 후 +3.5%</div></div></div>`;
-  }
+function _investTotalAssets() {
+  const iv = G.invest || {};
+  let total = 0;
+  if (iv.deposit) total += iv.deposit.amount;
+  if (iv.savings) total += iv.savings.totalPaid;
+  if (iv.fund) total += iv.fund.amount;
+  if (Array.isArray(iv.coins)) iv.coins.forEach(c => total += c.currentValue);
+  if (iv.domesticStock) total += iv.domesticStock.currentValue;
+  if (iv.foreignStock)  total += iv.foreignStock.currentValue;
+  if (iv.commodity)     total += iv.commodity.currentValue;
+  if (iv.venture) total += iv.venture.amount;
+  if (iv.ip) total += iv.ip.amount;
+  if (Array.isArray(iv.realEstate)) iv.realEstate.forEach(r => total += r.currentValue);
+  return total;
+}
 
-  // 적금
-  if(iv.savings){
-    html+=`<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">💳 적금 (${iv.savings.monthsLeft}개월 남음)</div>
-      <div class="effects">월 ${f(iv.savings.monthly)} | 납입 ${f(iv.savings.totalPaid)} | 만기 시 +2.5%</div></div>
-      ${iv.savings.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureSavings()">만료해지</div>`:''}
-    </div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('savings')"><div><div class="name">💳 적금 가입</div><div class="effects">월 30만~1000만 | 1년 후 +2.5%</div></div></div>`;
-  }
+function renderInvestMenu() {
+  const iv = G.invest;
+  const total = _investTotalAssets();
 
-  // 펀드
-  if(iv.fund){
-    html+=`<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">📊 펀드 (${iv.fund.monthsLeft}개월 남음)</div>
-      <div class="effects">원금 ${f(iv.fund.amount)} | 만기 시 -10%~+20%</div></div>
-      ${iv.fund.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureFund()">만료해지</div>`:''}
-    </div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('fund')"><div><div class="name">📊 펀드 가입</div><div class="effects">1000만~10억 | 1년 후 -10%~+20%</div></div></div>`;
-  }
+  let html = '<div style="height:480px;overflow-y:auto">';
 
-  // 코인
-  iv.coins.forEach((c,i)=>{
-    html+=`<div class="action-option"><div style="flex:1"><div class="name">💎 코인 #${i+1}</div>
-      <div class="effects">투자 ${f(c.amount)} → 현재 ${f(c.currentValue)} (${pct(c.currentValue,c.amount)})</div></div>
-      <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCoin(${i})">판매</div></div>`;
+  // 자산 요약 헤더
+  html += `<div style="text-align:center;margin-bottom:10px;padding:8px;background:#1e110a;border:1px solid #5a3528;border-radius:6px">
+    <div style="font-size:0.74rem;color:#a09080">투자 자산 합계</div>
+    <div style="font-size:1.1rem;color:#f0c850;font-weight:700;margin-top:2px">${formatMoney(total)}</div>
+  </div>`;
+
+  // 탭
+  const tabs = [
+    {key:'savings',  label:'저축'},
+    {key:'market',   label:'단기투자'},
+    {key:'longterm', label:'장기투자'},
+    {key:'realestate', label:'부동산'},
+  ];
+  html += '<div style="display:flex;gap:5px;margin-bottom:12px;justify-content:center">';
+  tabs.forEach(t => {
+    const isActive = _investTab === t.key;
+    const style = `width:96px;padding:6px 0;font-size:0.82rem;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#5a3528'};background:${isActive?'rgba(201,168,76,0.18)':'#1e110a'};color:${isActive?'#f0c850':'#a09080'};font-weight:${isActive?'700':'500'};border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:0.5px;text-align:center`;
+    html += `<button style="${style}" onclick="_investTab='${t.key}';renderInvestMenu()">${t.label}</button>`;
   });
-  if(iv.coins.length<2) html+=`<div class="action-option" onclick="investInput('coin')"><div><div class="name">💎 코인 투자</div><div class="effects">1000만~10억 | 매월 -95%~+200% 변동</div></div></div>`;
+  html += '</div>';
 
-  // 주식
-  if(iv.domesticStock){
-    html+=`<div class="action-option"><div style="flex:1"><div class="name">📈 국내주식</div>
-      <div class="effects">투자 ${f(iv.domesticStock.amount)} → 현재 ${f(iv.domesticStock.currentValue)} (${pct(iv.domesticStock.currentValue,iv.domesticStock.amount)})</div></div>
-      <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('domestic')">판매</div></div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('domesticStock')"><div><div class="name">📈 국내주식 투자</div><div class="effects">1000만~10억 | 매월 -30%~+50% 변동</div></div></div>`;
+  if (_investTab === 'savings') {
+    // 예금
+    if (iv.deposit) {
+      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">💰 예금 (${iv.deposit.monthsLeft}개월 남음)</div>
+        <div class="effects">원금 ${f(iv.deposit.amount)} | 만기 시 +3.5%</div></div>
+        ${iv.deposit.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureDeposit()">만료해지</div>`:''}
+      </div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('deposit')"><div><div class="name">💰 예금 가입</div><div class="effects">1000만~10억 | 1년 후 +3.5%</div></div></div>`;
+    }
+    // 적금
+    if (iv.savings) {
+      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">💳 적금 (${iv.savings.monthsLeft}개월 남음)</div>
+        <div class="effects">월 ${f(iv.savings.monthly)} | 납입 ${f(iv.savings.totalPaid)} | 만기 시 +2.5%</div></div>
+        ${iv.savings.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureSavings()">만료해지</div>`:''}
+      </div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('savings')"><div><div class="name">💳 적금 가입</div><div class="effects">월 30만~1000만 | 1년 후 +2.5%</div></div></div>`;
+    }
+  } else if (_investTab === 'market') {
+    // 펀드
+    if (iv.fund) {
+      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">📊 펀드 (${iv.fund.monthsLeft}개월 남음)</div>
+        <div class="effects">원금 ${f(iv.fund.amount)} | 만기 시 -10%~+20%</div></div>
+        ${iv.fund.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureFund()">만료해지</div>`:''}
+      </div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('fund')"><div><div class="name">📊 펀드 가입</div><div class="effects">1000만~10억 | 1년 후 -10%~+20%</div></div></div>`;
+    }
+    // 국내주식
+    if (iv.domesticStock) {
+      html += `<div class="action-option"><div style="flex:1"><div class="name">📈 국내주식</div>
+        <div class="effects">투자 ${f(iv.domesticStock.amount)} → 현재 ${f(iv.domesticStock.currentValue)} (${pct(iv.domesticStock.currentValue,iv.domesticStock.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('domestic')">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('domesticStock')"><div><div class="name">📈 국내주식 투자</div><div class="effects">1000만~10억 | 매월 -30%~+50% 변동</div></div></div>`;
+    }
+    // 해외주식
+    if (iv.foreignStock) {
+      html += `<div class="action-option"><div style="flex:1"><div class="name">🌐 해외주식</div>
+        <div class="effects">투자 ${f(iv.foreignStock.amount)} → 현재 ${f(iv.foreignStock.currentValue)} (${pct(iv.foreignStock.currentValue,iv.foreignStock.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('foreign')">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('foreignStock')"><div><div class="name">🌐 해외주식 투자</div><div class="effects">1000만~10억 | 매월 -15%~+30% 변동</div></div></div>`;
+    }
+    // 코인
+    iv.coins.forEach((c,i)=>{
+      html += `<div class="action-option"><div style="flex:1"><div class="name">💎 코인 #${i+1}</div>
+        <div class="effects">투자 ${f(c.amount)} → 현재 ${f(c.currentValue)} (${pct(c.currentValue,c.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCoin(${i})">판매</div></div>`;
+    });
+    if (iv.coins.length < 2) html += `<div class="action-option" onclick="investInput('coin')"><div><div class="name">💎 코인 투자</div><div class="effects">1000만~10억 | 매월 -95%~+200% 변동</div></div></div>`;
+    // 현물
+    if (iv.commodity) {
+      html += `<div class="action-option"><div style="flex:1"><div class="name">🥇 현물</div>
+        <div class="effects">투자 ${f(iv.commodity.amount)} → 현재 ${f(iv.commodity.currentValue)} (${pct(iv.commodity.currentValue,iv.commodity.amount)})</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCommodity()">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('commodity')"><div><div class="name">🥇 현물 투자</div><div class="effects">1000만~10억 | 매월 -40%~+60% 변동</div></div></div>`;
+    }
+  } else if (_investTab === 'longterm') {
+    // 벤처
+    if (iv.venture) {
+      html += `<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">🚀 벤처캐피탈 (${iv.venture.monthsLeft}개월 남음)</div>
+        <div class="effects">투자 ${f(iv.venture.amount)} | 만기 시 -90%~+300%</div></div>
+        ${iv.venture.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureVenture()">투자회수</div>`:''}
+      </div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('venture')"><div><div class="name">🚀 벤처캐피탈</div><div class="effects">1000만~10억 | 1년 후 -90%~+300%</div></div></div>`;
+    }
+    // 지식재산권
+    if (iv.ip) {
+      html += `<div class="action-option"><div style="flex:1"><div class="name">💡 지식재산권</div>
+        <div class="effects">투자 ${f(iv.ip.amount)} | 매월 0.1~2% 수익</div></div>
+        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellIP()">판매</div></div>`;
+    } else {
+      html += `<div class="action-option" onclick="investInput('ip')"><div><div class="name">💡 지식재산권 투자</div><div class="effects">1000만~10억 | 매월 0.1~2% 수익, 원금 회수 가능</div></div></div>`;
+    }
+  } else if (_investTab === 'realestate') {
+    iv.realEstate.forEach((r,i)=>{
+      const canSell = r.monthsOwned >= 24;
+      html += `<div class="action-option"><div style="flex:1"><div class="name">🏠 ${r.name}</div>
+        <div class="effects">매입 ${f(r.buyPrice)} → 시세 ${f(r.currentValue)} (${pct(r.currentValue,r.buyPrice)}) | ${r.monthsOwned}개월 보유${canSell?'':' (2년 후 매도 가능)'}</div></div>
+        ${canSell?`<div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellRealEstate(${i})">매도</div>`:''}
+      </div>`;
+    });
+    html += `<div class="action-option" onclick="openRealEstateMenu()"><div><div class="name">🏠 부동산 매입</div><div class="effects">빌라/구축/재건축/신축 아파트</div></div></div>`;
+    if (iv.realEstate.length === 0) {
+      html += `<div style="text-align:center;color:#8a7a60;padding:20px 16px;font-size:0.78rem">아직 보유한 부동산이 없습니다.</div>`;
+    }
   }
-  if(iv.foreignStock){
-    html+=`<div class="action-option"><div style="flex:1"><div class="name">🌐 해외주식</div>
-      <div class="effects">투자 ${f(iv.foreignStock.amount)} → 현재 ${f(iv.foreignStock.currentValue)} (${pct(iv.foreignStock.currentValue,iv.foreignStock.amount)})</div></div>
-      <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellStock('foreign')">판매</div></div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('foreignStock')"><div><div class="name">🌐 해외주식 투자</div><div class="effects">1000만~10억 | 매월 -15%~+30% 변동</div></div></div>`;
-  }
 
-  // 현물
-  if(iv.commodity){
-    html+=`<div class="action-option"><div style="flex:1"><div class="name">🥇 현물</div>
-      <div class="effects">투자 ${f(iv.commodity.amount)} → 현재 ${f(iv.commodity.currentValue)} (${pct(iv.commodity.currentValue,iv.commodity.amount)})</div></div>
-      <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellCommodity()">판매</div></div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('commodity')"><div><div class="name">🥇 현물 투자</div><div class="effects">1000만~10억 | 매월 -40%~+60% 변동</div></div></div>`;
-  }
-
-  // 벤처
-  if(iv.venture){
-    html+=`<div class="action-option" style="cursor:default"><div style="flex:1"><div class="name">🚀 벤처캐피탈 (${iv.venture.monthsLeft}개월 남음)</div>
-      <div class="effects">투자 ${f(iv.venture.amount)} | 만기 시 -90%~+300%</div></div>
-      ${iv.venture.monthsLeft<=0?`<div class="cost" style="color:#66cc88;cursor:pointer" onclick="matureVenture()">투자회수</div>`:''}
-    </div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('venture')"><div><div class="name">🚀 벤처캐피탈</div><div class="effects">1000만~10억 | 1년 후 -90%~+300%</div></div></div>`;
-  }
-
-  // 지식재산권
-  if(iv.ip){
-    html+=`<div class="action-option"><div style="flex:1"><div class="name">💡 지식재산권</div>
-      <div class="effects">투자 ${f(iv.ip.amount)} | 매월 0.1~2% 수익</div></div>
-      <div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellIP()">판매</div></div>`;
-  } else {
-    html+=`<div class="action-option" onclick="investInput('ip')"><div><div class="name">💡 지식재산권 투자</div><div class="effects">1000만~10억 | 매월 0.1~2% 수익, 원금 회수 가능</div></div></div>`;
-  }
-
-  // 부동산
-  iv.realEstate.forEach((r,i)=>{
-    const canSell=r.monthsOwned>=24;
-    html+=`<div class="action-option"><div style="flex:1"><div class="name">🏠 ${r.name}</div>
-      <div class="effects">매입 ${f(r.buyPrice)} → 시세 ${f(r.currentValue)} (${pct(r.currentValue,r.buyPrice)}) | ${r.monthsOwned}개월 보유${canSell?'':' (2년 후 매도 가능)'}</div></div>
-      ${canSell?`<div class="cost" style="color:#cc6666;cursor:pointer" onclick="sellRealEstate(${i})">매도</div>`:''}
-    </div>`;
-  });
-  html+=`<div class="action-option" onclick="openRealEstateMenu()"><div><div class="name">🏠 부동산 매입</div><div class="effects">빌라/구축/재건축/신축 아파트</div></div></div>`;
-
-  document.getElementById('storage-list').innerHTML=html;
+  html += '</div>';
+  document.getElementById('storage-list').innerHTML = html;
 }
 
 function f(v){return Math.floor(v).toLocaleString()+'원';}
@@ -19005,7 +19080,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 12;
+const GAME_VERSION = 13;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -19109,7 +19184,12 @@ const MIGRATIONS = {
     }
     return state;
   },
-  // 향후 업데이트: v13, v14 ... 형태로 추가
+  // v12 → v13 : 플레이타임 추적 (세이브 슬롯 표시용)
+  13: function(state) {
+    if (typeof state.playTimeSec !== 'number' || !isFinite(state.playTimeSec)) state.playTimeSec = 0;
+    return state;
+  },
+  // 향후 업데이트: v14, v15 ... 형태로 추가
 };
 
 // ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
@@ -19218,6 +19298,7 @@ function ensureDefaults(state) {
     snsFollowers: 0, youtubeSubscribers: 0,
     preparation: 0, cases: 0, wins: 0, losses: 0,
     gradSchoolCount: 0, phdProgress: 0,
+    playTimeSec: 0,
   };
   for (const k in nums) {
     if (typeof state[k] !== 'number' || !isFinite(state[k])) state[k] = nums[k];
@@ -19292,6 +19373,28 @@ function getSaveInfo(slot) {
   try { return JSON.parse(raw); } catch(e) { return null; }
 }
 
+// 세션 시작 시각. 저장/로드 시 G.playTimeSec에 누적.
+let _sessionStart = Date.now();
+function _flushPlayTime() {
+  const now = Date.now();
+  const diff = (now - _sessionStart) / 1000;
+  if (diff > 0 && diff < 86400) {
+    G.playTimeSec = (G.playTimeSec || 0) + diff;
+  }
+  _sessionStart = now;
+}
+function formatPlayTime(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (h > 0) return `${h}시간 ${m}분`;
+  if (m > 0) return `${m}분`;
+  return `${sec}초`;
+}
+function _faceForGender(gender) {
+  return gender === 'male' ? '캐릭터얼굴/남주인공.webp' : '캐릭터얼굴/여주인공.webp';
+}
+
 function confirmSaveOverwrite(slot) {
   document.getElementById('saveload-modal').style.display = 'none';
   gameConfirm(`슬롯 ${slot+1}에 덮어쓰시겠습니까?`, () => { saveGame(slot); }, () => { openSaveScreen(); });
@@ -19301,6 +19404,7 @@ function confirmSaveDelete(slot, mode) {
   gameConfirm(`슬롯 ${J(String(slot+1),'을/를')} 삭제하시겠습니까?`, () => { deleteSave(slot); if(mode==='save') openSaveScreen(); else openLoadScreen(); }, () => { if(mode==='save') openSaveScreen(); else openLoadScreen(); });
 }
 function saveGame(slot, silent) {
+  _flushPlayTime();
   const saveData = {
     version: GAME_VERSION,
     savedAt: new Date().toISOString(),
@@ -19312,6 +19416,7 @@ function saveGame(slot, silent) {
       month: G.month,
       funds: G.funds,
       firmName: G.firmName || G.officeName || '',
+      playTimeSec: G.playTimeSec || 0,
     },
     state: JSON.parse(JSON.stringify(G)),
   };
@@ -19360,6 +19465,7 @@ function loadGame(slot) {
   document.querySelector('.room-bg').style.backgroundImage = `url('${bgMap[G.housing]||'원룸.webp'}')`;
   updateUI();
   if (G.bgmOn) { playBGM('normal'); } else { if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; } }
+  _sessionStart = Date.now();
   showToast(`슬롯 ${slot+1} 불러오기 완료!`);
 }
 
@@ -19463,35 +19569,42 @@ function formatSaveDate(isoStr) {
 }
 
 function renderSaveLoadList(mode) {
+  const AUTO_SLOT = SAVE_SLOT_COUNT - 1;
   let html = '';
   for (let i = 0; i < SAVE_SLOT_COUNT; i++) {
     const data = getSaveInfo(i);
+    const isAuto = (i === AUTO_SLOT);
+    const slotLabel = isAuto ? `슬롯 ${i+1} <span style="display:inline-block;margin-left:4px;padding:1px 6px;font-size:0.62rem;color:#1e110a;background:#c9a84c;border-radius:3px;font-weight:700;letter-spacing:0.5px">자동</span>` : `슬롯 ${i+1}`;
     if (data && data.meta) {
       const m = data.meta;
       const dateStr = formatSaveDate(data.savedAt);
-      html += `<div class="action-option" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="name" style="font-size:0.92rem">슬롯 ${i+1} - ${m.name} (${m.status})</div>
-            <div class="effects" style="margin-top:2px">${m.year}년 ${m.month}월 | ${m.firmName?m.firmName+' | ':''}자금 ${m.funds.toLocaleString()}원</div>
-            <div class="effects" style="font-size:0.65rem;color:#807060;margin-top:1px">${dateStr}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">`;
+      const face = _faceForGender(m.gender);
+      const ptStr = (typeof m.playTimeSec === 'number' && m.playTimeSec > 0) ? formatPlayTime(m.playTimeSec) : '';
+      html += `<div class="action-option" style="align-items:stretch;gap:10px;padding:10px 12px">
+        <div style="flex-shrink:0;width:56px;height:56px;border:1px solid #5a3528;border-radius:6px;background:#1e110a center/cover no-repeat url('${face}')"></div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">
+          <div class="name" style="font-size:0.92rem">${slotLabel} · ${m.name} <span style="color:#a09080;font-weight:400;font-size:0.78rem">(${m.status})</span></div>
+          <div class="effects" style="margin-top:2px">${m.year}년 ${m.month}월${m.firmName?' | '+m.firmName:''} | 자금 ${m.funds.toLocaleString()}원</div>
+          <div class="effects" style="font-size:0.65rem;color:#807060;margin-top:1px">${dateStr}${ptStr?` <span style="color:#a09080">· 플레이 ${ptStr}</span>`:''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;justify-content:center">`;
       if (mode === 'save') {
         html += `<button class="btn btn-primary" style="padding:6px 14px;font-size:0.78rem" onclick="event.stopPropagation();confirmSaveOverwrite(${i})">저장</button>`;
       } else {
         html += `<button class="btn btn-primary" style="padding:6px 14px;font-size:0.78rem" onclick="event.stopPropagation();loadGame(${i})">불러오기</button>`;
       }
-      html += `<button class="btn btn-secondary" style="padding:6px 10px;font-size:0.72rem;color:#cc6666;border-color:#663333" onclick="event.stopPropagation();confirmSaveDelete(${i},'${mode}')">삭제</button>`;
-      html += `</div></div></div>`;
+      html += `<button class="btn btn-secondary" style="padding:4px 10px;font-size:0.7rem;color:#cc6666;border-color:#663333" onclick="event.stopPropagation();confirmSaveDelete(${i},'${mode}')">삭제</button>`;
+      html += `</div></div>`;
     } else {
       if (mode === 'save') {
-        html += `<div class="action-option" onclick="saveGame(${i})">
-          <div><div class="name" style="color:#666">슬롯 ${i+1} - 비어있음</div></div>
+        html += `<div class="action-option" onclick="saveGame(${i})" style="gap:10px;padding:10px 12px;align-items:center">
+          <div style="flex-shrink:0;width:56px;height:56px;border:1px dashed #5a3528;border-radius:6px;background:#1a0e08;display:flex;align-items:center;justify-content:center;color:#5a3528;font-size:1.4rem">＋</div>
+          <div style="flex:1"><div class="name" style="color:#666">${slotLabel} <span style="font-weight:400;font-size:0.78rem">- 비어있음</span></div></div>
           <div class="cost">저장</div></div>`;
       } else {
-        html += `<div class="action-option" style="opacity:0.4;cursor:default">
-          <div><div class="name" style="color:#555">슬롯 ${i+1} - 비어있음</div></div></div>`;
+        html += `<div class="action-option" style="opacity:0.4;cursor:default;gap:10px;padding:10px 12px;align-items:center">
+          <div style="flex-shrink:0;width:56px;height:56px;border:1px dashed #5a3528;border-radius:6px;background:#1a0e08"></div>
+          <div style="flex:1"><div class="name" style="color:#555">${slotLabel} <span style="font-weight:400;font-size:0.78rem">- 비어있음</span></div></div></div>`;
       }
     }
   }
@@ -22104,7 +22217,7 @@ function renderEndingMainStats() {
     {label:'경력', value:G.totalMonths+'개월'},
     {label:'결혼', value:G.isMarried?'기혼':'미혼'},
     {label:'자녀', value:G.children&&G.children.length>0?G.children.map(c=>c.name).join(', '):'없음'},
-  ].map(st=>`<div style="text-align:center;min-width:70px"><div style="font-size:0.68rem;color:#8899bb">${st.label}</div><div style="font-size:0.95rem;font-weight:700;color:#e0d0a0">${st.value}</div></div>`).join('');
+  ].map(st=>`<div style="text-align:center;min-width:70px;padding:6px 8px;background:rgba(50,30,22,0.55);border:1px solid #5a3528;border-radius:6px"><div style="font-size:0.68rem;color:#a09080;letter-spacing:0.5px">${st.label}</div><div style="font-size:0.95rem;font-weight:700;color:#f0d68a;margin-top:2px">${st.value}</div></div>`).join('');
 }
 
 function renderEndingCumulativeStats() {
@@ -22154,7 +22267,7 @@ function renderEndingCumulativeStats() {
   ];
 
   document.getElementById('ending-stats').innerHTML = items
-    .map(st=>`<div style="text-align:center;min-width:80px"><div style="font-size:0.68rem;color:#8899bb">${st.label}</div><div style="font-size:0.92rem;font-weight:700;color:#e0d0a0">${st.value}</div></div>`)
+    .map(st=>`<div style="text-align:center;min-width:80px;padding:6px 8px;background:rgba(50,30,22,0.55);border:1px solid #5a3528;border-radius:6px"><div style="font-size:0.68rem;color:#a09080;letter-spacing:0.5px">${st.label}</div><div style="font-size:0.92rem;font-weight:700;color:#f0d68a;margin-top:2px">${st.value}</div></div>`)
     .join('');
 }
 
