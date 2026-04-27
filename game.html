@@ -524,7 +524,9 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
 .schedule-cell {
   background: #331e16; border: 1px solid #5a3528; border-radius: 4px;
   padding: 3px; min-height: 62px; cursor: default; transition: all 0.2s;
+  position: relative;
 }
+.schedule-cell.weekend { background: #3a2018; }
 .schedule-cell.editable {
   cursor: pointer; border: 1px dashed #5a352888; background: #2a1812;
 }
@@ -599,6 +601,42 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.96) translateY(6px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+/* 스탯 변동 펄스 (명성·승률·자금 등) */
+.stat-pulse {
+  animation: statPulse 0.9s ease-out;
+  display: inline-block;
+}
+@keyframes statPulse {
+  0%   { color: inherit; transform: scale(1); text-shadow: none; }
+  25%  { color: #f0c850; transform: scale(1.22); text-shadow: 0 0 14px rgba(240,200,80,0.9); }
+  60%  { color: #f0c850; transform: scale(1.05); text-shadow: 0 0 8px rgba(240,200,80,0.5); }
+  100% { color: inherit; transform: scale(1); text-shadow: none; }
+}
+.stat-pulse-down {
+  animation: statPulseDown 0.9s ease-out;
+  display: inline-block;
+}
+@keyframes statPulseDown {
+  0%   { color: inherit; transform: scale(1); text-shadow: none; }
+  25%  { color: #f08080; transform: scale(1.18); text-shadow: 0 0 12px rgba(240,128,128,0.9); }
+  60%  { color: #f08080; transform: scale(1.05); text-shadow: 0 0 6px rgba(240,128,128,0.5); }
+  100% { color: inherit; transform: scale(1); text-shadow: none; }
+}
+/* 사건 결과 도장 이펙트 */
+.stamp-effect {
+  position: fixed; top: 50%; left: 50%;
+  width: 320px; height: 320px;
+  margin: -160px 0 0 -160px;
+  z-index: 600; pointer-events: none;
+  animation: stampHit 1.4s ease-out forwards;
+}
+@keyframes stampHit {
+  0%   { transform: scale(2.8) rotate(-18deg); opacity: 0; }
+  35%  { transform: scale(0.92) rotate(3deg); opacity: 1; }
+  50%  { transform: scale(1) rotate(0deg); opacity: 1; }
+  85%  { transform: scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: scale(1.05) rotate(0deg); opacity: 0; }
 }
 .modal-close {
   position: absolute; top: 10px; right: 14px; background: none; border: none;
@@ -3611,6 +3649,7 @@ function runSubTrialPhase(subNum, mc, trialArray, evidence, phase, step, callbac
           if (hasClear) {
             mc.active = false;
             mc.cleared = true;
+            showStampEffect('win');
             applyStat('reputation', 2);
             const clearDialogues = trialData.clearDialogues || [];
             if (clearDialogues.length > 0) {
@@ -3708,7 +3747,7 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
     // 아래 _submitSubEv와 동일한 오답 흐름을 타지만 isCorrect=false 강제
     mc.wrongCount = (mc.wrongCount || 0) + 1;
     if (mc.wrongCount >= 3) {
-      mc.failed = true; mc.active = false;
+      mc.failed = true; mc.active = false; showStampEffect('lose');
       const verdictText = (subNum === 5)
         ? '판결을 선고합니다. 피고인 정수빈에게 징역 3년형을 선고한다.'
         : (subNum === 3)
@@ -3758,7 +3797,7 @@ function showSubEvidenceSelection(subNum, mc, allEvidence, phase, evStep, onCorr
       mc.wrongCount = (mc.wrongCount || 0) + 1;
       selected = [];
       if (mc.wrongCount >= 3) {
-        mc.failed = true; mc.active = false;
+        mc.failed = true; mc.active = false; showStampEffect('lose');
         const verdictText = (subNum === 5)
           ? '판결을 선고합니다. 피고인 정수빈에게 징역 3년형을 선고한다.'
           : (subNum === 3)
@@ -4138,6 +4177,7 @@ function runSubTrial3Phase(phase, step, callback) {
           if (hasClear) {
             mc.active = false;
             mc.cleared = true;
+            showStampEffect('win');
             applyStat('reputation', 10);
             G.funds += 20000000; statChanges.funds += 20000000;
             const clearDlgs = trialData.clearDialogues || [];
@@ -4205,7 +4245,7 @@ function applySc3Choice(idx, isCorrect) {
   } else {
     mc.wrongCount = (mc.wrongCount || 0) + 1;
     if (mc.wrongCount >= 3) {
-      mc.failed = true; mc.active = false;
+      mc.failed = true; mc.active = false; showStampEffect('lose');
       showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
         showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 반소원고의 청구를 기각한다.'}, () => {
           showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 제대로 대응하지 못했다. 실패했어.)'}, () => {
@@ -4505,7 +4545,7 @@ function runSubTrial4Phase(phase, step, callback) {
             showMainTrialDialogueSequence(filtered, 0, () => {
               trialData._phase2Done = false;
               if (hasClear) {
-                mc.active = false; mc.cleared = true;
+                mc.active = false; mc.cleared = true; showStampEffect('win');
                 applyStat('reputation', 15);
                 const cd = trialData.clearDialogues || [];
                 if (cd.length > 0) {
@@ -4571,7 +4611,7 @@ function applySc4Choice(idx, isCorrect) {
   } else {
     mc.wrongCount = (mc.wrongCount||0) + 1;
     if (mc.wrongCount >= 3) {
-      mc.failed = true; mc.active = false;
+      mc.failed = true; mc.active = false; showStampEffect('lose');
       showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.'}, () => {
         showMainTrialDialogue({face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'판결을 선고합니다. 원고의 청구를 기각한다.'}, () => {
           showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 제대로 대응하지 못했다. 실패했어.)'}, () => {
@@ -4877,7 +4917,7 @@ function runSubTrial5Phase(phase, step, callback) {
                     showMainTrialDialogueSequence(filtered, 0, () => {
                       trialData._p2Done = false; trialData._p3Done = false;
                       if (hasClear) {
-                        mc.active = false; mc.cleared = true;
+                        mc.active = false; mc.cleared = true; showStampEffect('win');
                         applyStat('reputation', 15);
                         const cd = trialData.clearDialogues || [];
                         showMainTrialDialogueSequence(cd, 0, () => {
@@ -4905,7 +4945,7 @@ function runSubTrial5Phase(phase, step, callback) {
               showMainTrialDialogueSequence(filtered, 0, () => {
                 trialData._p2Done = false;
                 if (hasClear) {
-                  mc.active = false; mc.cleared = true;
+                  mc.active = false; mc.cleared = true; showStampEffect('win');
                   applyStat('reputation', 15);
                   const cd = trialData.clearDialogues || [];
                   showMainTrialDialogueSequence(cd, 0, () => {
@@ -4977,7 +5017,7 @@ function updateUI() {
     card.className = 'business-card bc-tier-' + tier;
   }
   document.getElementById('top-date').textContent = `${2029+G.year}년 ${G.month}월 (${G.year}년차)`;
-  document.getElementById('top-funds').textContent = G.funds.toLocaleString() + '원';
+  document.getElementById('top-funds').textContent = formatMoney(G.funds);
   document.getElementById('top-cases').textContent = G.cases + '건';
   document.getElementById('top-reputation').textContent = Math.floor(G.stats.reputation);
   const wr = (G.wins+G.losses)>0 ? Math.round(G.wins/(G.wins+G.losses)*100)+'%' : '-';
@@ -4987,6 +5027,22 @@ function updateUI() {
   document.getElementById('sc-winrate').textContent = wr;
   document.getElementById('sc-stress').textContent = Math.floor(G.stats.stress);
   document.getElementById('sc-fatigue').textContent = Math.floor(G.stats.fatigue);
+  // 스탯 변동 펄스 효과 (이전 값과 비교, 첫 호출은 스킵)
+  if (G._statPulseInit) {
+    const repNow = Math.floor(G.stats.reputation);
+    const wrNow = (G.wins+G.losses);
+    const fundsNow = G.funds;
+    if (repNow !== G._prevRep) pulseStat('sc-reputation', repNow > G._prevRep);
+    if (repNow !== G._prevRep) pulseStat('top-reputation', repNow > G._prevRep);
+    if (wrNow !== G._prevWrTotal) pulseStat('sc-winrate', G.wins > (G._prevWins||0));
+    if (wrNow !== G._prevWrTotal) pulseStat('top-winrate', G.wins > (G._prevWins||0));
+    if (fundsNow !== G._prevFunds) pulseStat('top-funds', fundsNow > G._prevFunds);
+  }
+  G._statPulseInit = true;
+  G._prevRep = Math.floor(G.stats.reputation);
+  G._prevWrTotal = G.wins + G.losses;
+  G._prevWins = G.wins;
+  G._prevFunds = G.funds;
   // 사무실 버튼 표시
   const offBtn = document.getElementById('office-btn');
   if(offBtn) {
@@ -5140,6 +5196,57 @@ function showToast(msg) {
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 1500);
+}
+
+// 자금 단위 압축 표기 (조·억·만)
+function formatMoney(n) {
+  n = Math.floor(n || 0);
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1e12) {
+    const jo = Math.floor(abs / 1e12);
+    const eok = Math.floor((abs % 1e12) / 1e8);
+    return sign + jo + '조' + (eok > 0 ? ' ' + eok + '억' : '') + '원';
+  }
+  if (abs >= 1e8) {
+    const eok = Math.floor(abs / 1e8);
+    const man = Math.floor((abs % 1e8) / 1e4);
+    return sign + eok + '억' + (man > 0 ? ' ' + man.toLocaleString() + '만' : '') + '원';
+  }
+  if (abs >= 1e4) {
+    const man = Math.floor(abs / 1e4);
+    return sign + man.toLocaleString() + '만원';
+  }
+  return sign + abs.toLocaleString() + '원';
+}
+
+// 스탯 변동 펄스 (id 요소에 적용, isPositive=true면 골드, false면 빨강)
+function pulseStat(elementId, isPositive) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const cls = isPositive ? 'stat-pulse' : 'stat-pulse-down';
+  el.classList.remove('stat-pulse', 'stat-pulse-down');
+  void el.offsetWidth;  // reflow trigger to restart animation
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 1000);
+}
+
+// 사건 결과 도장 이펙트 (승소/패소 등)
+function showStampEffect(type) {
+  const stampMap = {
+    win: 'UI/이펙트/승소.png',
+    lose: 'UI/이펙트/패소.png',
+  };
+  const src = stampMap[type];
+  if (!src) return;
+  // 이전 도장 있으면 제거
+  document.querySelectorAll('.stamp-effect').forEach(el => el.remove());
+  const img = document.createElement('img');
+  img.src = src;
+  img.className = 'stamp-effect';
+  img.alt = '';
+  document.body.appendChild(img);
+  setTimeout(() => img.remove(), 1400);
 }
 
 // 빠른진행 — 이번 달에 한해 autoSkip 강제 ON (이벤트 포함 자동)
@@ -7524,12 +7631,20 @@ function openDiaryModal() {
       const months = byYear[y].map(d => {
         // day 오름차순 (day 없는 항목은 뒤로)
         const sortedEntries = [...d.entries].sort((a,b) => (a.day || 99) - (b.day || 99));
+        const iconColors = {
+          '⚖':'#c9a84c', '🎓':'#aa88cc', '🎉':'#e08aa8', '💼':'#88aacc',
+          '🤝':'#88cc88', '✨':'#f0c850', '🏆':'#f0a040', '💕':'#ff8aa8',
+          '👶':'#ffb088', '🏠':'#a0a0e0', '🍽':'#d8a888', '✍':'#c0c0a0',
+          '🌸':'#ffa0c0', '🍁':'#e08040', '❄':'#a0d8e0', '☀':'#f0c050',
+          '🏖':'#88c0e0', '😰':'#cc6666', '💤':'#9090a0', '🎬':'#cc88ff',
+        };
         const items = sortedEntries.map(e => {
-          const iconPart = e.icon ? `<span style="margin-right:4px">${e.icon}</span>` : '';
+          const accent = iconColors[e.icon] || '#c9a84c';
+          const iconPart = e.icon ? `<span style="margin-right:6px;font-size:1rem">${e.icon}</span>` : '';
           const dayTag = e.day
             ? `<span style="color:#b39460;font-size:0.75rem;margin-right:8px;font-family:serif">${d.month}월 ${e.day}일</span>`
             : '';
-          return `<div style="color:#d8c8a8;font-size:0.88rem;line-height:1.75;padding-left:14px;border-left:2px solid #4a3a20;font-family:serif;margin-bottom:10px">${dayTag}${iconPart}${e.text}</div>`;
+          return `<div style="background:#3a2018;border-left:4px solid ${accent};border-radius:4px;padding:8px 12px;color:#e8d5b5;font-size:0.88rem;line-height:1.75;font-family:serif;margin-bottom:8px">${dayTag}${iconPart}${e.text}</div>`;
         }).join('');
         return `<div style="margin:0 0 18px">
           <div style="color:#b39460;font-size:0.8rem;font-weight:700;letter-spacing:1px;margin-bottom:6px;font-family:serif">${d.month}월</div>
@@ -8756,6 +8871,7 @@ function renderSchedule(daysInMonth, firstDayOfWeek) {
       const hasEditable = ds.slots.some(s=>!s.locked);
       const dayColor = ds.isHoliday ? 'color:#e06060' : (ds.dow===0?'color:#e06060':ds.dow===6?'color:#6088e0':'');
       let cc = `<div class="day-num" style="${dayColor}">${dayNum}일${ds.holidayName?` <span style="font-size:0.55rem">${ds.holidayName}</span>`:''}</div>`;
+      const hasTrial = ds.slots.some(s=>s.action==='trial');
       ds.slots.forEach((slot, si) => {
         const tl = slot.time==='day'?'낮 ':(slot.time==='evening'?'저녁 ':'');
         const emptyLabel = slot.time==='day' ? '낮 일정선택' : (slot.time==='evening' ? '저녁 일정선택' : '일정선택');
@@ -8767,7 +8883,8 @@ function renderSchedule(daysInMonth, firstDayOfWeek) {
           cc += `<div class="slot ${slot.action?slot.slotClass:''}">${tl}${slot.label}</div>`;
         }
       });
-      const cls = hasEditable?'editable':(ds.slots.every(s=>s.locked)?'locked':'');
+      let cls = hasEditable?'editable':(ds.slots.every(s=>s.locked)?'locked':'');
+      if (ds.isWeekend || ds.isHoliday) cls += ' weekend';
       html += `<div class="schedule-cell ${cls}">${cc}</div>`;
       dayNum++;
     }
@@ -16999,36 +17116,56 @@ function openComputer() {
   renderComputer();
 }
 
+let _computerTab = 'career';
+
 function renderComputer() {
   let html = '';
   // 팔로워/구독자 표시
   if (G.snsStarted || G.youtubeStarted) {
-    html += '<div style="text-align:center;margin-bottom:12px;padding:8px;background:#1e110a;border-radius:6px;font-size:0.8rem;color:#a09080">';
+    html += '<div style="text-align:center;margin-bottom:10px;padding:6px;background:#1e110a;border-radius:6px;font-size:0.78rem;color:#a09080">';
     if (G.snsStarted) html += `SNS 팔로워: <span style="color:#66cc88;font-weight:700">${G.snsFollowers.toLocaleString()}</span> `;
     if (G.youtubeStarted) html += `유튜브 구독자: <span style="color:#cc6666;font-weight:700">${G.youtubeSubscribers.toLocaleString()}</span>`;
     html += '</div>';
   }
 
+  // 탭 버튼
+  const tabs = [
+    {key:'career', label:'커리어'},
+    {key:'cases', label:'사건·영업'},
+    {key:'etc', label:'기타'},
+  ];
+  html += '<div style="display:flex;gap:6px;margin-bottom:12px;justify-content:center">';
+  tabs.forEach(t => {
+    const isActive = _computerTab === t.key;
+    const style = `width:120px;padding:6px 0;font-size:0.85rem;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#5a3528'};background:${isActive?'rgba(201,168,76,0.18)':'#1e110a'};color:${isActive?'#f0c850':'#a09080'};font-weight:${isActive?'700':'500'};border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:1px;text-align:center`;
+    html += `<button style="${style}" onclick="_computerTab='${t.key}';renderComputer()">${t.label}</button>`;
+  });
+  html += '</div>';
+
   const jDone = G.monthApplied;
-  html += `<div class="action-option" onclick="${jDone?'':`openJobSearch()`}" style="${jDone?'opacity:0.4;cursor:default':''}">
-    <div><div class="name">구직활동</div><div class="effects">${jDone?'이번 달 이미 지원함':'로펌/회사에 지원 (매월 1곳)'}</div></div></div>`;
   const canHire = G.status==='partner'||G.status==='senior'||G.status==='solo';
-  html += `<div class="action-option" onclick="${canHire?'openHireMenu()':'showToast(\'파트너/대표/개업 변호사만 이용 가능합니다.\')'}" style="${canHire?'':'opacity:0.5'}">
-    <div><div class="name">구인활동</div><div class="effects">${canHire?'어쏘변호사/직원 채용 (매월 2명)':'현재 신분에서 이용 불가'}</div></div></div>`;
-
   const mDone = G.monthMarketingDone;
-  html += `<div class="action-option" onclick="${mDone?'':`openMarketingMenu()`}" style="${mDone?'opacity:0.4;cursor:default':''}">
-    <div><div class="name">영업 (SNS/유튜브)</div><div class="effects">${mDone?'이번 달 이미 실행함':'매월 1회 실행 가능'}</div></div></div>`;
-
   const isInhouseStatus = isInhouse();
   const pdDone = G.monthPublicDefender || isInhouseStatus;
-  html += `<div class="action-option" onclick="${pdDone?'':`confirmPublicDefender()`}" style="${pdDone?'opacity:0.4;cursor:default':''}">
-    <div><div class="name">국선변호인 신청</div><div class="effects">${isInhouseStatus?'사내변호사는 신청 불가':pdDone?'이번 달 이미 신청함':'일반형사 사건 1건 추가 (수임료 50만원)'}</div></div></div>`;
   const laDone = G.monthLegalAid || isInhouseStatus;
-  html += `<div class="action-option" onclick="${laDone?'':`confirmLegalAid()`}" style="${laDone?'opacity:0.4;cursor:default':''}">
-    <div><div class="name">소송구조 대리인 신청</div><div class="effects">${isInhouseStatus?'사내변호사는 신청 불가':laDone?'이번 달 이미 신청함':'민사/가사/행정 사건 1건 추가 (수임료 100만원)'}</div></div></div>`;
-  html += `<div class="action-option" onclick="openDonation()"><div><div class="name">기부하기</div><div class="effects">좋은 곳에 기부합니다</div></div></div>`;
-  html += `<div class="action-option" onclick="openSpecialLawyerMenu()"><div><div class="name">전문변호사 등록</div><div class="effects">전문분야 등록/해제 (최대 3개)</div></div></div>`;
+
+  // 탭별 콘텐츠
+  if (_computerTab === 'career') {
+    html += `<div class="action-option" onclick="${jDone?'':`openJobSearch()`}" style="${jDone?'opacity:0.4;cursor:default':''}">
+      <div><div class="name">구직활동</div><div class="effects">${jDone?'이번 달 이미 지원함':'로펌/회사에 지원 (매월 1곳)'}</div></div></div>`;
+    html += `<div class="action-option" onclick="${canHire?'openHireMenu()':'showToast(\'파트너/대표/개업 변호사만 이용 가능합니다.\')'}" style="${canHire?'':'opacity:0.5'}">
+      <div><div class="name">구인활동</div><div class="effects">${canHire?'어쏘변호사/직원 채용 (매월 2명)':'현재 신분에서 이용 불가'}</div></div></div>`;
+    html += `<div class="action-option" onclick="openSpecialLawyerMenu()"><div><div class="name">전문변호사 등록</div><div class="effects">전문분야 등록/해제 (최대 3개)</div></div></div>`;
+  } else if (_computerTab === 'cases') {
+    html += `<div class="action-option" onclick="${mDone?'':`openMarketingMenu()`}" style="${mDone?'opacity:0.4;cursor:default':''}">
+      <div><div class="name">영업 (SNS/유튜브)</div><div class="effects">${mDone?'이번 달 이미 실행함':'매월 1회 실행 가능'}</div></div></div>`;
+    html += `<div class="action-option" onclick="${pdDone?'':`confirmPublicDefender()`}" style="${pdDone?'opacity:0.4;cursor:default':''}">
+      <div><div class="name">국선변호인 신청</div><div class="effects">${isInhouseStatus?'사내변호사는 신청 불가':pdDone?'이번 달 이미 신청함':'일반형사 사건 1건 추가 (수임료 50만원)'}</div></div></div>`;
+    html += `<div class="action-option" onclick="${laDone?'':`confirmLegalAid()`}" style="${laDone?'opacity:0.4;cursor:default':''}">
+      <div><div class="name">소송구조 대리인 신청</div><div class="effects">${isInhouseStatus?'사내변호사는 신청 불가':laDone?'이번 달 이미 신청함':'민사/가사/행정 사건 1건 추가 (수임료 100만원)'}</div></div></div>`;
+  } else if (_computerTab === 'etc') {
+    html += `<div class="action-option" onclick="openDonation()"><div><div class="name">기부하기</div><div class="effects">좋은 곳에 기부합니다 (자금 → 업보 ↓)</div></div></div>`;
+  }
 
   document.getElementById('computer-list').innerHTML = html;
 }
@@ -18048,28 +18185,51 @@ function openStaffPanel() {
   renderStaffList();
 }
 
+let _staffTab = 'assoc';
+
 function renderStaffList() {
-  let html = '';
-  if (G.hiredAssocs.length) {
-    html += `<div class="action-category"><div class="action-category-title">어쏘변호사</div>`;
-    G.hiredAssocs.forEach((a,i) => {
-      html += `<div class="action-option" onclick="viewAssocDetail(${i})">
-        <div style="flex:1"><div class="name">${a.name} <span style="color:#a09080;font-size:0.72rem">사건 ${a.cases.length}/20</span></div>
-        <div class="effects">법률 ${a.lawKnowledge} / 변론 ${a.debate} / 관찰 ${a.observation}</div></div>
-        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="event.stopPropagation();fireEmployee('assoc',${i})">해고</div></div>`;
-    });
-    html += '</div>';
+  let html = '<div style="height:440px;overflow-y:auto">';
+  // 처음 열 때 인원 많은 쪽으로 자동 선택 (한쪽만 있을 때)
+  if (G.hiredAssocs.length === 0 && G.hiredStaff.length > 0) _staffTab = 'staff';
+  else if (G.hiredStaff.length === 0 && G.hiredAssocs.length > 0) _staffTab = 'assoc';
+
+  // 탭 버튼
+  const tabs = [
+    {key:'assoc', label:`어쏘 (${G.hiredAssocs.length})`},
+    {key:'staff', label:`직원 (${G.hiredStaff.length})`},
+  ];
+  html += '<div style="display:flex;gap:6px;margin-bottom:12px;justify-content:center">';
+  tabs.forEach(t => {
+    const isActive = _staffTab === t.key;
+    const style = `width:120px;padding:6px 0;font-size:0.85rem;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#5a3528'};background:${isActive?'rgba(201,168,76,0.18)':'#1e110a'};color:${isActive?'#f0c850':'#a09080'};font-weight:${isActive?'700':'500'};border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:1px;text-align:center`;
+    html += `<button style="${style}" onclick="_staffTab='${t.key}';renderStaffList()">${t.label}</button>`;
+  });
+  html += '</div>';
+
+  if (_staffTab === 'assoc') {
+    if (!G.hiredAssocs.length) {
+      html += `<div style="text-align:center;color:#8a7a60;padding:30px 16px;font-size:0.85rem">고용된 어쏘변호사가 없습니다.<br><span style="font-size:0.75rem">컴퓨터 → 구인활동에서 채용 가능</span></div>`;
+    } else {
+      G.hiredAssocs.forEach((a,i) => {
+        html += `<div class="action-option" onclick="viewAssocDetail(${i})">
+          <div style="flex:1"><div class="name">${a.name} <span style="color:#a09080;font-size:0.72rem">사건 ${a.cases.length}/20</span></div>
+          <div class="effects">법률 ${a.lawKnowledge} / 변론 ${a.debate} / 관찰 ${a.observation}</div></div>
+          <div class="cost" style="color:#cc6666;cursor:pointer" onclick="event.stopPropagation();fireEmployee('assoc',${i})">해고</div></div>`;
+      });
+    }
+  } else {
+    if (!G.hiredStaff.length) {
+      html += `<div style="text-align:center;color:#8a7a60;padding:30px 16px;font-size:0.85rem">고용된 직원이 없습니다.<br><span style="font-size:0.75rem">컴퓨터 → 구인활동에서 채용 가능</span></div>`;
+    } else {
+      G.hiredStaff.forEach((s,i) => {
+        html += `<div class="action-option" style="cursor:default">
+          <div style="flex:1"><div class="name">${s.name}</div>
+          <div class="effects">영업력 ${s.sales} (매월 수임 ${Math.floor(s.sales/100)}건)</div></div>
+          <div class="cost" style="color:#cc6666;cursor:pointer" onclick="event.stopPropagation();fireEmployee('staff',${i})">해고</div></div>`;
+      });
+    }
   }
-  if (G.hiredStaff.length) {
-    html += `<div class="action-category"><div class="action-category-title">직원</div>`;
-    G.hiredStaff.forEach((s,i) => {
-      html += `<div class="action-option" style="cursor:default">
-        <div style="flex:1"><div class="name">${s.name}</div>
-        <div class="effects">영업력 ${s.sales} (매월 수임 ${Math.floor(s.sales/100)}건)</div></div>
-        <div class="cost" style="color:#cc6666;cursor:pointer" onclick="event.stopPropagation();fireEmployee('staff',${i})">해고</div></div>`;
-    });
-    html += '</div>';
-  }
+  html += '</div>';
   document.getElementById('storage-list').innerHTML = html;
 }
 
@@ -18288,7 +18448,7 @@ function renderBriefcase() {
       const canReview = G.monthReviewCount < 3 && card.difficulty !== 'd';
       // G.caseCards에서의 실제 인덱스 (reviewCase/openTossMenu는 index 기반)
       const realIdx = G.caseCards.findIndex(c => c.id === card.id);
-      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:4px;background:#331e16;border:1px solid #5a3528;border-radius:4px">
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:4px;background:#331e16;border:1px solid #5a3528;border-left:5px solid ${diffColors[card.difficulty]};border-radius:4px">
         <div>
           <div style="font-size:0.85rem;color:#e8d5b5;font-weight:500">${card.id}</div>
           <div style="font-size:0.75rem;color:#a09080">${card.typeName} / 난이도 <span style="color:${diffColors[card.difficulty]};font-weight:700">${card.diffName}</span></div>
@@ -19363,7 +19523,7 @@ function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback)
     selected = [];
     mc.wrongCount = (mc.wrongCount || 0) + 1;
     if (mc.wrongCount >= 3) {
-      mc.failed = true; mc.active = false;
+      mc.failed = true; mc.active = false; showStampEffect('lose');
       const failFace = caseNum>=4 ? '캐릭터얼굴/수사관.webp' : '캐릭터얼굴/판사.webp';
       const failSpk = caseNum>=4 ? '수사관' : '판사';
       const failText = caseNum>=4 ? '더 이상 조사를 진행할 수 없습니다. 조사를 종결하겠습니다.' : (caseNum===3 ? '원고 측 변호사, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.' : '변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.');
@@ -19406,7 +19566,7 @@ function showEvidenceSelection(caseNum, phase, evStep, onCorrect, finalCallback)
       selected = [];
       if (mc.wrongCount >= 3) {
         // 패소
-        mc.failed = true; mc.active = false;
+        mc.failed = true; mc.active = false; showStampEffect('lose');
         const failFace = caseNum>=4 ? '캐릭터얼굴/수사관.webp' : '캐릭터얼굴/판사.webp';
         const failSpk = caseNum>=4 ? '수사관' : '판사';
         const failText = caseNum>=4 ? '더 이상 조사를 진행할 수 없습니다. 조사를 종결하겠습니다.' : (caseNum===3 ? '원고 측 변호사, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.' : '변호인, 더 이상의 지연은 허용할 수 없습니다. 재판을 종결하겠습니다.');
@@ -20268,7 +20428,7 @@ function showCase4SpecialChoice(caseNum, choiceData, mc, onCorrect, finalCallbac
     } else {
       mc.wrongCount = (mc.wrongCount||0) + 1;
       if (mc.wrongCount >= 3) {
-        mc.failed = true; mc.active = false;
+        mc.failed = true; mc.active = false; showStampEffect('lose');
         showMainTrialDialogue({bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'더 이상 조사를 진행할 수 없습니다. 조사를 종결하겠습니다.'}, () => {
           showMainTrialDialogue({bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'피고소인은 혐의없음으로 불송치 처분하겠습니다.'}, () => {
             showMainTrialDialogue({face:'player', speaker:G.name, text:'(이런... 증거를 제대로 제시하지 못했다. 실패했어.)'}, () => {
@@ -20358,6 +20518,7 @@ function processMainStoryMonthEnd(checkOffer) {
       if (mc.trialPhase >= 4 && !mc.cleared) {
         mc.cleared = true;
         mc.active = false;
+        showStampEffect('win');
         const _mainLastDay = mc.lastTrialDay || new Date(2029 + G.year, G.month, 0).getDate();
         if (idx === 0) {
           G.mainStoryFlag.case1_cleared = true;
