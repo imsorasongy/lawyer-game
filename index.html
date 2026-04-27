@@ -3147,17 +3147,21 @@ function openSaveFileManager() {
     <div>⬆ <b>가져오기</b> — JSON 파일을 슬롯에 덮어쓰기</div>
   </div>`;
 
+  const _LINE = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
   for (let i = 0; i < SAVE_SLOT_COUNT; i++) {
     const data = getSaveInfo(i);
     if (data && data.meta) {
       const m = data.meta;
       const dateStr = formatSaveDate(data.savedAt);
+      const shortStatus = (m.status || '').replace('변호사', '').trim();
+      const fundsCompact = formatMoney(m.funds);
+      const ymStr = `${m.year}.${String(m.month).padStart(2,'0')}`;
       html += `<div class="action-option" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 12px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <div style="min-width:0;flex:1">
-            <div class="name" style="font-size:0.88rem">슬롯 ${i+1} · ${m.name} (${m.status})</div>
-            <div class="effects" style="margin-top:2px">${m.year}년 ${m.month}월 · 자금 ${m.funds.toLocaleString()}원</div>
-            <div class="effects" style="font-size:0.65rem;color:#807060;margin-top:1px">${dateStr}</div>
+            <div class="name" style="font-size:0.88rem;${_LINE}">슬롯 ${i+1} · ${m.name}${shortStatus?` <span style="color:#a09080;font-weight:400;font-size:0.76rem">· ${shortStatus}</span>`:''}</div>
+            <div class="effects" style="margin-top:2px;${_LINE}">${ymStr} · ${fundsCompact}</div>
+            <div class="effects" style="font-size:0.65rem;color:#807060;margin-top:1px;${_LINE}">${dateStr}</div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button class="btn btn-secondary" style="padding:6px 10px;font-size:0.72rem;color:#88b0c0;border-color:#446677" onclick="event.stopPropagation();exportSave(${i})">⬇ 내보내기</button>
@@ -19570,6 +19574,9 @@ function formatSaveDate(isoStr) {
 
 function renderSaveLoadList(mode) {
   const AUTO_SLOT = SAVE_SLOT_COUNT - 1;
+  // 카드 행 공통 스타일 — 모든 슬롯이 같은 높이가 되도록 고정.
+  const ROW_STYLE = 'align-items:center;gap:10px;padding:10px 12px;height:80px;box-sizing:border-box';
+  const LINE_STYLE = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
   let html = '';
   for (let i = 0; i < SAVE_SLOT_COUNT; i++) {
     const data = getSaveInfo(i);
@@ -19580,12 +19587,15 @@ function renderSaveLoadList(mode) {
       const dateStr = formatSaveDate(data.savedAt);
       const face = _faceForGender(m.gender);
       const ptStr = (typeof m.playTimeSec === 'number' && m.playTimeSec > 0) ? formatPlayTime(m.playTimeSec) : '';
-      html += `<div class="action-option" style="align-items:stretch;gap:10px;padding:10px 12px">
+      const shortStatus = (m.status || '').replace('변호사', '').trim();
+      const fundsCompact = formatMoney(m.funds);
+      const ymStr = `${m.year}.${String(m.month).padStart(2,'0')}`;
+      html += `<div class="action-option" style="${ROW_STYLE}">
         <div style="flex-shrink:0;width:56px;height:56px;border:1px solid #5a3528;border-radius:6px;background:#1e110a center/cover no-repeat url('${face}')"></div>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">
-          <div class="name" style="font-size:0.92rem">${slotLabel} · ${m.name} <span style="color:#a09080;font-weight:400;font-size:0.78rem">(${m.status})</span></div>
-          <div class="effects" style="margin-top:2px">${m.year}년 ${m.month}월${m.firmName?' | '+m.firmName:''} | 자금 ${m.funds.toLocaleString()}원</div>
-          <div class="effects" style="font-size:0.65rem;color:#807060;margin-top:1px">${dateStr}${ptStr?` <span style="color:#a09080">· 플레이 ${ptStr}</span>`:''}</div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px">
+          <div class="name" style="font-size:0.9rem;${LINE_STYLE}">${slotLabel} · ${m.name}${shortStatus?` <span style="color:#a09080;font-weight:400;font-size:0.76rem">· ${shortStatus}</span>`:''}</div>
+          <div class="effects" style="${LINE_STYLE}">${ymStr} · ${fundsCompact}${m.firmName?' · '+m.firmName:''}</div>
+          <div class="effects" style="font-size:0.65rem;color:#807060;${LINE_STYLE}">${dateStr}${ptStr?` · 플레이 ${ptStr}`:''}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;justify-content:center">`;
       if (mode === 'save') {
@@ -19597,14 +19607,14 @@ function renderSaveLoadList(mode) {
       html += `</div></div>`;
     } else {
       if (mode === 'save') {
-        html += `<div class="action-option" onclick="saveGame(${i})" style="gap:10px;padding:10px 12px;align-items:center">
+        html += `<div class="action-option" onclick="saveGame(${i})" style="${ROW_STYLE}">
           <div style="flex-shrink:0;width:56px;height:56px;border:1px dashed #5a3528;border-radius:6px;background:#1a0e08;display:flex;align-items:center;justify-content:center;color:#5a3528;font-size:1.4rem">＋</div>
-          <div style="flex:1"><div class="name" style="color:#666">${slotLabel} <span style="font-weight:400;font-size:0.78rem">- 비어있음</span></div></div>
+          <div style="flex:1;min-width:0"><div class="name" style="color:#666;${LINE_STYLE}">${slotLabel} <span style="font-weight:400;font-size:0.78rem">- 비어있음</span></div></div>
           <div class="cost">저장</div></div>`;
       } else {
-        html += `<div class="action-option" style="opacity:0.4;cursor:default;gap:10px;padding:10px 12px;align-items:center">
+        html += `<div class="action-option" style="opacity:0.4;cursor:default;${ROW_STYLE}">
           <div style="flex-shrink:0;width:56px;height:56px;border:1px dashed #5a3528;border-radius:6px;background:#1a0e08"></div>
-          <div style="flex:1"><div class="name" style="color:#555">${slotLabel} <span style="font-weight:400;font-size:0.78rem">- 비어있음</span></div></div></div>`;
+          <div style="flex:1;min-width:0"><div class="name" style="color:#555;${LINE_STYLE}">${slotLabel} <span style="font-weight:400;font-size:0.78rem">- 비어있음</span></div></div></div>`;
       }
     }
   }
@@ -21208,19 +21218,19 @@ function renderSubCaseEvidence(subNum) {
   const reviewedCount = ((subNum>=3) && sc) ? (sc.reviewedCount||0) : allEvidence.length;
   allEvidence.forEach((ev, idx) => {
     if (idx < reviewedCount) {
-      html += `<div style="padding:5px 8px;margin-bottom:3px;background:#331e16;border:1px solid #5a3528;border-radius:4px;font-size:0.78rem">`;
-      html += `<div style="color:#e8d5b5;font-weight:700">✓ ${ev.name}</div>`;
-      html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px;white-space:pre-line">${ev.desc}</div>`;
+      html += `<div style="${_evCardOpen(true)}">`;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">${_evBadge('found')}<div style="color:#f0d68a;font-weight:700;font-size:0.88rem">${ev.name}</div></div>`;
+      html += `<div style="color:#c0b090;font-size:0.8rem;line-height:1.55;white-space:pre-line">${ev.desc}</div>`;
       html += `</div>`;
     } else if (subNum>=3) {
-      // 사건3: 증거 이름은 보이고 의미만 가려짐
-      html += `<div style="padding:5px 8px;margin-bottom:3px;background:#1e110a;border:1px solid #3a2018;border-radius:4px;font-size:0.78rem">`;
-      html += `<div style="color:#8a7a60;font-weight:700">○ ${ev.name}</div>`;
-      html += `<div style="color:#4a4030;font-size:0.72rem;margin-top:2px;font-style:italic">— 검토하면 의미를 파악할 수 있다 —</div>`;
+      // 사건3+: 증거 이름은 보이고 의미만 가려짐
+      html += `<div style="padding:10px 12px;margin-bottom:6px;background:rgba(20,12,8,0.55);border:1px dashed #3a2018;border-radius:5px">`;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">${_evBadge('foundPending')}<div style="color:#a09080;font-weight:700;font-size:0.86rem">${ev.name}</div></div>`;
+      html += `<div style="color:#7a6a50;font-size:0.78rem;line-height:1.5;font-style:italic">검토하면 의미를 파악할 수 있다</div>`;
       html += `</div>`;
     } else {
-      html += `<div style="padding:5px 8px;margin-bottom:3px;background:#1e110a;border:1px solid #3a2018;border-radius:4px;font-size:0.78rem">`;
-      html += `<div style="color:#5a5040">○ ???</div>`;
+      html += `<div style="${_evCardOpen(false)}">`;
+      html += `<div style="display:flex;align-items:center;gap:8px">${_evBadge('unknown')}<div style="color:#5a5040;font-size:0.84rem">???</div></div>`;
       html += `</div>`;
     }
   });
@@ -21257,35 +21267,53 @@ function renderEvidenceCase(caseNum) {
   document.getElementById('evidence-case-body').innerHTML = html;
 }
 
+// 증거함 공통 스타일 헬퍼
+function _evSectionHeader(color, label, count) {
+  return `<div style="display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:8px;padding:6px 10px;background:rgba(50,30,22,0.55);border-left:3px solid ${color};border-radius:3px"><div style="font-size:0.92rem;color:${color};font-weight:700;letter-spacing:1px">${label}</div><div style="margin-left:auto;font-size:0.78rem;color:#807060">${count}</div></div>`;
+}
+function _evBadge(state) {
+  const map = {
+    found:           {bg:'#5a3528', fg:'#f0d68a', bd:'#c9a84c', label:'발견'},
+    foundAnalyzed:   {bg:'#3a4a18', fg:'#c8d8a0', bd:'#8aa040', label:'분석완료'},
+    foundPending:    {bg:'#5a3a18', fg:'#ffcc88', bd:'#cc8844', label:'분석대기'},
+    unknown:         {bg:'#1a1810', fg:'#5a5040', bd:'#3a2018', label:'미발견'},
+  };
+  const s = map[state] || map.unknown;
+  return `<span style="display:inline-block;padding:1px 8px;font-size:0.7rem;font-weight:700;letter-spacing:1px;border-radius:3px;background:${s.bg};color:${s.fg};border:1px solid ${s.bd};flex-shrink:0">${s.label}</span>`;
+}
+function _evCardOpen(found) {
+  return `padding:10px 12px;margin-bottom:6px;background:${found?'rgba(50,30,22,0.85)':'rgba(20,12,8,0.55)'};border:1px ${found?'solid':'dashed'} ${found?'#5a3528':'#3a2018'};border-radius:5px`;
+}
+
 // 사건1~2용 (조사/검토 별도 풀)
 function renderEvidenceCaseOld(caseNum, mc) {
   const evData = MAIN_STORY_EVIDENCE['case'+caseNum];
   let html = '';
 
   // 조사 증거
-  html += `<div style="font-size:0.8rem;color:#88aadd;font-weight:700;margin-bottom:6px">🔍 조사 증거 (${mc.investigateEvidence.length}/${evData.investigate.length})</div>`;
+  html += _evSectionHeader('#88aadd', '🔍 조사 증거', `${mc.investigateEvidence.length} / ${evData.investigate.length}`);
   evData.investigate.forEach(ev => {
     const found = mc.investigateEvidence.includes(ev.id);
-    html += `<div style="padding:5px 8px;margin-bottom:3px;background:${found?'#331e16':'#1a1810'};border:1px solid ${found?'#5a3528':'#3a2018'};border-radius:4px;font-size:0.78rem">`;
+    html += `<div style="${_evCardOpen(found)}">`;
     if (found) {
-      html += `<div style="color:#e8d5b5;font-weight:700">✓ ${ev.name}</div>`;
-      html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px">${ev.desc}</div>`;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">${_evBadge('found')}<div style="color:#f0d68a;font-weight:700;font-size:0.88rem">${ev.name}</div></div>`;
+      html += `<div style="color:#c0b090;font-size:0.8rem;line-height:1.55">${ev.desc}</div>`;
     } else {
-      html += `<div style="color:#5a5040">○ ???</div>`;
+      html += `<div style="display:flex;align-items:center;gap:8px">${_evBadge('unknown')}<div style="color:#5a5040;font-size:0.84rem">???</div></div>`;
     }
     html += `</div>`;
   });
 
   // 검토 증거
-  html += `<div style="font-size:0.8rem;color:#88ddaa;font-weight:700;margin-top:10px;margin-bottom:6px">📋 검토 증거 (${mc.reviewEvidence.length}/${evData.review.length})</div>`;
+  html += _evSectionHeader('#88ddaa', '📋 검토 증거', `${mc.reviewEvidence.length} / ${evData.review.length}`);
   evData.review.forEach(ev => {
     const found = mc.reviewEvidence.includes(ev.id);
-    html += `<div style="padding:5px 8px;margin-bottom:3px;background:${found?'#331e16':'#1a1810'};border:1px solid ${found?'#5a3528':'#3a2018'};border-radius:4px;font-size:0.78rem">`;
+    html += `<div style="${_evCardOpen(found)}">`;
     if (found) {
-      html += `<div style="color:#e8d5b5;font-weight:700">✓ ${ev.name}</div>`;
-      html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px">${ev.desc}</div>`;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">${_evBadge('found')}<div style="color:#f0d68a;font-weight:700;font-size:0.88rem">${ev.name}</div></div>`;
+      html += `<div style="color:#c0b090;font-size:0.8rem;line-height:1.55">${ev.desc}</div>`;
     } else {
-      html += `<div style="color:#5a5040">○ ???</div>`;
+      html += `<div style="display:flex;align-items:center;gap:8px">${_evBadge('unknown')}<div style="color:#5a5040;font-size:0.84rem">???</div></div>`;
     }
     html += `</div>`;
   });
@@ -21299,28 +21327,31 @@ function renderEvidenceCaseNew(caseNum, mc) {
   let html = '';
 
   [
-    {label:'Phase 1 증거', pool:evData.phase1, color:'#88aadd'},
-    {label:'Phase 2 증거', pool:evData.phase2, color:'#dd88aa'}
+    {label:'🔍 Phase 1 증거', pool:evData.phase1, color:'#88aadd'},
+    {label:'🔍 Phase 2 증거', pool:evData.phase2, color:'#dd88aa'}
   ].forEach(section => {
     const foundCount = section.pool.filter(e => mc.foundEvidence.includes(e.id)).length;
     const reviewedCount = section.pool.filter(e => mc.reviewedEvidence.includes(e.id)).length;
-    html += `<div style="font-size:0.8rem;color:${section.color};font-weight:700;margin-top:10px;margin-bottom:6px">🔍 ${section.label} (발견: ${foundCount}/${section.pool.length} | 분석: ${reviewedCount}/${section.pool.length})</div>`;
+    html += _evSectionHeader(section.color, section.label, `발견 ${foundCount}/${section.pool.length} · 분석 ${reviewedCount}/${section.pool.length}`);
 
     section.pool.forEach(ev => {
       const found = mc.foundEvidence.includes(ev.id);
       const reviewed = mc.reviewedEvidence.includes(ev.id);
-      html += `<div style="padding:5px 8px;margin-bottom:3px;background:${found?'#331e16':'#1a1810'};border:1px solid ${found?(reviewed?'#4a6020':'#5a3528'):'#3a2018'};border-radius:4px;font-size:0.78rem">`;
+      const cardStyle = found
+        ? `padding:10px 12px;margin-bottom:6px;background:rgba(50,30,22,0.85);border:1px solid ${reviewed?'#6a7a30':'#5a3528'};border-radius:5px`
+        : `padding:10px 12px;margin-bottom:6px;background:rgba(20,12,8,0.55);border:1px dashed #3a2018;border-radius:5px`;
+      html += `<div style="${cardStyle}">`;
       if (found) {
-        const icon = reviewed ? '✅' : '⚠️';
-        html += `<div style="color:#e8d5b5;font-weight:700">${icon} ${ev.name}</div>`;
-        html += `<div style="color:#a09080;font-size:0.72rem;margin-top:2px">${ev.desc}</div>`;
+        const state = reviewed ? 'foundAnalyzed' : 'foundPending';
+        html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">${_evBadge(state)}<div style="color:#f0d68a;font-weight:700;font-size:0.88rem">${ev.name}</div></div>`;
+        html += `<div style="color:#c0b090;font-size:0.8rem;line-height:1.55">${ev.desc}</div>`;
         if (reviewed) {
-          html += `<div style="color:#88cc88;font-size:0.72rem;margin-top:2px;font-style:italic">→ ${ev.reviewDesc}</div>`;
+          html += `<div style="margin-top:7px;padding:7px 10px;background:rgba(138,160,64,0.08);border-left:3px solid #8aa040;border-radius:3px;color:#c8d8a0;font-size:0.8rem;line-height:1.55">💡 ${ev.reviewDesc}</div>`;
         } else {
-          html += `<div style="color:#cc8844;font-size:0.72rem;margin-top:2px;font-style:italic">→ 분석 필요 (검토를 통해 의미를 파악하세요)</div>`;
+          html += `<div style="margin-top:7px;padding:7px 10px;background:rgba(204,136,68,0.08);border-left:3px solid #cc8844;border-radius:3px;color:#e8b888;font-size:0.78rem;line-height:1.5;font-style:italic">분석 필요 — 검토를 통해 의미를 파악하세요</div>`;
         }
       } else {
-        html += `<div style="color:#5a5040">○ ???</div>`;
+        html += `<div style="display:flex;align-items:center;gap:8px">${_evBadge('unknown')}<div style="color:#5a5040;font-size:0.84rem">???</div></div>`;
       }
       html += `</div>`;
     });
@@ -22483,49 +22514,282 @@ function showEndingCustom(title,desc){
 }
 
 // ==================== 도움말 ====================
-const HELP_PAGES = [
+// 카테고리별 위키 형식. 사이드바에서 선택 → 우측 본문 표시.
+// _HL은 인라인 강조 — content는 white-space:pre-line으로 \n이 줄바꿈으로 보존됨.
+const _HL = (t) => `<b style="color:#f0c850;letter-spacing:1px;font-size:0.86rem">▸ ${t}</b>`;
+const HELP_CATEGORIES = [
   {
-    title: '게임 소개',
-    content: `<b>변호사 생존기</b>는 변호사 시뮬레이션 게임입니다.\n\n신입 변호사로 시작하여 <b>10년(120개월)</b> 동안 다양한 활동을 하며 커리어를 쌓아보세요.\n\n매월 스케줄을 짜고 실행하면 한 달이 지나갑니다.\n결과는 여러분의 선택에 달려 있습니다!`
+    id: 'basics', icon: '📘', title: '게임 기초',
+    content:
+`<b>변호사 생존기</b>는 변호사 시뮬레이션 게임입니다.
+신입 변호사로 시작해 <b>10년(120개월)</b> 동안 커리어를 쌓아보세요.
+
+${_HL('진행 방식')}
+매월 <b>스케줄</b>을 짜고 <b>실행</b>하면 한 달이 흘러갑니다.
+- 일과 (평일 낮): 업무 — 상담·재판·서면작성
+- 저녁 (평일 저녁): 자기계발·여가 — 공부·운동·모임
+- 주말: 자유롭게 활동 선택
+스케줄을 다 짰으면 <b>실행</b> 버튼.
+
+${_HL('왼쪽 메뉴')}
+- <b>인적사항</b> — 능력치/전문분야/SNS/일기
+- <b>스케줄</b> — 이번 달 일정 + 저장된 프리셋
+- <b>어쏘/직원</b> — 고용한 인력 관리
+- <b>인간관계</b> — 만난 사람과의 관계
+- <b>시스템</b> — 저장/불러오기/설정/도움말
+- <b>신상관리</b> — 사직/이별/이혼/피임 등
+
+${_HL('오른쪽 메뉴')}
+- <b>서류가방</b> — 사건 검토·증거함·토스
+- <b>책장</b> — 보유 책 (소유 자체로 능력치 보너스)
+- <b>컴퓨터</b> — 구직/구인/영업/뉴스/SNS/유튜브/쇼핑
+- <b>옷장</b> — 의상 변경
+- <b>집</b> — 주거 업그레이드 (원룸 → 아파트 → 최고급)
+- <b>냉장고</b> — 음료로 능력치 회복
+- <b>사무실</b> — 사무실 업그레이드 (대표·개업)
+- <b>재테크</b> — 저축/단기/장기/부동산`
   },
   {
-    title: '기본 진행 방식',
-    content: `매월 <b>스케줄</b>을 짜고 <b>실행</b>하면 한 달이 흘러갑니다.\n\n<span style="color:#c9a84c">▸ 일과 시간</span> (평일 낮)\n  업무 관련 활동 — 상담, 재판, 서면작성 등\n\n<span style="color:#c9a84c">▸ 저녁 시간</span> (평일 저녁)\n  자기계발, 여가 — 공부, 운동, 모임 등\n\n<span style="color:#c9a84c">▸ 주말</span>\n  자유롭게 활동을 선택할 수 있습니다.\n\n스케줄을 다 짰으면 <b>실행</b> 버튼을 누르세요!`
+    id: 'stats', icon: '📊', title: '능력치',
+    content:
+`능력치는 사건 승패와 이벤트 결과를 좌우합니다. 매 활동의 효과는 사건/이벤트마다 다르게 적용돼요.
+
+${_HL('주요 능력치')}
+- <b>법률지식</b> — 사건 승률의 핵심 (법학공부·대학원·박사·책)
+- <b>변론능력</b> — 재판 비중 큼 (웅변·재판 진행)
+- <b>관찰력</b> — 증거 검토 유리 (스터디·검토)
+- <b>영업력</b> — 수임 확률·사무실 운영 (영업·모임)
+- <b>매력</b> — 인간관계·외모 이벤트 (PT·옷차림·집)
+- <b>사교성</b> — 모임·인맥 (저녁모임·업계모임)
+- <b>도덕성</b> — 인권·정치 엔딩 조건 (공익·국선)
+- <b>업보(karma)</b> — 낮을수록 좋음. 정치/악덕변호사 분기에 영향
+
+${_HL('상태치')}
+- <b>명성</b> — 수임·승진·뉴스 트리거 (승소·방송·회무·메인 클리어)
+- <b>멘탈</b> — 이벤트 회피·번아웃 저항
+- <b>체력</b> — 스트레스+피로 한계 (PT·집 업그레이드)
+- <b>스트레스/피로</b> — 합이 체력을 넘으면 질병, 심하면 과로사
+
+${_HL('관리 팁')}
+- 휴식·음료(냉장고)·데이트로 회복
+- 일정 기간 활동만 하면 번아웃 (시스템 탭 참고)
+- 사건은 단일 능력치가 아닌 여러 능력치 가중치로 판정
+- 검토·증거제출이 능력치 부족을 보완`
   },
   {
-    title: '화면 안내 — 왼쪽 메뉴',
-    content: `<span style="color:#c9a84c">▸ 인적사항</span>\n  내 능력치와 전문분야 확인\n\n<span style="color:#c9a84c">▸ 스케줄</span>\n  이번 달 스케줄을 짜고 실행\n\n<span style="color:#c9a84c">▸ 어쏘/직원</span>\n  고용한 어쏘변호사와 직원 관리\n\n<span style="color:#c9a84c">▸ 인간관계</span>\n  만난 사람들과의 관계 확인\n\n<span style="color:#c9a84c">▸ 시스템</span>\n  저장, 불러오기, 도움말, 처음으로\n\n<span style="color:#c9a84c">▸ 신상관리</span>\n  이름 변경, 피임, 사직, 이별 등`
+    id: 'career', icon: '💼', title: '신분·커리어',
+    content:
+`초기 신분은 <b>어쏘변호사</b> (법무법인 대영). 이후 다양한 경로로 전환됩니다.
+
+${_HL('전환 경로')}
+- 어쏘 → <b>파트너</b>: 같은 법인 승진 또는 다른 법인 스카웃
+- 파트너 → <b>대표</b>: 같은 법인 승진
+- 어쏘/파트너 → <b>개업</b>: 사직 후 사무소 차리기 (사무실·이름 선택)
+- 어쏘/파트너 → <b>사내변호사</b>: 컴퓨터·구직 → 기업 합격
+- 모든 신분 → <b>휴업</b>: 사직 후 활동 중단
+
+${_HL('신분별 특징')}
+- <b>어쏘</b> — 월급 보장 (수임료/성공보수 비율 0)
+- <b>파트너</b> — 월급 + 수임료/성공보수 50%
+- <b>대표</b> — 월급 + 100% + 어쏘·직원 채용 가능
+- <b>개업</b> — 월급 0, 100% 자력. 어쏘·직원 채용 가능
+- <b>사내</b> — 월급만 (재판 관여 X). 인하우스 평가 시스템
+- <b>휴업</b> — 수입 0, 고정지출만 발생
+
+${_HL('스카웃·승진 조건')}
+명성·승률·경력이 일정 이상 충족되면 자동 제안. 같은 법인 승진은 직장 평가도 고려.
+컴퓨터·구직 메뉴에서 직접 지원도 가능 (월 1회).
+
+${_HL('사직·폐업')}
+신상관리에서 처리. 어쏘/파트너/대표/사내는 사직, 개업은 폐업. 휴업으로 전환됩니다.
+
+${_HL('강사 겸직')}
+법학강의는 별도 계약. 변호사 본업과 동시 운영. 신상관리 → 강의중단으로 해제 가능.`
   },
   {
-    title: '화면 안내 — 오른쪽 메뉴',
-    content: `<span style="color:#c9a84c">▸ 서류가방</span>\n  맡고 있는 사건 확인, 검토, 어쏘에게 토스\n\n<span style="color:#c9a84c">▸ 책장</span>\n  보유한 책 확인 (소유만으로 능력치 보너스)\n\n<span style="color:#c9a84c">▸ 컴퓨터</span>\n  구직, 구인, 영업, 국선신청, 쇼핑, 기부 등\n\n<span style="color:#c9a84c">▸ 옷장</span> — 보유 의상 확인 및 변경\n<span style="color:#c9a84c">▸ 집</span> — 주거 업그레이드\n<span style="color:#c9a84c">▸ 냉장고</span> — 음료 섭취 (능력치 회복)\n<span style="color:#c9a84c">▸ 사무실</span> — 사무실 업그레이드, 개업\n<span style="color:#c9a84c">▸ 재테크</span> — 예적금, 주식, 부동산 등 투자`
+    id: 'cases', icon: '⚖', title: '사건·재판',
+    content:
+`사건은 메인스토리(주축)와 서브스토리(보조), 일반 사건카드로 나뉩니다.
+
+${_HL('메인스토리 4건')}
+- 신분·연차 조건이 갖춰지면 자동으로 수임 제안
+- phase 1~3로 나뉨. 각 phase에 재판
+- 클리어 시 명성 대폭 상승 + 뉴스 + SNS 포스트
+- 진행 중 라이벌·동료 조력 이벤트 등장
+
+${_HL('서브스토리 5건')}
+1) 대여금  2) 손해배상  3) 이혼  4) 부당해고  5) 보이스피싱
+- 일반 사건과 같은 흐름이지만 인물·증거가 풍부
+- 일부 결과는 라이벌·연인 반응 분기
+
+${_HL('검토 시스템')}
+서류가방 → 사건 카드 → <b>검토</b> (월 최대 3회)
+- 다음 재판 변론·관찰력 보정
+- 증거 시스템 잠금 해제
+- 일부 분기는 검토 횟수가 조건
+
+${_HL('증거 시스템')}
+서류가방 → <b>증거함</b>에서 사건별 증거 확인.
+재판에서 결정적 증거 제출 → 승률 상승.
+일부 사건은 "내지 않는다" 선택지가 유리할 수도 (직접 판단).
+
+${_HL('토스')}
+대표/개업 변호사: 어쏘에게 사건을 넘기면 어쏘 능력치로 자동 처리. 월말 결과 확인.
+효율적이지만 본인 명성 상승은 적음.`
   },
   {
-    title: '핵심 팁',
-    content: `<span style="color:#cc8888">1. 스트레스와 피로 관리가 중요합니다!</span>\n  스트레스+피로가 체력을 넘으면 병에 걸립니다.\n  심하면 과로사할 수 있으니 휴식을 챙기세요.\n\n<span style="color:#88aadd">2. 사건은 능력치로 승패가 결정됩니다.</span>\n  법률지식, 변론, 관찰력 등을 고루 올리세요.\n  서류가방에서 사건을 검토하면 난이도가 낮아집니다.\n\n<span style="color:#88cc88">3. 신분에 따라 할 수 있는 것이 달라집니다.</span>\n  어쏘 → 파트너 → 대표로 승진하거나 개업할 수 있습니다.\n\n<span style="color:#e0d0a0">4. 돈 관리도 신경 쓰세요.</span>\n  매월 고정지출이 나갑니다. 재테크로 자산을 불려보세요.\n\n<span style="color:#f0c850">5. 여러분의 플레이에 따라 26종, 53가지 엔딩 중\n  하나가 결정됩니다. 전설의 변호사를 목표로 해보세요!</span>`
-  }
+    id: 'relations', icon: '💝', title: '인간관계',
+    content:
+`연애 14명 + 라이벌 2명. 매월 만남 이벤트가 자동으로 진행됩니다.
+
+${_HL('연애')}
+업계모임/저녁외출/스터디/와인/공익 등으로 만남 → 호감도 상승 → 데이트 → 연인 → 결혼
+- 호감도 단계: 처음 만남 → 친밀(30+) → 데이트 가능(60+) → 연인 발전 조건
+- 14명은 각자 직업·성격·이벤트가 다름 (인간관계 패널에서 확인)
+
+${_HL('데이트·결혼')}
+- 데이트는 일정 호감도 + 의지로 발생
+- 결혼은 연인 + 일정 데이트 횟수 + 호감도 유지
+- 결혼기념일·배우자 생일은 매년 자동 체크
+
+${_HL('출산·자녀')}
+- 결혼 후 임신 가능 (피임 토글은 신상관리)
+- 임신 인지 → 출산 → 자녀 성장 (어린이집·초등 이벤트)
+- 만 2세+ 부터 자녀 동반 이벤트 (설날·어린이날·휴가 등)
+- 자녀 패널에서 개별 이벤트 기록 확인
+
+${_HL('라이벌 2명')}
+성별별로 friendly·competitive 두 라이벌이 자동 생성.
+- 월간 뉴스에서 명성 경쟁 (rep500/800/950 단계)
+- 조우·대결 이벤트 → rivalBond 진행 (3단계)
+- 친한 라이벌(rivalry<0) 시: 결혼식 축하·메인4 조력
+- 적대 라이벌(rivalry>0) 시: 본격 대결 이벤트
+
+${_HL('이별·이혼')}
+신상관리에서 처리. 호감도 -20 페널티, 다시 쌓아야 재연애. 이혼 시 재산 분할 발생 가능.`
+  },
+  {
+    id: 'invest', icon: '💰', title: '재테크',
+    content:
+`컴퓨터 → 재테크. 4탭으로 분류 (저축/단기투자/장기투자/부동산).
+
+${_HL('저축 — 안전형')}
+- <b>예금</b>: 1년 만기, +3.5% 고정. 1000만~10억
+- <b>적금</b>: 1년 만기, +2.5% 고정. 월 30만~1000만 납입
+
+${_HL('단기투자 — 매월 변동')}
+- <b>펀드</b>: 1년 만기, -10%~+20% (저~중)
+- <b>국내주식</b>: 매월 -30%~+50% (중)
+- <b>해외주식</b>: 매월 -15%~+30% (저~중)
+- <b>코인</b> (최대 2): 매월 -95%~+200% (초고)
+- <b>현물(금)</b>: 매월 -40%~+60% (중)
+
+${_HL('장기투자 — 1년 만기')}
+- <b>벤처캐피탈</b>: 1년 만기, -90%~+300% (고)
+- <b>지식재산권</b>: 매월 0.1~2% 안정 수익. 원금 회수 가능
+
+${_HL('부동산')}
+- 빌라/구축/재건축/신축 아파트 매입
+- 매입 후 <b>2년 보유</b>해야 매도 가능
+- 시세 월간 변동 + 뉴스 영향
+
+${_HL('전략 팁')}
+- 월간 뉴스의 경제·시사 카테고리 → 다음 달 손실 확률 편향 (사전 정보)
+- 목돈은 부동산·예금, 여유돈은 단기투자
+- 코인·벤처는 단발 큰 베팅용 (분산 X)
+- 결혼 후 배우자 수입(월 0~1000만)도 자금에 합산`
+  },
+  {
+    id: 'systems', icon: '🔧', title: '시스템',
+    content:
+`게임 진행 도중 자동 작동하는 시스템들.
+
+${_HL('번아웃 (0~100)')}
+업무·자기계발 누적으로 상승. 휴식·데이트·가족 이벤트로 회복.
+- 40/60/80에서 경고 이벤트
+- 100 도달 시 번아웃 엔딩 (조기 종료)
+- 번아웃 상태 시 능력치 획득 -20~30% 페널티
+
+${_HL('슬럼프')}
+연속 5패하면 슬럼프 이벤트 발동. 멘탈 회복 선택지 제공. 연인이 있으면 회복에 유리.
+
+${_HL('정치 진출')}
+명성·도덕성이 일정 이상 → 시의원 출마 제안.
+- 6월 말 당선 판정 (politicsSupport 기준)
+- 임기 4년 (당선년도+4의 6월 만료)
+- 의정활동 횟수가 정치인 엔딩(상/중/하) 분기
+- 임기 중 매월 시의원 수당 +400만
+
+${_HL('방송·강의·회무')}
+- <b>방송</b>: 매월 1회 섭외 가능. 명성·영업력 상승
+- <b>법학강의</b>: 강사 계약 시 매월 강의 활동
+- <b>회무</b>: 변협 활동. 회무참여도 누적 → 변협 협회장 엔딩 분기
+
+${_HL('월간 뉴스')}
+4 카테고리 (법조/경제/시사/주인공). 매월 자동 생성 + 효과 적용.
+- <b>법조</b>: 다음 달 사건 유형 편향
+- <b>경제·시사</b>: 다음 달 투자 변동 편향
+- <b>주인공</b>: 명성·메인스토리·당선 등 트리거. 전 기간 보존
+
+${_HL('SNS·유튜브')}
+컴퓨터에서 시작. 매월 팔로워 자동 증가 (능력치 기반).
+- SNS는 월 1회 직접 작성 가능
+- 유튜브 구독자 마일스톤 보너스
+- 구독자 100만 → 주인공 뉴스 트리거`
+  },
+  {
+    id: 'keys', icon: '⌨', title: '단축키·엔딩',
+    content:
+`${_HL('키보드 단축키')}
+- <b>Esc</b> — 열린 모달 닫기
+- <b>F5</b> — 슬롯 1에 빠른 저장
+- <b>F9</b> — 슬롯 1에서 빠른 불러오기
+
+${_HL('자동 저장')}
+설정 → ON 시, 매월 시작 시 슬롯 10에 자동 저장 (자동 슬롯은 [자동] 배지 표시).
+
+${_HL('자동넘김 / 스킵')}
+- <b>자동넘김</b> (설정): 이벤트 없는 일반 스케줄을 자동 진행
+- <b>스킵 ▶▶</b> 버튼 (스케줄 진행 중): 이번 달 끝까지 자동, 월말에 자동 해제
+
+${_HL('세이브 파일 관리')}
+설정 → 세이브 파일 관리에서 슬롯별 JSON 내보내기/가져오기. 다른 기기 이전·백업용.
+
+${_HL('엔딩 — 26종 53가지')}
+플레이 결과에 따라 자동 결정. 우선순위가 있어 조기 종료 엔딩(과로사·번아웃 등)이 먼저 적용됩니다.
+
+대표 엔딩 (조건 일부 공개):
+- <b>전설의 변호사</b> — 모든 메인 클리어 + 명성 950+ + 정상 신분
+- <b>인권변호사</b> — 도덕성 850+ + 공익활동 다수
+- <b>정치인 (상/중/하)</b> — 시의원 임기 + 카르마 등급
+- <b>악덕변호사</b> — 카르마 100+ + 자금 30억+
+- <b>고위공무원·판사·변협 협회장</b> — 각 시스템 경로 충족
+- <b>결혼·가정 엔딩</b> — 결혼 + 자녀 + 일정 자금 + 평화로운 마무리
+
+자세한 조건은 직접 발견하는 재미가 있어 생략. 게임 내 SNS·뉴스에 단서가 있습니다.`
+  },
 ];
 
-let helpPage = 0;
+let helpCategoryId = 'basics';
 
 function openHelpModal() {
-  helpPage = 0;
+  helpCategoryId = 'basics';
   let overlay = document.getElementById('help-modal');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'help-modal';
     overlay.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center';
-    overlay.innerHTML = `<div style="background:url('UI/테두리/가죽타일.png') 0 0 / 160px 160px repeat;border:24px solid transparent;border-image:url('UI/테두리/모달_trim.png') 110 stretch;border-image-width:24px;border-radius:0;padding:14px 18px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;box-sizing:border-box">
-      <div id="help-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div id="help-title" style="font-size:1.1rem;font-weight:700;color:#c9a84c;letter-spacing:2px"></div>
-        <div id="help-page-num" style="font-size:0.75rem;color:#8a7a60"></div>
+    overlay.innerHTML = `<div style="background:url('UI/테두리/가죽타일.png') 0 0 / 160px 160px repeat;border:24px solid transparent;border-image:url('UI/테두리/모달_trim.png') 110 stretch;border-image-width:24px;border-radius:0;padding:14px 18px;max-width:780px;width:94%;height:540px;max-height:88vh;box-sizing:border-box;display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-shrink:0">
+        <div style="font-size:1.1rem;font-weight:700;color:#c9a84c;letter-spacing:2px">📖 도움말</div>
+        <button style="display:inline-block;width:auto;padding:5px 18px;background:#1e110a;border:1px solid #5a3528;color:#e8d5b5;font-size:0.82rem;font-weight:700;cursor:pointer;border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:2px;text-align:center" onclick="document.getElementById('help-modal').style.display='none'">닫기</button>
       </div>
-      <div id="help-content" style="color:#d0c0a0;font-size:0.88rem;line-height:1.8;white-space:pre-line;margin-bottom:18px;height:320px;overflow-y:auto"></div>
-      <div id="help-dots" style="text-align:center;margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px;justify-content:center">
-        <button id="help-prev" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="changeHelpPage(-1)">◀ 이전</button>
-        <button id="help-close" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="document.getElementById('help-modal').style.display='none'">닫기</button>
-        <button id="help-next" class="event-choice" style="padding:6px 20px;font-size:0.82rem" onclick="changeHelpPage(1)">다음 ▶</button>
+      <div style="display:flex;gap:10px;flex:1;min-height:0">
+        <div id="help-sidebar" style="width:148px;flex-shrink:0;display:flex;flex-direction:column;gap:3px;overflow-y:auto"></div>
+        <div id="help-content-wrap" style="flex:1;background:rgba(20,12,8,0.45);border:1px solid #5a3528;border-radius:6px;padding:14px 18px;overflow-y:auto;min-width:0">
+          <div id="help-title" style="font-size:1.0rem;font-weight:700;color:#f0c850;letter-spacing:1px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #5a3528"></div>
+          <div id="help-content" style="color:#d0c0a0;font-size:0.82rem;line-height:1.7;white-space:pre-line"></div>
+        </div>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -22534,25 +22798,27 @@ function openHelpModal() {
   renderHelpPage();
 }
 
-function changeHelpPage(delta) {
-  helpPage = Math.max(0, Math.min(HELP_PAGES.length - 1, helpPage + delta));
+function changeHelpCategory(id) {
+  helpCategoryId = id;
   renderHelpPage();
 }
 
 function renderHelpPage() {
-  const page = HELP_PAGES[helpPage];
-  document.getElementById('help-title').textContent = page.title;
-  document.getElementById('help-page-num').textContent = (helpPage+1) + ' / ' + HELP_PAGES.length;
-  document.getElementById('help-content').innerHTML = page.content;
-  // 인디케이터
-  document.getElementById('help-dots').innerHTML = HELP_PAGES.map((_, i) =>
-    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i===helpPage?'#c9a84c':'#4a4030'}"></span>`
-  ).join('');
-  // 버튼 활성화
-  document.getElementById('help-prev').style.opacity = helpPage === 0 ? '0.3' : '1';
-  document.getElementById('help-prev').style.pointerEvents = helpPage === 0 ? 'none' : 'auto';
-  document.getElementById('help-next').style.opacity = helpPage === HELP_PAGES.length-1 ? '0.3' : '1';
-  document.getElementById('help-next').style.pointerEvents = helpPage === HELP_PAGES.length-1 ? 'none' : 'auto';
+  const cat = HELP_CATEGORIES.find(c => c.id === helpCategoryId) || HELP_CATEGORIES[0];
+  // 사이드바
+  const sidebar = HELP_CATEGORIES.map(c => {
+    const active = c.id === helpCategoryId;
+    const style = `padding:8px 10px;font-size:0.78rem;cursor:pointer;border:1px solid ${active?'#c9a84c':'#5a3528'};background:${active?'rgba(201,168,76,0.18)':'#1e110a'};color:${active?'#f0c850':'#a09080'};font-weight:${active?'700':'500'};border-radius:4px;letter-spacing:0.5px;text-align:left;font-family:inherit;width:100%`;
+    return `<button style="${style}" onclick="changeHelpCategory('${c.id}')">${c.icon} ${c.title}</button>`;
+  }).join('');
+  document.getElementById('help-sidebar').innerHTML = sidebar;
+  // 본문 — 원본 \n은 white-space:pre-line으로 줄바꿈 유지. `- `는 시각적으로 좀 더 부드러운 `•`로 치환.
+  const html = cat.content
+    .replace(/^- /gm, '• ')
+    .trim();
+  document.getElementById('help-title').textContent = cat.icon + '  ' + cat.title;
+  document.getElementById('help-content').innerHTML = html;
+  document.getElementById('help-content-wrap').scrollTop = 0;
 }
 
 // ==================== 글로벌 키보드 단축키 ====================
