@@ -17446,61 +17446,61 @@ function resignAndSuspend() {
 
 // ==================== ITEM/SHOP DATA ====================
 const SHOP_ITEMS = [
-  {id:'premiumPC',name:'고급컴퓨터',icon:'🖥️',iconImg:'ui/쇼핑/차와기타/고급컴퓨터.png',desc:'고급컴퓨터, 업무효율이 올라간다.',price:3000000,max:1,category:'etc',
+  {id:'premiumPC',name:'고급컴퓨터',icon:'🖥️',iconImg:'UI/쇼핑/차와기타/고급컴퓨터.png',desc:'고급컴퓨터, 업무효율이 올라간다.',price:3000000,max:1,category:'etc',
     effects:{sales:10,debate:10}},
-  {id:'lawBook',name:'기본서',icon:'📕',iconImg:'ui/쇼핑/책/기본서.png',desc:'법학에 대한 기초를 다시 다져줄 수 있게 만드는 책.',price:50000,max:10,category:'book',
+  {id:'lawBook',name:'기본서',icon:'📕',iconImg:'UI/쇼핑/책/기본서.png',desc:'법학에 대한 기초를 다시 다져줄 수 있게 만드는 책.',price:50000,max:10,category:'book',
     effects:{lawKnowledge:2}},
-  {id:'practiceBook',name:'실무제요',icon:'📗',iconImg:'ui/쇼핑/책/실무제요.png',desc:'소송 실무에 대해 확실히 공부할 수 있는 책.',price:100000,max:10,category:'book',
+  {id:'practiceBook',name:'실무제요',icon:'📗',iconImg:'UI/쇼핑/책/실무제요.png',desc:'소송 실무에 대해 확실히 공부할 수 있는 책.',price:100000,max:10,category:'book',
     effects:{lawKnowledge:2,debate:2}},
-  {id:'lawCode',name:'법전',icon:'📘',iconImg:'ui/쇼핑/책/법전.png',desc:'별 쓸모는 없지만 있어 보이는 책.',price:100000,max:5,category:'book',
+  {id:'lawCode',name:'법전',icon:'📘',iconImg:'UI/쇼핑/책/법전.png',desc:'별 쓸모는 없지만 있어 보이는 책.',price:100000,max:5,category:'book',
     effects:{lawKnowledge:1,sales:3}},
-  {id:'caseBook',name:'판례집',icon:'📙',iconImg:'ui/쇼핑/책/판례집.png',desc:'법원의 판례경향을 파악할 수 있는 책.',price:150000,max:10,category:'book',
+  {id:'caseBook',name:'판례집',icon:'📙',iconImg:'UI/쇼핑/책/판례집.png',desc:'법원의 판례경향을 파악할 수 있는 책.',price:150000,max:10,category:'book',
     effects:{lawKnowledge:3,debate:3}},
-  {id:'itBook',name:'IT 서적',icon:'💻',iconImg:'ui/쇼핑/책/IT서적.png',desc:'IT 시대에 살아남기 위해 꼭 필요한 책.',price:50000,max:10,category:'book',
+  {id:'itBook',name:'IT 서적',icon:'💻',iconImg:'UI/쇼핑/책/IT서적.png',desc:'IT 시대에 살아남기 위해 꼭 필요한 책.',price:50000,max:10,category:'book',
     effects:{},proEffect:{itLaw:2},statEffects:{sales:1}},
-  {id:'vitaminC',name:'비타민C',icon:'💊',iconImg:'ui/쇼핑/음료/비타민C.png',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:10000,max:20,category:'drink',
+  {id:'vitaminC',name:'비타민C',icon:'💊',iconImg:'UI/쇼핑/음료/비타민C.png',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:10000,max:20,category:'drink',
     useEffects:{fatigue:-2}},
-  {id:'energyDrink',name:'에너지드링크',icon:'🥤',iconImg:'ui/쇼핑/음료/에너지드링크.png',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:20000,max:20,category:'drink',
+  {id:'energyDrink',name:'에너지드링크',icon:'🥤',iconImg:'UI/쇼핑/음료/에너지드링크.png',desc:'현대 직장인의 필수품. 사실은 쓸모없다는 이야기도 많다.',price:20000,max:20,category:'drink',
     useEffects:{fatigue:-3,stress:-1}},
-  {id:'expensiveWine',name:'고가와인',icon:'🍷',iconImg:'ui/쇼핑/음료/고급와인.png',desc:'이베리아 반도의 탱고추는 여인이 떠오르는 고급 와인. 매우 맛있다.',price:300000,max:10,category:'drink',
+  {id:'expensiveWine',name:'고가와인',icon:'🍷',iconImg:'UI/쇼핑/음료/고급와인.png',desc:'이베리아 반도의 탱고추는 여인이 떠오르는 고급 와인. 매우 맛있다.',price:300000,max:10,category:'drink',
     useEffects:{stress:-10,fatigue:1}},
-  {id:'cheapWine',name:'소주',icon:'🍶',iconImg:'ui/쇼핑/음료/소주.png',desc:'동네 마트에서 파는 한국인의 술. 한 병 비우면 시름이 잠깐은<br>잊힌다.',price:20000,max:10,category:'drink',
+  {id:'cheapWine',name:'소주',icon:'🍶',iconImg:'UI/쇼핑/음료/소주.png',desc:'동네 마트에서 파는 한국인의 술. 한 병 비우면 시름이 잠깐은<br>잊힌다.',price:20000,max:10,category:'drink',
     useEffects:{stress:-5,fatigue:2}},
-  {id:'premiumSuit',name:'고급 정장',icon:'👔',iconImg:'ui/쇼핑/옷/남자고급정장.png',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'male',
+  {id:'premiumSuit',name:'고급 정장',icon:'👔',iconImg:'UI/쇼핑/옷/남자고급정장.png',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'male',
     effects:{charm:5,sales:5}},
-  {id:'premiumDress',name:'고급 원피스',icon:'👗',iconImg:'ui/쇼핑/옷/여자고급원피스.png',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'female',
+  {id:'premiumDress',name:'고급 원피스',icon:'👗',iconImg:'UI/쇼핑/옷/여자고급원피스.png',desc:'옷에 대해 잘 모르는 내가 봐도 멋있는 옷.',price:500000,max:1,category:'clothes',gender:'female',
     effects:{charm:5,sales:5}},
-  {id:'luxurySuit',name:'명품 정장',icon:'🤵',iconImg:'ui/쇼핑/옷/남자명품정장.png',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'male',
+  {id:'luxurySuit',name:'명품 정장',icon:'🤵',iconImg:'UI/쇼핑/옷/남자명품정장.png',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'male',
     effects:{charm:15,sales:15}},
-  {id:'luxuryDress',name:'명품 원피스',icon:'👘',iconImg:'ui/쇼핑/옷/여자명품원피스.png',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'female',
+  {id:'luxuryDress',name:'명품 원피스',icon:'👘',iconImg:'UI/쇼핑/옷/여자명품원피스.png',desc:'옷에 대해 모르는 사람이 입기에는 부담스러울 정도로 비싼 옷.',price:2000000,max:1,category:'clothes',gender:'female',
     effects:{charm:15,sales:15}},
-  {id:'lawyerBag',name:'변호사 가방',icon:'💼',iconImg:'ui/쇼핑/옷/변호사가방.png',desc:'변호사협회에서 기념품으로 주는 가방. 변호사 마크가 붙어있어 살짝 민망하다.',price:0,max:1,category:'clothes',
+  {id:'lawyerBag',name:'변호사 가방',icon:'💼',iconImg:'UI/쇼핑/옷/변호사가방.png',desc:'변호사협회에서 기념품으로 주는 가방. 변호사 마크가 붙어있어 살짝 민망하다.',price:0,max:1,category:'clothes',
     effects:{sales:1}},
-  {id:'luxuryBag',name:'명품 가방',icon:'👜',iconImg:'ui/쇼핑/옷/명품가방.png',desc:'큰맘먹고 산 가방. 들고 나가면 사람들이 관심을 보인다.',price:5000000,max:1,category:'clothes',
+  {id:'luxuryBag',name:'명품 가방',icon:'👜',iconImg:'UI/쇼핑/옷/명품가방.png',desc:'큰맘먹고 산 가방. 들고 나가면 사람들이 관심을 보인다.',price:5000000,max:1,category:'clothes',
     effects:{charm:10,sales:10}},
-  {id:'luxWatch',name:'명품 시계',icon:'⌚',iconImg:'ui/쇼핑/옷/명품시계.png',desc:'변호사에게 시계는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'male',
+  {id:'luxWatch',name:'명품 시계',icon:'⌚',iconImg:'UI/쇼핑/옷/명품시계.png',desc:'변호사에게 시계는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'male',
     effects:{sales:30}},
-  {id:'luxAccessory',name:'명품 악세사리',icon:'💎',iconImg:'ui/쇼핑/옷/명품악세사리.png',desc:'변호사에게 악세사리는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'female',
+  {id:'luxAccessory',name:'명품 악세사리',icon:'💎',iconImg:'UI/쇼핑/옷/명품악세사리.png',desc:'변호사에게 악세사리는 신뢰의 상징이다.',price:10000000,max:1,category:'clothes',gender:'female',
     effects:{sales:30}},
-  {id:'casualWear',name:'캐주얼복',icon:'👚',iconImg:'ui/쇼핑/옷/여자캐주얼.png',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'female',
+  {id:'casualWear',name:'캐주얼복',icon:'👚',iconImg:'UI/쇼핑/옷/여자캐주얼.png',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'female',
     effects:{stamina:5}},
-  {id:'partyDress',name:'파티드레스',icon:'✨',iconImg:'ui/쇼핑/옷/여자파티드레스.png',desc:'화려한 파티용 드레스. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'female',
+  {id:'partyDress',name:'파티드레스',icon:'✨',iconImg:'UI/쇼핑/옷/여자파티드레스.png',desc:'화려한 파티용 드레스. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'female',
     effects:{charm:50,sales:50}},
-  {id:'casualWearM',name:'캐주얼복',icon:'👕',iconImg:'ui/쇼핑/옷/남자캐주얼.png',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'male',
+  {id:'casualWearM',name:'캐주얼복',icon:'👕',iconImg:'UI/쇼핑/옷/남자캐주얼.png',desc:'편하고 활동적인 캐주얼 복장. 재판에는 부적절할 수 있다.',price:50000,max:1,category:'clothes',gender:'male',
     effects:{stamina:5}},
-  {id:'tailcoat',name:'연미복',icon:'🎩',iconImg:'ui/쇼핑/옷/남자연미복.png',desc:'화려한 연미복. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'male',
+  {id:'tailcoat',name:'연미복',icon:'🎩',iconImg:'UI/쇼핑/옷/남자연미복.png',desc:'화려한 연미복. 매력적이지만 재판에는 부적절할 수 있다.',price:5000000,max:1,category:'clothes',gender:'male',
     effects:{charm:50,sales:50}},
-  {id:'proBook',name:'전문서적',icon:'📚',iconImg:'ui/쇼핑/책/특별법.png',desc:'전문분야의 실력을 높여줄 수 있는 전문서적.',price:50000,max:10,category:'book',
+  {id:'proBook',name:'전문서적',icon:'📚',iconImg:'UI/쇼핑/책/특별법.png',desc:'전문분야의 실력을 높여줄 수 있는 전문서적.',price:50000,max:10,category:'book',
     effects:{},isProBook:true},
-  {id:'historyBook',name:'역사책',icon:'📖',iconImg:'ui/쇼핑/책/역사.png',desc:'역사를 알면 세상을 보는 눈이 달라진다.',price:50000,max:10,category:'book',
+  {id:'historyBook',name:'역사책',icon:'📖',iconImg:'UI/쇼핑/책/역사.png',desc:'역사를 알면 세상을 보는 눈이 달라진다.',price:50000,max:10,category:'book',
     effects:{observation:1}},
-  {id:'philosophyBook',name:'철학책',icon:'📕',iconImg:'ui/쇼핑/책/철학.png',desc:'철학을 읽으면 도덕적 감수성이 높아진다.',price:30000,max:10,category:'book',
+  {id:'philosophyBook',name:'철학책',icon:'📕',iconImg:'UI/쇼핑/책/철학.png',desc:'철학을 읽으면 도덕적 감수성이 높아진다.',price:30000,max:10,category:'book',
     effects:{morality:1}},
-  {id:'kcar',name:'경차',icon:'🚗',iconImg:'ui/쇼핑/차와기타/경차.png',desc:'경제적인 경차. 영업에 약간 도움이 된다.',price:20000000,max:1,category:'car',
+  {id:'kcar',name:'경차',icon:'🚗',iconImg:'UI/쇼핑/차와기타/경차.png',desc:'경제적인 경차. 영업에 약간 도움이 된다.',price:20000000,max:1,category:'car',
     carBonus:5},
-  {id:'midcar',name:'중형차',icon:'🚙',iconImg:'ui/쇼핑/차와기타/중형차.png',desc:'무난한 중형차. 영업에 도움이 된다.',price:50000000,max:1,category:'car',
+  {id:'midcar',name:'중형차',icon:'🚙',iconImg:'UI/쇼핑/차와기타/중형차.png',desc:'무난한 중형차. 영업에 도움이 된다.',price:50000000,max:1,category:'car',
     carBonus:10},
-  {id:'luxcar',name:'고급외제차',icon:'🏎️',iconImg:'ui/쇼핑/차와기타/고급외제차.png',desc:'누가 봐도 성공한 변호사의 차. 영업력이 크게 오른다.',price:200000000,max:1,category:'car',
+  {id:'luxcar',name:'고급외제차',icon:'🏎️',iconImg:'UI/쇼핑/차와기타/고급외제차.png',desc:'누가 봐도 성공한 변호사의 차. 영업력이 크게 오른다.',price:200000000,max:1,category:'car',
     carBonus:30},
 ];
 
@@ -17933,7 +17933,7 @@ function openCloset() {
 
   // 일반 복장 (현재 다른 옷 입고 있을 때만 표시)
   if (G.currentOutfit !== 'default') {
-    const defaultImg = G.gender === 'male' ? 'ui/쇼핑/옷/남자기본.png' : 'ui/쇼핑/옷/여자기본.png';
+    const defaultImg = G.gender === 'male' ? 'UI/쇼핑/옷/남자기본.png' : 'UI/쇼핑/옷/여자기본.png';
     html += `<div class="action-option" onclick="confirmEquip('default')">
       <img src="${defaultImg}" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
       <div style="flex:1"><div class="name">일반 복장</div>
@@ -18762,9 +18762,9 @@ function takeBackCase(assocIdx, caseIdx) {
 
 // ==================== HOUSING ====================
 const HOUSING_DATA = {
-  oneroom: {name:'원룸', bg:'원룸.webp', icon:'ui/아이콘/집/원룸.png'},
-  apartment: {name:'아파트', bg:'아파트.webp', icon:'ui/아이콘/집/아파트.png'},
-  luxury: {name:'최고급 아파트', bg:'최고급아파트.webp', icon:'ui/아이콘/집/최고급아파트.png'},
+  oneroom: {name:'원룸', bg:'원룸.webp', icon:'UI/아이콘/집/원룸.png'},
+  apartment: {name:'아파트', bg:'아파트.webp', icon:'UI/아이콘/집/아파트.png'},
+  luxury: {name:'최고급 아파트', bg:'최고급아파트.webp', icon:'UI/아이콘/집/최고급아파트.png'},
 };
 const HOUSING_RANK = { oneroom: 0, apartment: 1, luxury: 2 };
 const HOUSING_PRICE = { oneroom: 0, apartment: 500000000, luxury: 2000000000 };
