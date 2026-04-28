@@ -18763,29 +18763,48 @@ function getRoomBg() { return HOUSING_DATA[G.housing].bg; }
 
 function openHousing() {
   document.getElementById('storage-modal').style.display = 'flex';
-  document.getElementById('storage-title').textContent = '집 - 이사';
+  document.getElementById('storage-title').textContent = '집';
   const cur = HOUSING_DATA[G.housing].name;
-  let html = `<div style="text-align:center;font-size:0.85rem;color:#a09080;margin-bottom:12px">현재 주거: <span style="color:#c9a84c;font-weight:700">${cur}</span></div>`;
+  const sectionHeader = (label) => `<div style="font-size:0.7rem;color:#a09060;letter-spacing:2px;font-weight:700;padding:6px 0 4px;margin-top:4px;border-bottom:1px solid #5a3528">${label}</div>`;
 
+  let html = `<div style="text-align:center;font-size:0.85rem;color:#a09080;margin-bottom:8px">현재 주거: <span style="color:#c9a84c;font-weight:700">${cur}</span></div>`;
+
+  // 보유 차량 섹션
+  html += sectionHeader('내 차량');
+  if (G.currentCar) {
+    const carItem = SHOP_ITEMS.find(i=>i.id===G.currentCar);
+    if (carItem) {
+      html += `<div class="action-option" style="cursor:default;background:#1e110a;border-color:#3a2018">
+        ${_itemIconHtml(carItem)}
+        <div style="flex:1"><div class="name">${carItem.name}</div>
+        <div class="effects">${carItem.desc}</div>
+        <div class="effects" style="color:#66cc88">영업 보너스 +${carItem.carBonus}</div></div></div>`;
+    }
+  } else {
+    html += `<div style="text-align:center;color:#8a7060;padding:14px 0;font-size:0.85rem">차량 없음 (쇼핑에서 구입 가능)</div>`;
+  }
+
+  // 이사 섹션
+  html += sectionHeader('이사');
   if (G.housing === 'oneroom') {
     html += `<div class="action-option" onclick="buyHousing('apartment')">
-      <span style="font-size:1.5rem;margin-right:8px">🏢</span>
+      <img src="ui/아이콘/집/아파트.png" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
       <div style="flex:1"><div class="name">아파트로 이사</div>
       <div class="effects">명성+10, 멘탈+30, 체력+50, 스트레스-100, 피로-100</div></div>
       <div class="cost">5억원</div></div>`;
     html += `<div class="action-option" onclick="buyHousing('luxury')">
-      <span style="font-size:1.5rem;margin-right:8px">🏰</span>
+      <img src="ui/아이콘/집/최고급아파트.png" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
       <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
       <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
       <div class="cost">20억원</div></div>`;
   } else if (G.housing === 'apartment') {
     html += `<div class="action-option" onclick="buyHousing('luxury')">
-      <span style="font-size:1.5rem;margin-right:8px">🏰</span>
+      <img src="ui/아이콘/집/최고급아파트.png" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
       <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
       <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
       <div class="cost">20억원</div></div>`;
   } else {
-    html += `<div style="text-align:center;color:#c9a84c;padding:20px 0">이미 최고급 아파트에 살고 있습니다.</div>`;
+    html += `<div style="text-align:center;color:#c9a84c;padding:14px 0">이미 최고급 아파트에 살고 있습니다.</div>`;
   }
 
   document.getElementById('storage-list').innerHTML = html;
