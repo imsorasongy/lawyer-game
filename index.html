@@ -1645,8 +1645,10 @@ const G = {
   monthApplied: false,       // 이번달 구직 지원 여부
   isBlackFirmFirstMonth: false, // 더블랙 첫달 이벤트용
   housing: 'oneroom',          // oneroom, apartment, luxury
+  housingBuffApplied: null,    // null|'apartment'|'luxury' — 현재 stat에 적용된 집 보너스 (이사 시 차감용)
   currentOutfit: 'default',    // default, premiumSuit, luxurySuit, premiumDress, luxuryDress
-  currentCar: null,            // null, 'kcar', 'midcar', 'luxcar'
+  currentCar: null,            // 현재 활성(가장 비싼) 차량 id. null|'kcar'|'midcar'|'luxcar'
+  activeCarBonus: 0,           // 현재 영업력에 적용된 차량 보너스 — 차량 교체 시 차감용
   // 연애 시스템
   romance: {
     met: { seungha: true },        // {캐릭터id: true} 만난 적 있는지
@@ -17771,14 +17773,17 @@ function openShopping() {
   // 차 카테고리
   const carItems = SHOP_ITEMS.filter(i=>i.category==='car');
   if (carItems.length) {
-    const curCarLabel = G.currentCar ? (SHOP_ITEMS.find(i=>i.id===G.currentCar)?.name || '없음') : '없음';
-    html += `<div class="action-category"><div class="action-category-title">차 (현재: ${curCarLabel})</div>`;
+    const activeId = getActiveCarId();
+    const curCarLabel = activeId ? (SHOP_ITEMS.find(i=>i.id===activeId)?.name || '없음') : '없음';
+    html += `<div class="action-category"><div class="action-category-title">차 (적용중: ${curCarLabel})</div>`;
     carItems.forEach(item => {
-      const isCurrent = G.currentCar === item.id;
+      const owned = (G.inventory[item.id]||0) > 0;
+      const isActive = activeId === item.id;
       const priceStr = `${(item.price/10000).toLocaleString()}만원`;
-      html += `<div class="action-option" onclick="${isCurrent?'':`buyItem('${item.id}')`}" style="${isCurrent?'background:#1e110a;border-color:#3a2018;opacity:0.55;cursor:default':''}">
+      const tag = owned ? (isActive ? '(보유중·적용)' : '(보유중)') : '';
+      html += `<div class="action-option" onclick="${owned?'':`buyItem('${item.id}')`}" style="${owned?'background:#1e110a;border-color:#3a2018;opacity:0.55;cursor:default':''}">
         ${_itemIconHtml(item)}
-        <div style="flex:1"><div class="name">${item.name} ${isCurrent?'(보유중)':''}</div>
+        <div style="flex:1"><div class="name">${item.name} ${tag}</div>
         <div class="effects">${item.desc}</div></div>
         <div class="cost">${priceStr}</div></div>`;
     });
@@ -17829,20 +17834,23 @@ function buyItem(itemId) {
 function buyCar(carId) {
   const item = SHOP_ITEMS.find(i=>i.id===carId);
   if (!item) return;
-  if (G.currentCar === carId) { showToast('이미 보유 중인 차량입니다.'); return; }
+  if ((G.inventory[carId]||0) >= (item.max||1)) { showToast('이미 보유 중인 차량입니다.'); return; }
   if (G.funds < item.price) { showToast('자금이 부족합니다.'); return; }
   G.funds -= item.price;
-  // 이전 차 보너스 제거
-  if (G.currentCar) {
-    const oldCar = SHOP_ITEMS.find(i=>i.id===G.currentCar);
-    if (oldCar && oldCar.carBonus) {
-      G.stats.sales = Math.max(0, G.stats.sales - oldCar.carBonus);
-    }
+  // 인벤토리에 추가
+  G.inventory[carId] = (G.inventory[carId]||0) + 1;
+  // 이전 적용 보너스 제거 후, 새 활성 차량 보너스 재계산
+  const oldBonus = G.activeCarBonus || 0;
+  if (oldBonus) G.stats.sales = Math.max(0, G.stats.sales - oldBonus);
+  G.currentCar = getActiveCarId();
+  G.activeCarBonus = getActiveCarBonus();
+  G.stats.sales = Math.min(999, G.stats.sales + G.activeCarBonus);
+  const bonusDelta = G.activeCarBonus - oldBonus;
+  if (bonusDelta > 0) {
+    showToast(`${item.name} 구매 완료! 영업력 +${bonusDelta}`);
+  } else {
+    showToast(`${item.name} 구매 완료! (영업 보너스는 더 비싼 차량 기준 유지)`);
   }
-  // 새 차 보너스 적용
-  G.currentCar = carId;
-  G.stats.sales = Math.min(999, G.stats.sales + item.carBonus);
-  showToast(`${item.name} 구매 완료! 영업력 +${item.carBonus}`);
   addDiary('🚗', pickDiaryText([
     `${item.name} 샀다 🚗 첫 시동 걸 때 묘한 만족감 #새차 #드림카`,
     `${item.name} 구매 완료 ✨ 이 차로 어디 가볼까 #새차 #나의애마`,
@@ -18754,94 +18762,188 @@ function takeBackCase(assocIdx, caseIdx) {
 
 // ==================== HOUSING ====================
 const HOUSING_DATA = {
-  oneroom: {name:'원룸', bg:'원룸.webp'},
-  apartment: {name:'아파트', bg:'아파트.webp'},
-  luxury: {name:'최고급 아파트', bg:'최고급아파트.webp'},
+  oneroom: {name:'원룸', bg:'원룸.webp', icon:'ui/아이콘/집/원룸.png'},
+  apartment: {name:'아파트', bg:'아파트.webp', icon:'ui/아이콘/집/아파트.png'},
+  luxury: {name:'최고급 아파트', bg:'최고급아파트.webp', icon:'ui/아이콘/집/최고급아파트.png'},
 };
+const HOUSING_RANK = { oneroom: 0, apartment: 1, luxury: 2 };
+const HOUSING_PRICE = { oneroom: 0, apartment: 500000000, luxury: 2000000000 };
+// 그 집에 사는 동안만 적용되는 능력치 보너스
+const HOUSING_BUFF = {
+  apartment: { reputation: 10, mental: 30, stamina: 50 },
+  luxury: { reputation: 30, charm: 50, stamina: 100 },
+};
+
+// === 차량 다중보유: 보유 차량 중 가장 비싼 차의 carBonus만 영업력에 적용 ===
+function getOwnedCarIds() {
+  return ['kcar','midcar','luxcar'].filter(id => (G.inventory[id]||0) > 0);
+}
+function getActiveCarId() {
+  const owned = getOwnedCarIds();
+  if (!owned.length) return null;
+  let best = null, bestPrice = -1;
+  for (const id of owned) {
+    const it = SHOP_ITEMS.find(i=>i.id===id);
+    if (it && it.price > bestPrice) { bestPrice = it.price; best = id; }
+  }
+  return best;
+}
+function getActiveCarBonus() {
+  const id = getActiveCarId();
+  if (!id) return 0;
+  const it = SHOP_ITEMS.find(i=>i.id===id);
+  return it ? (it.carBonus||0) : 0;
+}
 
 function getRoomBg() { return HOUSING_DATA[G.housing].bg; }
 
+function _housingIconHtml(type) {
+  const data = HOUSING_DATA[type];
+  return `<img src="${data.icon}" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">`;
+}
 function openHousing() {
   document.getElementById('storage-modal').style.display = 'flex';
   document.getElementById('storage-title').textContent = '집';
-  const cur = HOUSING_DATA[G.housing].name;
   const sectionHeader = (label) => `<div style="font-size:0.7rem;color:#a09060;letter-spacing:2px;font-weight:700;padding:6px 0 4px;margin-top:4px;border-bottom:1px solid #5a3528">${label}</div>`;
 
-  let html = `<div style="text-align:center;font-size:0.85rem;color:#a09080;margin-bottom:8px">현재 주거: <span style="color:#c9a84c;font-weight:700">${cur}</span></div>`;
+  // 현재 주거
+  const curData = HOUSING_DATA[G.housing];
+  let html = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px">
+    ${_housingIconHtml(G.housing)}
+    <div style="font-size:0.85rem;color:#a09080">현재 주거: <span style="color:#c9a84c;font-weight:700">${curData.name}</span></div>
+  </div>`;
 
   // 보유 차량 섹션
   html += sectionHeader('내 차량');
-  if (G.currentCar) {
-    const carItem = SHOP_ITEMS.find(i=>i.id===G.currentCar);
-    if (carItem) {
-      html += `<div class="action-option" style="cursor:default;background:#1e110a;border-color:#3a2018">
-        ${_itemIconHtml(carItem)}
-        <div style="flex:1"><div class="name">${carItem.name}</div>
-        <div class="effects">${carItem.desc}</div>
-        <div class="effects" style="color:#66cc88">영업 보너스 +${carItem.carBonus}</div></div></div>`;
-    }
-  } else {
+  const ownedCars = getOwnedCarIds();
+  const activeCarId = getActiveCarId();
+  if (ownedCars.length === 0) {
     html += `<div style="text-align:center;color:#8a7060;padding:14px 0;font-size:0.85rem">차량 없음 (쇼핑에서 구입 가능)</div>`;
+  } else {
+    // 비싼 순으로 정렬
+    const sortedCars = ownedCars.slice().sort((a,b)=>{
+      const pa = SHOP_ITEMS.find(i=>i.id===a)?.price || 0;
+      const pb = SHOP_ITEMS.find(i=>i.id===b)?.price || 0;
+      return pb - pa;
+    });
+    sortedCars.forEach(id => {
+      const car = SHOP_ITEMS.find(i=>i.id===id); if (!car) return;
+      const isActive = id === activeCarId;
+      const tag = isActive ? `<span style="color:#c9a84c;font-weight:700;font-size:0.78rem">[적용중]</span>` : `<span style="color:#8a7060;font-size:0.75rem">[보관]</span>`;
+      html += `<div class="action-option" style="cursor:default;background:#1e110a;border-color:${isActive?'#5a3528':'#3a2018'};${isActive?'':'opacity:0.7;'}">
+        ${_itemIconHtml(car)}
+        <div style="flex:1"><div class="name">${car.name} ${tag}</div>
+        <div class="effects">${car.desc}</div>
+        ${isActive?`<div class="effects" style="color:#66cc88">영업 보너스 +${car.carBonus}</div>`:''}</div></div>`;
+    });
+    if (ownedCars.length > 1) {
+      html += `<div style="text-align:center;font-size:0.72rem;color:#8a7060;padding:4px 0">가장 비싼 차량의 보너스만 적용됩니다.</div>`;
+    }
   }
 
   // 이사 섹션
   html += sectionHeader('이사');
-  if (G.housing === 'oneroom') {
-    html += `<div class="action-option" onclick="buyHousing('apartment')">
-      <img src="ui/아이콘/집/아파트.png" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
-      <div style="flex:1"><div class="name">아파트로 이사</div>
-      <div class="effects">명성+10, 멘탈+30, 체력+50, 스트레스-100, 피로-100</div></div>
-      <div class="cost">5억원</div></div>`;
-    html += `<div class="action-option" onclick="buyHousing('luxury')">
-      <img src="ui/아이콘/집/최고급아파트.png" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
-      <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
-      <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
-      <div class="cost">20억원</div></div>`;
-  } else if (G.housing === 'apartment') {
-    html += `<div class="action-option" onclick="buyHousing('luxury')">
-      <img src="ui/아이콘/집/최고급아파트.png" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">
-      <div style="flex:1"><div class="name">최고급 아파트로 이사</div>
-      <div class="effects">명성+30, 매력+50, 체력+100, 스트레스-200, 피로-200</div></div>
-      <div class="cost">20억원</div></div>`;
-  } else {
-    html += `<div style="text-align:center;color:#c9a84c;padding:14px 0">이미 최고급 아파트에 살고 있습니다.</div>`;
-  }
+  ['oneroom','apartment','luxury'].forEach(type => {
+    const data = HOUSING_DATA[type];
+    const isCurrent = type === G.housing;
+    const price = HOUSING_PRICE[type];
+    const refund = Math.floor(HOUSING_PRICE[G.housing] * 0.75);
+    const netCost = price - refund; // 실제 필요 자금 (음수면 잔돈 받음)
+    let cost = '', enabled = false, costColor = '#cc6666';
+    if (isCurrent) {
+      cost = '거주 중';
+      costColor = '#c9a84c';
+    } else if (price === 0) {
+      cost = '무료';
+      enabled = true;
+      costColor = '#a09060';
+    } else {
+      cost = formatMoney(price);
+      enabled = G.funds >= netCost; // 환급 차감 후 실제 들 자금
+    }
+    const buffStr = HOUSING_BUFF[type] ? Object.entries(HOUSING_BUFF[type]).map(([k,v])=>`${STAT_NAMES[k]||k}+${v}`).join(', ') : '없음';
+    const effects = isCurrent
+      ? `현재 적용: ${buffStr}`
+      : `거주 효과: ${buffStr}`;
+    const opacity = isCurrent ? 'opacity:0.55;' : (enabled ? '' : 'opacity:0.45;');
+    const click = (isCurrent || !enabled) ? '' : `onclick="changeHousing('${type}')"`;
+    html += `<div class="action-option" ${click} style="${opacity}${(isCurrent||!enabled)?'cursor:default;':''}">
+      ${_housingIconHtml(type)}
+      <div style="flex:1"><div class="name">${data.name}</div>
+      <div class="effects">${effects}</div></div>
+      <div class="cost" style="color:${costColor}">${cost}</div></div>`;
+  });
 
   document.getElementById('storage-list').innerHTML = html;
 }
 
-function buyHousing(type) {
-  const cost = type === 'apartment' ? 500000000 : 2000000000;
-  const label = type === 'apartment' ? '아파트' : '최고급 아파트';
-  if (G.funds < cost) { showToast('자금이 부족합니다.'); return; }
-  G.funds -= cost;
-  G.housing = type;
+function changeHousing(type) {
+  const oldType = G.housing;
+  if (oldType === type) return;
+  const isUpgrade = HOUSING_RANK[type] > HOUSING_RANK[oldType];
+  const label = HOUSING_DATA[type].name;
+  const oldLabel = HOUSING_DATA[oldType].name;
 
-  if (type === 'apartment') {
-    G.stats.reputation = Math.min(999, G.stats.reputation + 10);
-    G.stats.mental = Math.min(999, G.stats.mental + 30);
-    G.stats.stamina = Math.min(999, G.stats.stamina + 50);
-    G.stats.stress = Math.max(0, G.stats.stress - 100);
-    G.stats.fatigue = Math.max(0, G.stats.fatigue - 100);
-  } else {
-    G.stats.reputation = Math.min(999, G.stats.reputation + 30);
-    G.stats.charm = Math.min(999, G.stats.charm + 50);
-    G.stats.stamina = Math.min(999, G.stats.stamina + 100);
-    G.stats.stress = Math.max(0, G.stats.stress - 200);
-    G.stats.fatigue = Math.max(0, G.stats.fatigue - 200);
+  // 자금 흐름: 현재 집 75% 환급 + 새 집 100% 매입
+  const refund = Math.floor(HOUSING_PRICE[oldType] * 0.75);
+  const cost = HOUSING_PRICE[type];
+  const netCost = cost - refund;
+  if (netCost > 0 && G.funds < netCost) { showToast('자금이 부족합니다.'); return; }
+  G.funds += refund - cost;
+
+  // 기존 조건부 보너스 제거 → 새 조건부 보너스 적용
+  if (G.housingBuffApplied && HOUSING_BUFF[G.housingBuffApplied]) {
+    const old = HOUSING_BUFF[G.housingBuffApplied];
+    for (const k in old) G.stats[k] = Math.max(0, G.stats[k] - old[k]);
   }
+  if (HOUSING_BUFF[type]) {
+    const nb = HOUSING_BUFF[type];
+    for (const k in nb) G.stats[k] = Math.min(999, G.stats[k] + nb[k]);
+  }
+  G.housingBuffApplied = type === 'oneroom' ? null : type;
 
-  // 메인화면 배경 변경
+  G.housing = type;
   document.querySelector('.room-bg').style.backgroundImage = `url('${getRoomBg()}')`;
-  showToast(`${label}(으)로 이사했습니다!`);
-  addDiary('🏠', pickDiaryText([
-    `${label}(으)로 이사 🏠 새 공간에 짐 푸는데 설렘 #이사 #새집`,
-    `이삿날 ✨ 넓어진 집 한 바퀴 돌아보며 혼자 웃음 ㅋㅋ #이사 #새출발`,
-    `${label} 🎉 오래 꿈꿨던 집에 드디어 내 이름 #이사 #꿈이루다`,
-  ]), 1);
+  if (isUpgrade) {
+    addDiary('🏠', pickDiaryText([
+      `${label}(으)로 이사 🏠 새 공간에 짐 푸는데 설렘 #이사 #새집`,
+      `이삿날 ✨ 넓어진 집 한 바퀴 돌아보며 혼자 웃음 ㅋㅋ #이사 #새출발`,
+      `${label} 🎉 오래 꿈꿨던 집에 드디어 내 이름 #이사 #꿈이루다`,
+    ]), 1);
+  } else {
+    addDiary('🏠', pickDiaryText([
+      `${label}(으)로 이사 🏠 좀 줄여서 마음은 가벼워짐 #이사 #다운사이징`,
+      `정든 집 떠나며 가구 정리 ✨ 새 출발이라 생각하자 #이사 #${label}`,
+      `${label} 입주 💭 사이즈는 작아져도 내 공간은 내 공간 #이사`,
+    ]), 1);
+  }
   updateUI();
   document.getElementById('storage-modal').style.display = 'none';
+
+  // 매각 알림 팝업 (이전 집이 원룸이 아니어서 환급이 발생한 경우만)
+  if (refund > 0) {
+    _housingMovePopup(`${oldLabel}을(를) 매각하여\n${formatMoney(refund)}을(를) 받았습니다.\n\n${label}(으)로 이사 완료!`);
+  } else {
+    showToast(`${label}(으)로 이사했습니다!`);
+  }
 }
+
+// 간단 알림 팝업 (확인 버튼만)
+function _housingMovePopup(msg) {
+  const existing = document.getElementById('sys-popup');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'sys-popup';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:700;display:flex;align-items:center;justify-content:center';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#331e16;border:2px solid #5a3528;border-radius:10px;padding:24px 32px;max-width:400px;width:85%;text-align:center;color:#e8d5b5;font-size:0.95rem;line-height:1.7';
+  box.innerHTML = `<div style="margin-bottom:16px;white-space:pre-line">${msg}</div>
+    <button class="event-choice" style="padding:6px 28px" onclick="document.getElementById('sys-popup').remove()">확인</button>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+// 호환: 외부에서 buyHousing 호출이 남아 있을 경우 대비
+function buyHousing(type) { changeHousing(type); }
 
 // ==================== BRIEFCASE ====================
 function openBriefcase() {
@@ -19136,7 +19238,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 14;
+const GAME_VERSION = 15;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -19254,7 +19356,28 @@ const MIGRATIONS = {
     }
     return state;
   },
-  // 향후 업데이트: v15, v16 ... 형태로 추가
+  // v14 → v15 : 차량 다중보유 + 집 보너스 분리 (조건부 vs 영구)
+  // - currentCar(단일) → inventory[carId] 다중 + activeCarBonus 추적
+  // - 기존 적용된 housing 보너스를 housingBuffApplied로 마킹 (다음 이사 시 정상 차감)
+  15: function(state) {
+    if (!state.inventory || typeof state.inventory !== 'object') state.inventory = {};
+    // 차량
+    if (state.currentCar) {
+      state.inventory[state.currentCar] = state.inventory[state.currentCar] || 1;
+      const carBonusMap = { kcar: 5, midcar: 10, luxcar: 30 };
+      state.activeCarBonus = carBonusMap[state.currentCar] || 0;
+    } else {
+      state.activeCarBonus = 0;
+    }
+    // 집 보너스 추적 (기존 stat은 그대로 유지, 다음 이사 시 차감하기 위한 마커)
+    if (state.housing && state.housing !== 'oneroom') {
+      state.housingBuffApplied = state.housing;
+    } else {
+      state.housingBuffApplied = null;
+    }
+    return state;
+  },
+  // 향후 업데이트: v16, v17 ... 형태로 추가
 };
 
 // ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
@@ -19369,10 +19492,15 @@ function ensureDefaults(state) {
     snsFollowers: 0, youtubeSubscribers: 0,
     preparation: 0, cases: 0, wins: 0, losses: 0,
     gradSchoolCount: 0, phdProgress: 0,
-    playTimeSec: 0,
+    playTimeSec: 0, activeCarBonus: 0,
   };
   for (const k in nums) {
     if (typeof state[k] !== 'number' || !isFinite(state[k])) state[k] = nums[k];
+  }
+
+  // 집 보너스 마커: null 또는 'apartment'/'luxury'
+  if (state.housingBuffApplied !== null && state.housingBuffApplied !== 'apartment' && state.housingBuffApplied !== 'luxury') {
+    state.housingBuffApplied = (state.housing === 'apartment' || state.housing === 'luxury') ? state.housing : null;
   }
 
   // 사건 객체 — null이거나 객체. undefined면 G.mainCase1.active 같은 접근에서 크래시
