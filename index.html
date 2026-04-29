@@ -3740,11 +3740,11 @@ function runSubTrialPhase(subNum, mc, trialArray, evidence, phase, step, callbac
             mc.active = false;
             mc.cleared = true;
             showStampEffect('win');
-            applyStat('reputation', 2);
+            awardCaseClearReward(2);
             const clearDialogues = trialData.clearDialogues || [];
             if (clearDialogues.length > 0) {
               showMainTrialDialogueSequence(clearDialogues, 0, () => {
-                showToast(`서브스토리 사건${subNum} 승소! 명성 +2`);
+                showToast(`서브스토리 사건${subNum} 승소! 모든 능력치 +2`);
                 const _cn = {1:'대여금',2:'손해배상'}[subNum] || '';
                 addDiary('⚖', pickDiaryText([
                   `${_cn} 사건 승소 🎉 준비한 만큼 나왔다 #승소 #변호사라이프`,
@@ -3754,7 +3754,7 @@ function runSubTrialPhase(subNum, mc, trialArray, evidence, phase, step, callbac
                 callback();
               });
             } else {
-              showToast(`서브스토리 사건${subNum} 승소! 명성 +2`);
+              showToast(`서브스토리 사건${subNum} 승소! 모든 능력치 +2`);
               callback();
             }
           } else {
@@ -4268,13 +4268,12 @@ function runSubTrial3Phase(phase, step, callback) {
             mc.active = false;
             mc.cleared = true;
             showStampEffect('win');
-            applyStat('reputation', 10);
-            G.funds += 20000000; statChanges.funds += 20000000;
+            awardCaseClearReward(3);
             const clearDlgs = trialData.clearDialogues || [];
             if (clearDlgs.length > 0) {
               showMainTrialDialogueSequence(clearDlgs, 0, () => {
                 playSubRivalReaction(3, 'win', () => {
-                  showToast('서브스토리 사건3 승소! 명성 +10, 자금 +2000만원');
+                  showToast('서브스토리 사건3 승소! 모든 능력치 +3');
                   addDiary('⚖', pickDiaryText([
                     `이혼 사건 승소 💪 재산분할도 제대로 받아냄! 의뢰인분 울먹이심 ㅠㅠ #승소 #가사전문`,
                     `오늘 이혼 판결 나옴 ✨ 긴 싸움 끝 후련 #승소 #변호사라이프`,
@@ -4285,7 +4284,7 @@ function runSubTrial3Phase(phase, step, callback) {
                 });
               });
             } else {
-              showToast('서브스토리 사건3 승소! 명성 +10, 자금 +2000만원');
+              showToast('서브스토리 사건3 승소! 모든 능력치 +3');
               playBGM('normal');
               callback();
             }
@@ -4636,12 +4635,12 @@ function runSubTrial4Phase(phase, step, callback) {
               trialData._phase2Done = false;
               if (hasClear) {
                 mc.active = false; mc.cleared = true; showStampEffect('win');
-                applyStat('reputation', 15);
+                awardCaseClearReward(3);
                 const cd = trialData.clearDialogues || [];
                 if (cd.length > 0) {
                   showMainTrialDialogueSequence(cd, 0, () => {
                     playSubRivalReaction(4, 'win', () => {
-                      showToast('서브스토리 사건4 승소! 명성 +15');
+                      showToast('서브스토리 사건4 승소! 모든 능력치 +3');
                       addDiary('⚖', pickDiaryText([
                       `부당해고 승소 💪 회사 상대 싸움 끝까지 밀어붙인 보람! #승소 #노동법`,
                       `오늘 부당해고 이겼다 🎉 의뢰인분 복직 확정 #승소 #뿌듯`,
@@ -4651,7 +4650,7 @@ function runSubTrial4Phase(phase, step, callback) {
                     });
                   });
                 } else {
-                  showToast('서브스토리 사건4 승소! 명성 +15');
+                  showToast('서브스토리 사건4 승소! 모든 능력치 +3');
                   playBGM('normal'); callback();
                 }
               } else { playBGM('normal'); callback(); }
@@ -5008,14 +5007,14 @@ function runSubTrial5Phase(phase, step, callback) {
                       trialData._p2Done = false; trialData._p3Done = false;
                       if (hasClear) {
                         mc.active = false; mc.cleared = true; showStampEffect('win');
-                        applyStat('reputation', 15);
+                        awardCaseClearReward(4);
                         const cd = trialData.clearDialogues || [];
                         showMainTrialDialogueSequence(cd, 0, () => {
-                          showToast('서브스토리 사건5 승소! 명성 +15');
+                          showToast('서브스토리 사건5 승소! 모든 능력치 +4');
                           addDiary('⚖', pickDiaryText([
-                            `보이스피싱 승소 💪 피해자분들 돈 일부라도 돌려받음 #승소 #정의구현`,
-                            `오늘 보이스피싱 이겼다 🔥 이런 건 이길 때마다 통쾌 #승소 #뿌듯`,
-                            `보이스피싱 OK ✨ 피해자분들 울먹 ㅠㅠ 오늘은 일찍 퇴근 #승소 #지친하루`,
+                            `보이스피싱 사건 무죄! 💪 누명 벗긴 의뢰인 손 잡고 한참 울었음 #무죄 #변호사라이프`,
+                            `오늘 보이스피싱 사건 무죄 🔥 미필적 고의 다투는 게 이렇게 통쾌할 줄 #무죄 #뿌듯`,
+                            `보이스피싱 사건 무죄! ✨ 의뢰인분 안도의 눈물 ㅠㅠ 오늘은 일찍 퇴근 #무죄 #지친하루`,
                           ]), _currentTrialDay);
                           playBGM('normal'); callback();
                         });
@@ -5036,10 +5035,10 @@ function runSubTrial5Phase(phase, step, callback) {
                 trialData._p2Done = false;
                 if (hasClear) {
                   mc.active = false; mc.cleared = true; showStampEffect('win');
-                  applyStat('reputation', 15);
+                  awardCaseClearReward(4);
                   const cd = trialData.clearDialogues || [];
                   showMainTrialDialogueSequence(cd, 0, () => {
-                    showToast('서브스토리 사건5 승소! 명성 +15');
+                    showToast('서브스토리 사건5 승소! 모든 능력치 +4');
                     playBGM('normal'); callback();
                   });
                 } else { playBGM('normal'); callback(); }
@@ -15328,7 +15327,7 @@ function judgeAction(){
   const penalty=Math.min(30,rawPenalty);  // 페널티 캡 30 — 최악 상태에서도 운 보정 여지
   let s=positive-penalty+(Math.random()*30-15);  // 운 폭 ±15
   s=Math.max(0,Math.min(100,s+50));
-  if(s>=88&&Math.random()<0.45)return{result:'great',mult:2};
+  if(s>=88&&Math.random()<0.30)return{result:'great',mult:2};
   if(s>=51)return{result:'success',mult:1};
   return{result:'fail',mult:0.5};
 }
@@ -15338,7 +15337,7 @@ function judgeConsult(){
   const penalty=Math.min(30,rawPenalty);
   let s=positive-penalty+(Math.random()*30-15);
   s=Math.max(0,Math.min(100,s+50));
-  if(s>=88&&Math.random()<0.45)return{result:'great',mult:2};
+  if(s>=88&&Math.random()<0.30)return{result:'great',mult:2};
   if(s>=51)return{result:'success',mult:1};
   return{result:'fail',mult:0.5};
 }
@@ -15374,6 +15373,12 @@ function applyStat(k,v){
   G.stats[k]=Math.max(0,Math.min(999,G.stats[k]+v));
   if(statChanges[k]!==undefined)statChanges[k]+=v;
   return v;
+}
+
+// 사건 클리어 보상: 일반 능력치 일괄 +N (스트레스·피로·업보·전문능력치 제외)
+const CASE_REWARD_STATS = ['lawKnowledge','debate','sales','charm','observation','stamina','mental','morality','sociability','reputation'];
+function awardCaseClearReward(amount) {
+  for (const k of CASE_REWARD_STATS) applyStat(k, amount);
 }
 
 // ==================== VN SCENE DISPLAY ====================
@@ -21221,8 +21226,8 @@ function processMainStoryMonthEnd(checkOffer) {
         const _mainLastDay = mc.lastTrialDay || new Date(2029 + G.year, G.month, 0).getDate();
         if (idx === 0) {
           G.mainStoryFlag.case1_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 10);
-          showToast('메인스토리 사건 1 클리어! 명성 +10');
+          awardCaseClearReward(5);
+          showToast('메인스토리 사건 1 클리어! 모든 능력치 +5');
           addDiary('📜', pickDiaryText([
             `긴 싸움 끝에 그 사건 마무리 🎉 오래 기억날 듯 #대형승소 #뿌듯`,
             `오래 끌어온 그 사건 끝냄 ✨ 얼마나 달려왔는지 #대형승소`,
@@ -21239,8 +21244,8 @@ function processMainStoryMonthEnd(checkOffer) {
             ]);
         } else if (idx === 1) {
           G.mainStoryFlag.case2_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 20);
-          showToast('메인스토리 사건 2 클리어! 명성 +20');
+          awardCaseClearReward(6);
+          showToast('메인스토리 사건 2 클리어! 모든 능력치 +6');
           addDiary('📜', pickDiaryText([
             `두 번째 대형 사건 매듭 💪 앞선 경험 빛 발함 #대형승소 #성장`,
             `그 사건 드디어 내 손에서 떠남 😮‍💨 안도의 한숨 #대형승소`,
@@ -21257,8 +21262,8 @@ function processMainStoryMonthEnd(checkOffer) {
             ]);
         } else if (idx === 2) {
           G.mainStoryFlag.case3_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 30);
-          showToast('메인스토리 사건 3 클리어! 명성 +30');
+          awardCaseClearReward(7);
+          showToast('메인스토리 사건 3 클리어! 모든 능력치 +7');
           addDiary('📜', pickDiaryText([
             `세 번째 대형 사건 종결 🎯 이 규모 이기다니 내가 여기까지 왔네 #대형승소`,
             `쉽지 않은 사건. 오늘 결과 오래 기억될 듯 ✨ #대형승소 #뿌듯`,
@@ -21275,8 +21280,8 @@ function processMainStoryMonthEnd(checkOffer) {
             ]);
         } else if (idx === 3) {
           G.mainStoryFlag.case4_cleared = true;
-          G.stats.reputation = Math.min(999, G.stats.reputation + 40);
-          showToast('메인스토리 사건 4 클리어! 명성 +40 — 메인스토리 완결!');
+          awardCaseClearReward(10);
+          showToast('메인스토리 사건 4 클리어! 모든 능력치 +10 — 메인스토리 완결!');
           addDiary('📜', pickDiaryText([
             `마지막 사건까지 끝났다 🎉 10년 가까이 이 순간 준비해온 듯 #대형승소 #완결`,
             `모든 게 끝남 ✨ 이 사건을 마지막으로 한 시대 통과함 #승소 #역사`,
