@@ -109,12 +109,12 @@ body {
 /* ===== Gender Selection ===== */
 #gender-screen {
   display: none; flex-direction: column; align-items: center; justify-content: center;
-  height: 100vh; background: linear-gradient(135deg, #0a0a2e 0%, #1a1a3e 50%, #0a0a2e 100%);
+  height: 100vh; background: linear-gradient(135deg, #1a0e08 0%, #2a1812 50%, #1a0e08 100%);
 }
 .gender-title { font-size: 2rem; font-weight: 700; color: #c9a84c; margin-bottom: 50px; letter-spacing: 4px; }
 .gender-choices { display: flex; gap: 60px; }
 .gender-card {
-  width: 280px; background: linear-gradient(180deg, #1a1a3e, #12122a); border: 2px solid #333366;
+  width: 280px; background: linear-gradient(180deg, #2a1812, #1a0e08); border: 2px solid #5a3528;
   border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s;
 }
 .gender-card:hover { border-color: #c9a84c; transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(201,168,76,0.15); }
@@ -124,17 +124,17 @@ body {
 /* ===== Name Input Screen ===== */
 #name-screen {
   display: none; flex-direction: column; align-items: center; justify-content: center;
-  height: 100vh; background: linear-gradient(135deg, #0a0a2e 0%, #1a1a3e 50%, #0a0a2e 100%);
+  height: 100vh; background: linear-gradient(135deg, #1a0e08 0%, #2a1812 50%, #1a0e08 100%);
 }
 .name-box {
-  background: linear-gradient(180deg, #1e1e42, #141430); border: 2px solid #444477;
+  background: linear-gradient(180deg, #2a1812, #1a0e08); border: 2px solid #5a3528;
   border-radius: 12px; padding: 40px 60px; text-align: center;
 }
 .name-box h2 { color: #c9a84c; font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 4px; }
 .name-box .char-preview { width: 150px; height: 150px; object-fit: contain; margin-bottom: 20px; }
 .name-input {
   width: 260px; padding: 12px 20px; font-size: 1.1rem; font-family: 'Noto Sans KR', sans-serif;
-  background: #0a0a2e; border: 2px solid #555588; border-radius: 8px; color: #e0d0a0;
+  background: #1e110a; border: 2px solid #5a3528; border-radius: 8px; color: #e0d0a0;
   text-align: center; letter-spacing: 4px; outline: none;
 }
 .name-input:focus { border-color: #c9a84c; }
@@ -170,6 +170,15 @@ body {
   height: 75vh; object-fit: contain;
   filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
 }
+
+/* Pets in room — 강아지 좌우반전, 위치는 JS에서 집별 설정. 프레임 애니메이션은 JS src 교체 */
+.room-pet {
+  position: absolute; height: 11vh; object-fit: contain;
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.45));
+  z-index: 8; pointer-events: none;
+  transform: translateX(-50%);
+}
+#room-pet-dog { transform: translateX(-50%) scaleX(-1); }
 
 /* Top Info Bar */
 .top-bar {
@@ -1309,6 +1318,10 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
     <img id="room-char-img" src="" alt="캐릭터">
   </div>
 
+  <!-- Pets — 강아지 좌, 고양이 우. 5프레임 idle 사이클 -->
+  <img id="room-pet-dog" class="room-pet" src="UI/쇼핑/차와기타/강아지_idle_1.png" alt="" style="display:none" onerror="this.dataset.broken='1';this.style.display='none'">
+  <img id="room-pet-cat" class="room-pet" src="UI/쇼핑/차와기타/고양이_idle_1.png" alt="" style="display:none" onerror="this.dataset.broken='1';this.style.display='none'">
+
   <!-- Top Bar -->
   <div class="top-bar">
     <div class="top-bar-left" style="visibility:hidden;pointer-events:none"></div>
@@ -1497,7 +1510,7 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
 
 <!-- Save/Load Modal -->
 <div id="saveload-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center" onclick="this.style.display='none'">
-  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:85vh;overflow-y:auto">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:80vh;overflow-y:auto">
     <button class="modal-close" onclick="document.getElementById('saveload-modal').style.display='none'">&times;</button>
     <div class="modal-title" id="saveload-title">저장하기</div>
     <div id="saveload-list"></div>
@@ -1506,7 +1519,7 @@ img.item-icon { width: 26px; height: 26px; display: block; margin-bottom: 1px; }
 
 <!-- Storage Modal (책장/옷장/냉장고 공용) -->
 <div id="storage-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:150;align-items:center;justify-content:center" onclick="this.style.display='none'">
-  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:460px;max-height:80vh;overflow-y:auto">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:80vh;overflow-y:auto">
     <button class="modal-close" onclick="document.getElementById('storage-modal').style.display='none'">&times;</button>
     <div class="modal-title" id="storage-title"></div>
     <div id="storage-list"></div>
@@ -1646,6 +1659,7 @@ const G = {
   isBlackFirmFirstMonth: false, // 더블랙 첫달 이벤트용
   housing: 'oneroom',          // oneroom, apartment, luxury
   housingBuffApplied: null,    // null|'apartment'|'luxury' — 현재 stat에 적용된 집 보너스 (이사 시 차감용)
+  pets: [],                    // [{species:'dog'|'cat', name, acquiredYear, acquiredMonth}]
   currentOutfit: 'default',    // default, premiumSuit, luxurySuit, premiumDress, luxuryDress
   currentCar: null,            // 현재 활성(가장 비싼) 차량 id. null|'kcar'|'midcar'|'luxcar'
   activeCarBonus: 0,           // 현재 영업력에 적용된 차량 보너스 — 차량 교체 시 차감용
@@ -3364,8 +3378,8 @@ function showCharCreateOnOpening() {
 let openingGender = null;
 function selectOpeningGender(g) {
   openingGender = g;
-  document.getElementById('og-male').style.borderColor = g==='male'?'#c9a84c':'#333366';
-  document.getElementById('og-female').style.borderColor = g==='female'?'#c9a84c':'#333366';
+  document.getElementById('og-male').style.borderColor = g==='male'?'#c9a84c':'#5a3528';
+  document.getElementById('og-female').style.borderColor = g==='female'?'#c9a84c':'#5a3528';
 }
 
 function confirmOpeningCreate() {
@@ -3440,6 +3454,7 @@ function confirmName() {
   document.getElementById('name-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'block';
   document.getElementById('room-char-img').src = G.gender === 'male' ? '남주인공.webp' : '여주인공.webp';
+  updateRoomPets();
   playBGM('normal');
   updateUI();
   G.playTimeSec = 0;
@@ -3592,7 +3607,7 @@ const SUB_TRIAL_1 = [
       {face:null, speaker:null, text:null, isClear:true},
     ],
     clearDialogues:[
-      {face:'player', speaker:'{name}', text:'(첫 사건을 이겼다!)'},
+      {face:'player', speaker:'{name}', text:'(처음으로 맡았던 사건을 이겼다!)'},
       {bg:'배경/서면.webp', face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'잘 했군 {name}변호사.'},
       {bg:'배경/서면.webp', face:'player', speaker:'{name}', text:'아닙니다. 이 정도야.'},
       {bg:'배경/서면.webp', face:'캐릭터얼굴/대표변호사.webp', speaker:'대표변호사', text:'앞으로 들어오는 사건도 이렇게만 처리하면 되네. 알겠지? 대신 앞으로는 점점 어려운 사건들이 들어올거야. 노력하라고.'},
@@ -7411,6 +7426,167 @@ function finishChildCharm() {
   if (cb) cb();
 }
 
+// ==================== 펫 이벤트 ====================
+// 펫 재롱 (homeRest 0.5%, 펫 보유 시) - 무릎 위로 와서 애교
+function tryPetCharmEvent(slot) {
+  if (slot.action !== 'homeRest') return null;
+  if (!Array.isArray(G.pets) || G.pets.length === 0) return null;
+  if (Math.random() >= 0.005) return null;
+  const pet = G.pets[Math.floor(Math.random() * G.pets.length)];
+  return { kind: 'petCharm', pet };
+}
+// 펫 병원행 (homeRest 0.3%, 펫 1세 이상)
+function tryPetVetEvent(slot) {
+  if (slot.action !== 'homeRest') return null;
+  if (!Array.isArray(G.pets) || G.pets.length === 0) return null;
+  if (Math.random() >= 0.003) return null;
+  // 1세 이상 펫만 대상
+  const eligible = G.pets.filter(p => {
+    const months = (G.year - (p.acquiredYear||1)) * 12 + (G.month - (p.acquiredMonth||1));
+    return months >= 12;
+  });
+  if (eligible.length === 0) return null;
+  const pet = eligible[Math.floor(Math.random() * eligible.length)];
+  return { kind: 'petVet', pet };
+}
+
+function triggerPetCharmVN(pet, onDone) {
+  const modal = document.getElementById('status-event-modal');
+  modal.style.display = 'flex';
+  resetModalStyle(true);
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
+  const item = SHOP_ITEMS.find(i => i.id === pet.species);
+  const petImg = item && item.iconImg ? item.iconImg : '';
+  if (petImg) {
+    document.getElementById('se-face').style.display = 'block';
+    document.getElementById('se-face-img').src = petImg;
+    document.getElementById('se-dialog').classList.remove('no-face');
+  } else {
+    document.getElementById('se-face').style.display = 'none';
+    document.getElementById('se-dialog').classList.add('no-face');
+  }
+  document.getElementById('se-speaker').textContent = pet.name;
+  document.getElementById('se-text').textContent = `${pet.name}이(가) 꼬리를 흔들며 다가와 무릎 위로 올라온다.`;
+  window._petCharmOnDone = onDone;
+  window._petCharmPet = pet;
+  document.getElementById('se-choices').innerHTML = `
+    <button class="event-choice" onclick="finishPetCharm('pet')">쓰다듬어 준다</button>
+    <button class="event-choice" onclick="finishPetCharm('busy')">지금은 바쁘다</button>`;
+}
+function finishPetCharm(choice) {
+  document.getElementById('status-event-modal').style.display = 'none';
+  const pet = window._petCharmPet;
+  if (choice === 'pet' && pet) {
+    applyStat('stress', -5);
+    applyStat('mental', 2);
+    addDiary('🐾', `${pet.name} 무릎 위에서 꾸벅꾸벅 졸고있다 ㅎㅎ #반려동물 #힐링`);
+  }
+  const cb = window._petCharmOnDone;
+  window._petCharmOnDone = null;
+  window._petCharmPet = null;
+  if (cb) cb();
+}
+
+function triggerPetVetVN(pet, onDone) {
+  const modal = document.getElementById('status-event-modal');
+  modal.style.display = 'flex';
+  resetModalStyle(true);
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
+  const item = SHOP_ITEMS.find(i => i.id === pet.species);
+  const petImg = item && item.iconImg ? item.iconImg : '';
+  if (petImg) {
+    document.getElementById('se-face').style.display = 'block';
+    document.getElementById('se-face-img').src = petImg;
+    document.getElementById('se-dialog').classList.remove('no-face');
+  } else {
+    document.getElementById('se-face').style.display = 'none';
+    document.getElementById('se-dialog').classList.add('no-face');
+  }
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = `${pet.name}이(가) 며칠째 밥을 잘 먹지 않는다. 동물병원에 가봐야 할 것 같다.`;
+  window._petVetOnDone = onDone;
+  window._petVetPet = pet;
+  document.getElementById('se-choices').innerHTML = `
+    <button class="event-choice" onclick="finishPetVet('best')">최선의 치료 (-200만원)</button>
+    <button class="event-choice" onclick="finishPetVet('basic')">기본 치료 (-50만원)</button>
+    <button class="event-choice" onclick="finishPetVet('skip')">치료를 미룬다</button>`;
+}
+function finishPetVet(choice) {
+  document.getElementById('status-event-modal').style.display = 'none';
+  const pet = window._petVetPet;
+  if (pet) {
+    if (choice === 'best') {
+      G.funds -= 2000000; statChanges.funds -= 2000000;
+      applyStat('mental', 1);
+      addDiary('🐾', `${pet.name} 병원 다녀옴. 다행히 큰 일은 아니라고. 안심 😮‍💨 #반려동물`);
+    } else if (choice === 'basic') {
+      G.funds -= 500000; statChanges.funds -= 500000;
+      addDiary('🐾', `${pet.name} 동네 병원에 데려갔다. 별일 아니길... #반려동물`);
+    } else {
+      applyStat('karma', 5);
+      applyStat('morality', -3);
+      applyStat('stress', 5);
+      addDiary('🐾', `${pet.name} 병원 안 데려갔는데 자꾸 마음이 무겁다... #죄책감`);
+    }
+  }
+  const cb = window._petVetOnDone;
+  window._petVetOnDone = null;
+  window._petVetPet = null;
+  if (cb) cb();
+}
+
+// 펫 SNS 화제 (월 단위, 매월 2%) - 월말 이벤트 체인에서 호출. true 반환 시 모달 띄움.
+function checkPetSnsEventChain(cb) {
+  if (!Array.isArray(G.pets) || G.pets.length === 0) return false;
+  if (Math.random() >= 0.02) return false;
+  const pet = G.pets[Math.floor(Math.random() * G.pets.length)];
+  triggerPetSnsVN(pet, cb);
+  return true;
+}
+function triggerPetSnsVN(pet, onDone) {
+  if (!pet) { if (onDone) onDone(); return; }
+  const modal = document.getElementById('status-event-modal');
+  modal.style.display = 'flex';
+  resetModalStyle(true);
+  document.getElementById('se-bg').style.backgroundImage = `url('${gBg('배경/방.webp')}')`;
+  const item = SHOP_ITEMS.find(i => i.id === pet.species);
+  const petImg = item && item.iconImg ? item.iconImg : '';
+  if (petImg) {
+    document.getElementById('se-face').style.display = 'block';
+    document.getElementById('se-face-img').src = petImg;
+    document.getElementById('se-dialog').classList.remove('no-face');
+  } else {
+    document.getElementById('se-face').style.display = 'none';
+    document.getElementById('se-dialog').classList.add('no-face');
+  }
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = `${pet.name}과(와) 찍은 사진이 갑자기 SNS에서 화제가 됐다. 댓글이 폭주하고 있다.`;
+  window._petSnsOnDone = onDone;
+  window._petSnsPet = pet;
+  document.getElementById('se-choices').innerHTML = `
+    <button class="event-choice" onclick="finishPetSns('more')">${pet.name} 사진을 더 자주 올린다</button>
+    <button class="event-choice" onclick="finishPetSns('casual')">재미로만 가끔 올린다</button>
+    <button class="event-choice" onclick="finishPetSns('stop')">앞으로 올리지 않는다</button>`;
+}
+function finishPetSns(choice) {
+  document.getElementById('status-event-modal').style.display = 'none';
+  const pet = window._petSnsPet;
+  if (pet) {
+    if (choice === 'more') {
+      G.snsFollowers += 5000;
+      applyStat('fatigue', 2);
+      addDiary('🐾', `${pet.name} SNS 본격적으로 운영 시작 ✨ 댓글이 폭주 중 #펫스타그램 #${pet.name}`);
+    } else if (choice === 'casual') {
+      G.snsFollowers += 2000;
+      addDiary('🐾', `${pet.name} 사진 가끔 올리니 반응 좋다 ㅎㅎ #반려동물`);
+    }
+  }
+  const cb = window._petSnsOnDone;
+  window._petSnsOnDone = null;
+  window._petSnsPet = null;
+  if (cb) cb();
+}
+
 // ==================== 계절·명절 이벤트 ====================
 function _seasonalKey(id) { return `${G.year}-${id}`; }
 
@@ -8833,6 +9009,86 @@ function openNewsArticleModal(idx) {
 }
 
 // ==================== SCHEDULE ====================
+// trial 슬롯을 비(非)trial로 변환 (신분별 기본 슬롯 규칙과 동일)
+function _convertTrialSlotToNonTrial(slot) {
+  const st = G.status;
+  slot.action = null;
+  slot.label = '미정';
+  slot.locked = false;
+  slot.slotClass = '';
+  delete slot.forced;
+  if (st === 'associate') {
+    const isDoc = Math.random() < 0.5;
+    slot.action = isDoc ? 'document' : 'consult';
+    slot.label = isDoc ? '서면작성' : '상담';
+    slot.locked = true;
+    slot.slotClass = 'slot-work';
+  } else if (st === 'inhouse' || st === 'inhouseTeam' || st === 'inhouseExec') {
+    slot.action = 'companyWork';
+    slot.label = '회사업무';
+    slot.locked = true;
+    slot.slotClass = 'slot-work';
+  } else {
+    // partner/senior/solo/suspended: 미정 (자유 배치)
+    slot.isDaytime = true;
+    if (st === 'suspended') slot.suspendedSlot = true;
+  }
+}
+
+// 사건 수 변화에 따라 trial 슬롯 개수만 동기화 (forced·메인trial·서브trial·사용자 편집 슬롯은 절대 안 건드림)
+function _syncTrialSlots() {
+  if (!G.schedule || G.schedule.length === 0) return;
+  if (G.status === 'suspended') return; // 휴업: trial 없음
+  const weekdayCount = countWeekdays(2029 + G.year, G.month);
+  const expectedTrials = Math.min(weekdayCount, Math.floor(G.cases / 6));
+  // 일반 trial 슬롯(자동배치)만 수집 — forced, mainTrialN, subTrialN 제외
+  const autoTrials = [];
+  G.schedule.forEach(ds => {
+    if (ds.isWeekend || ds.isHoliday) return;
+    ds.slots.forEach(slot => {
+      if (slot.action === 'trial' && !slot.forced) autoTrials.push({day: ds.day, slot});
+    });
+  });
+  if (autoTrials.length === expectedTrials) return;
+
+  if (autoTrials.length > expectedTrials) {
+    // 줄이기: 늦은 일자부터 차감
+    const removeCount = autoTrials.length - expectedTrials;
+    autoTrials.sort((a,b) => a.day - b.day);
+    autoTrials.slice(-removeCount).forEach(({slot}) => _convertTrialSlotToNonTrial(slot));
+  } else {
+    // 늘리기: 빈 일과시간 슬롯에 trial 추가 (균등 분포). 사용자 편집(자기계발 등) 슬롯은 회피.
+    const addCount = expectedTrials - autoTrials.length;
+    const candidates = [];
+    G.schedule.forEach(ds => {
+      if (ds.isWeekend || ds.isHoliday) return;
+      const slot = ds.slots.find(s => s.time === 'day');
+      if (!slot || slot.forced) return;
+      // 빈 미정 슬롯, 또는 associate 자동배치 서면/상담만 대상 (사용자 명시 액션은 회피)
+      const isOpen = slot.action === null;
+      const isAutoAssocWork = G.status === 'associate' && (slot.action === 'document' || slot.action === 'consult');
+      if (isOpen || isAutoAssocWork) candidates.push({day: ds.day, slot});
+    });
+    candidates.sort((a,b) => a.day - b.day);
+    if (candidates.length === 0) return;
+    const actualAdd = Math.min(addCount, candidates.length);
+    const step = candidates.length / actualAdd;
+    const usedIdx = new Set();
+    for (let i = 0; i < actualAdd; i++) {
+      let idx = Math.floor(i * step);
+      while (usedIdx.has(idx) && idx < candidates.length - 1) idx++;
+      if (usedIdx.has(idx)) break;
+      usedIdx.add(idx);
+      const {slot} = candidates[idx];
+      slot.action = 'trial';
+      slot.label = '재판';
+      slot.locked = true;
+      slot.slotClass = 'slot-trial';
+      delete slot.isDaytime;
+    }
+  }
+}
+
 function openScheduleOverlay() {
   // 10년 완주 후에는 스케줄 진행 대신 엔딩 확인
   if (G.year > 10) {
@@ -8868,7 +9124,8 @@ function openScheduleOverlay() {
     const ay = 2029 + G.year;
     renderSchedule(new Date(ay, G.month, 0).getDate(), new Date(ay, G.month - 1, 1).getDay());
   } else {
-    // 스케줄은 유지하되 렌더링만 다시
+    // 스케줄은 유지하되 trial 슬롯 수만 사건 수 변화(토스 등)에 맞춰 동기화 후 재렌더
+    _syncTrialSlots();
     const actualYear = 2029 + G.year;
     const daysInMonth = new Date(actualYear, G.month, 0).getDate();
     const firstDayOfWeek = new Date(actualYear, G.month - 1, 1).getDay();
@@ -10033,12 +10290,18 @@ function calcFixedExpense() {
   const staffCost = getStaffMonthlyCost();
   const marriageExtra = G.isMarried ? 3000000 : 0;
   const childExtra = (G.children ? G.children.length : 0) * 2000000;
-  if (G.status==='senior') return 20000000 + officeRent + staffCost + marriageExtra + childExtra;
-  if (G.status==='solo') return 3000000 + officeRent + staffCost + marriageExtra + childExtra;
-  if (G.status==='partner') return 10000000 + staffCost + marriageExtra + childExtra;
-  if (isInhouse()) return 2000000 + marriageExtra + childExtra;
-  if (G.status==='suspended') return 3000000 + marriageExtra + childExtra;
-  return 3000000 + marriageExtra + childExtra; // associate
+  // 펫 관리비: 보유 마리당 20만원
+  const petCount = ((G.inventory && G.inventory.dog)||0) + ((G.inventory && G.inventory.cat)||0);
+  const petExtra = petCount * 200000;
+  const base = (() => {
+    if (G.status==='senior') return 20000000 + officeRent + staffCost;
+    if (G.status==='solo') return 3000000 + officeRent + staffCost;
+    if (G.status==='partner') return 10000000 + staffCost;
+    if (isInhouse()) return 2000000;
+    if (G.status==='suspended') return 3000000;
+    return 3000000; // associate
+  })();
+  return base + marriageExtra + childExtra + petExtra;
 }
 
 function randomName() {
@@ -14376,7 +14639,7 @@ function renderRelationshipPanel() {
     else if (rivalCount > 0) _relationshipTab = 'rival';
   }
 
-  let html = '<div style="height:440px;overflow-y:auto">';
+  let html = '<div style="height:480px;overflow-y:auto">';
 
   // 탭 버튼 (3개)
   const tabs = [
@@ -14607,6 +14870,16 @@ function continueExecution() {
     const charm = tryChildCharmEvent(slot);
     if (charm) {
       vnScenes.push({ type: 'childCharm', child: charm.child, age: charm.age });
+    }
+    // 펫 재롱 (homeRest 0.5%)
+    const petCharm = tryPetCharmEvent(slot);
+    if (petCharm) {
+      vnScenes.push({ type: 'petCharm', pet: petCharm.pet });
+    }
+    // 펫 병원행 (homeRest 0.3%, 1세 이상)
+    const petVet = tryPetVetEvent(slot);
+    if (petVet) {
+      vnScenes.push({ type: 'petVet', pet: petVet.pet });
     }
     // A. 일반 이벤트 체크 (해외여행 중에는 스킵)
     const isTraveling = slot.action==='japanTrip'||slot.action==='seaTrip'||slot.action==='europeTrip';
@@ -15436,6 +15709,18 @@ function __renderVNSceneImpl(idx) {
   // 자녀 재롱 이벤트
   if (scene.type === 'childCharm') {
     triggerChildCharmVN(scene.child, scene.age, () => showVNScene(idx + 1));
+    return;
+  }
+
+  // 펫 재롱 이벤트
+  if (scene.type === 'petCharm') {
+    triggerPetCharmVN(scene.pet, () => showVNScene(idx + 1));
+    return;
+  }
+
+  // 펫 병원행 이벤트
+  if (scene.type === 'petVet') {
+    triggerPetVetVN(scene.pet, () => showVNScene(idx + 1));
     return;
   }
 
@@ -16344,6 +16629,15 @@ function finishMonth(){
   }
   // 고정지출
   G.funds -= G.fixedExpense; statChanges.funds -= G.fixedExpense;
+  // 펫 효과: 마리당 매월 스트레스 -5~10 랜덤
+  const _petCount = ((G.inventory && G.inventory.dog)||0) + ((G.inventory && G.inventory.cat)||0);
+  if (_petCount > 0) {
+    let petStressRelief = 0;
+    for (let i = 0; i < _petCount; i++) {
+      petStressRelief += 5 + Math.floor(Math.random() * 6); // 5~10
+    }
+    applyStat('stress', -petStressRelief);
+  }
   // 월간 수임료/성공보수 초기화
   G.monthCaseFees = 0; G.monthSuccessFees = 0;
   // SNS/유튜브 팔로워 증가
@@ -16783,10 +17077,11 @@ function finishMonthFinal(){
 
   document.getElementById('vn-screen').style.display='none';
   updateUI();
-  // 월말 이벤트 체인: 번아웃 → 슬럼프 → 가족 → 계절·명절 → 월간 정산
+  // 월말 이벤트 체인: 번아웃 → 슬럼프 → 가족 → 펫SNS → 계절·명절 → 월간 정산
   const finalizeSummary = () => showMonthSummary(empReports);
   const afterSeasonal = finalizeSummary;
-  const afterFamily = () => { if (checkSeasonalEvents(afterSeasonal)) return; afterSeasonal(); };
+  const afterPetSns = () => { if (checkSeasonalEvents(afterSeasonal)) return; afterSeasonal(); };
+  const afterFamily = () => { if (checkPetSnsEventChain(afterPetSns)) return; afterPetSns(); };
   const afterSlump = () => { if (checkFamilyEvents(afterFamily)) return; afterFamily(); };
   const afterBurnout = () => { if (checkSlumpEvent(afterSlump)) return; afterSlump(); };
   if (checkBurnoutThresholds(afterBurnout)) return;
@@ -17218,7 +17513,7 @@ function openChangeMenu() {
   if (G.isMarried) {
     const contraLabel = G.contraception ? '피임 해제' : '피임 설정';
     relSec.push(`<div class="action-option" onclick="G.contraception=!G.contraception;showToast(G.contraception?'피임을 시작합니다.':'피임을 해제합니다.');openChangeMenu()">
-      ${_chgIc('피임설정해제')}<div style="flex:1"><div class="name" style="color:#88aacc">${contraLabel}</div>
+      ${_chgIc('피임설정해제')}<div style="flex:1"><div class="name" style="color:#c9a84c">${contraLabel}</div>
       <div class="effects">${G.contraception?'현재 피임 중입니다':'현재 피임을 하지 않고 있습니다'}</div></div></div>`);
   }
   if (G.romance.dating && !G.isMarried) {
@@ -17453,6 +17748,8 @@ function resignAndSuspend() {
 const SHOP_ITEMS = [
   {id:'premiumPC',name:'고급컴퓨터',icon:'🖥️',iconImg:'UI/쇼핑/차와기타/고급컴퓨터.png',desc:'고급컴퓨터, 업무효율이 올라간다.',price:3000000,max:1,category:'etc',
     effects:{sales:10,debate:10}},
+  {id:'dog',name:'강아지',icon:'🐕',iconImg:'UI/쇼핑/차와기타/강아지.png',desc:'사랑스러운 강아지. 매월 관리비 20만원, 함께 있으면 스트레스가 줄어든다.',price:3000000,max:1,category:'etc',isPet:true},
+  {id:'cat',name:'고양이',icon:'🐈',iconImg:'UI/쇼핑/차와기타/고양이.png',desc:'도도한 고양이. 매월 관리비 20만원, 곁에 있으면 마음이 편안해진다.',price:3000000,max:1,category:'etc',isPet:true},
   {id:'lawBook',name:'기본서',icon:'📕',iconImg:'UI/쇼핑/책/기본서.png',desc:'법학에 대한 기초를 다시 다져줄 수 있게 만드는 책.',price:50000,max:10,category:'book',
     effects:{lawKnowledge:2}},
   {id:'practiceBook',name:'실무제요',icon:'📗',iconImg:'UI/쇼핑/책/실무제요.png',desc:'소송 실무에 대해 확실히 공부할 수 있는 책.',price:100000,max:10,category:'book',
@@ -17510,6 +17807,47 @@ const SHOP_ITEMS = [
 ];
 
 function getItemCount(itemId) { return G.inventory[itemId] || 0; }
+
+// 펫 idle 프레임 사이클 — 사용자가 그린 5프레임을 ~250ms 간격으로 순환
+const PET_IDLE_FRAMES = {
+  dog: ['UI/쇼핑/차와기타/강아지_idle_1.png','UI/쇼핑/차와기타/강아지_idle_2.png','UI/쇼핑/차와기타/강아지_idle_3.png','UI/쇼핑/차와기타/강아지_idle_4.png','UI/쇼핑/차와기타/강아지_idle_5.png'],
+  cat: ['UI/쇼핑/차와기타/고양이_idle_1.png','UI/쇼핑/차와기타/고양이_idle_2.png','UI/쇼핑/차와기타/고양이_idle_3.png','UI/쇼핑/차와기타/고양이_idle_4.png','UI/쇼핑/차와기타/고양이_idle_5.png'],
+};
+let _petFrameTimer = null;
+let _petFrameIdx = { dog: 0, cat: 0 };
+function startPetFrameCycle() {
+  if (_petFrameTimer) return;
+  _petFrameTimer = setInterval(() => {
+    const dogEl = document.getElementById('room-pet-dog');
+    const catEl = document.getElementById('room-pet-cat');
+    if (dogEl && dogEl.style.display !== 'none' && dogEl.dataset.broken !== '1') {
+      _petFrameIdx.dog = (_petFrameIdx.dog + 1) % PET_IDLE_FRAMES.dog.length;
+      dogEl.src = PET_IDLE_FRAMES.dog[_petFrameIdx.dog];
+    }
+    if (catEl && catEl.style.display !== 'none' && catEl.dataset.broken !== '1') {
+      _petFrameIdx.cat = (_petFrameIdx.cat + 1) % PET_IDLE_FRAMES.cat.length;
+      catEl.src = PET_IDLE_FRAMES.cat[_petFrameIdx.cat];
+    }
+  }, 250);
+}
+
+// 집별 펫 배치 (캐릭터를 가리지 않고 인접 위치)
+const PET_LAYOUT = {
+  // 원룸/아파트: 고양이 우측 배치, 강아지는 고양이 기준 우측 15vh·아래 15vh
+  oneroom:   { catLeft:'calc(50% + 32vh)', catBottom:'43vh', dogLeft:'calc(50% + 37vh)', dogBottom:'28vh' },
+  apartment: { catLeft:'calc(50% + 32vh)', catBottom:'43vh', dogLeft:'calc(50% + 37vh)', dogBottom:'28vh' },
+  // 최고급 아파트: 강아지는 좌측 팔꿈치, 고양이는 우측 팔꿈치 기준 (고양이 추가 +10vh 위)
+  luxury:    { dogLeft:'calc(50% - 29vh)', dogBottom:'34vh', catLeft:'calc(50% + 33vh)', catBottom:'19vh' },
+};
+
+// 방 화면 펫 표시 — 일단 비활성화 (구매·관리비·스트레스 효과는 그대로 동작)
+function updateRoomPets() {
+  const dogEl = document.getElementById('room-pet-dog');
+  const catEl = document.getElementById('room-pet-cat');
+  if (dogEl) dogEl.style.display = 'none';
+  if (catEl) catEl.style.display = 'none';
+  if (_petFrameTimer) { clearInterval(_petFrameTimer); _petFrameTimer = null; }
+}
 
 function _itemIconHtml(item) {
   if (item && item.iconImg) {
@@ -17742,45 +18080,42 @@ function applyLegalAid() {
 }
 
 // ==================== SHOPPING ====================
+let _shopTab = 'book';
 function openShopping() {
   const modal = document.getElementById('storage-modal');
   modal.style.display = 'flex';
   document.getElementById('storage-title').textContent = '쇼핑';
-  let html = '';
-  const categories = [
-    {key:'etc',label:'기타'},
-    {key:'book',label:'책 (책장)'},
-    {key:'drink',label:'음료 (냉장고)'},
-    {key:'clothes',label:'옷/가방 (옷장)'},
+  renderShopMenu();
+}
+function renderShopMenu() {
+  // 탭
+  const tabs = [
+    {key:'book',    label:'책'},
+    {key:'drink',   label:'음료'},
+    {key:'clothes', label:'옷/가방'},
+    {key:'car',     label:'차'},
+    {key:'etc',     label:'기타'},
   ];
-  const clothesOrder = ['casualWear','casualWearM','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','tailcoat','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
-  categories.forEach(cat => {
-    let items = SHOP_ITEMS.filter(i => {
-      if (i.category !== cat.key) return false;
-      if (i.gender && i.gender !== G.gender) return false;
-      return true;
-    });
-    if (cat.key==='clothes') items.sort((a,b)=>{const ai=clothesOrder.indexOf(a.id);const bi=clothesOrder.indexOf(b.id);return (ai===-1?99:ai)-(bi===-1?99:bi);});
-    if (!items.length) return;
-    html += `<div class="action-category"><div class="action-category-title">${cat.label}</div>`;
-    items.forEach(item => {
-      const owned = getItemCount(item.id);
-      const full = owned >= item.max;
-      const priceStr = item.price > 0 ? `${(item.price/10000)}만원` : '무료';
-      html += `<div class="action-option" onclick="${full?'':`buyItem('${item.id}')`}" style="${full?'background:#1e110a;border-color:#3a2018;opacity:0.55;cursor:default':''}">
-        ${_itemIconHtml(item)}
-        <div style="flex:1"><div class="name">${item.name} ${full?'(보유중)':owned>0?`(${owned}/${item.max})`:''}</div>
-        <div class="effects">${item.desc}</div></div>
-        <div class="cost">${priceStr}</div></div>`;
-    });
-    html += '</div>';
+  // 고정 높이 컨테이너 시작
+  let html = '<div style="height:480px;display:flex;flex-direction:column">';
+  html += '<div style="display:flex;gap:5px;margin-bottom:12px;justify-content:center;flex-wrap:wrap;flex-shrink:0">';
+  tabs.forEach(t => {
+    const isActive = _shopTab === t.key;
+    const style = `width:78px;padding:6px 0;font-size:0.82rem;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#5a3528'};background:${isActive?'rgba(201,168,76,0.18)':'#1e110a'};color:${isActive?'#f0c850':'#a09080'};font-weight:${isActive?'700':'500'};border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:0.5px;text-align:center`;
+    html += `<button style="${style}" onclick="_shopTab='${t.key}';renderShopMenu()">${t.label}</button>`;
   });
-  // 차 카테고리
-  const carItems = SHOP_ITEMS.filter(i=>i.category==='car');
-  if (carItems.length) {
+  html += '</div>';
+  // 아이템 리스트 — 스크롤 영역
+  html += '<div style="flex:1;overflow-y:auto;min-height:0">';
+
+  const clothesOrder = ['casualWear','casualWearM','premiumSuit','premiumDress','luxurySuit','luxuryDress','partyDress','tailcoat','lawyerBag','luxuryBag','luxWatch','luxAccessory'];
+
+  if (_shopTab === 'car') {
+    // 차 — 다중보유 + 활성 표시
+    const carItems = SHOP_ITEMS.filter(i=>i.category==='car');
     const activeId = getActiveCarId();
     const curCarLabel = activeId ? (SHOP_ITEMS.find(i=>i.id===activeId)?.name || '없음') : '없음';
-    html += `<div class="action-category"><div class="action-category-title">차 (적용중: ${curCarLabel})</div>`;
+    html += `<div style="text-align:center;font-size:0.78rem;color:#a09080;margin-bottom:8px">적용 중: <span style="color:#c9a84c;font-weight:700">${curCarLabel}</span></div>`;
     carItems.forEach(item => {
       const owned = (G.inventory[item.id]||0) > 0;
       const isActive = activeId === item.id;
@@ -17792,8 +18127,30 @@ function openShopping() {
         <div class="effects">${item.desc}</div></div>
         <div class="cost">${priceStr}</div></div>`;
     });
-    html += '</div>';
+  } else {
+    // 일반 카테고리
+    let items = SHOP_ITEMS.filter(i => {
+      if (i.category !== _shopTab) return false;
+      if (i.gender && i.gender !== G.gender) return false;
+      return true;
+    });
+    if (_shopTab === 'clothes') items.sort((a,b)=>{const ai=clothesOrder.indexOf(a.id);const bi=clothesOrder.indexOf(b.id);return (ai===-1?99:ai)-(bi===-1?99:bi);});
+    if (items.length === 0) {
+      html += `<div style="text-align:center;color:#8a7060;padding:20px 0;font-size:0.85rem">판매 중인 아이템이 없습니다.</div>`;
+    } else {
+      items.forEach(item => {
+        const owned = getItemCount(item.id);
+        const full = owned >= item.max;
+        const priceStr = item.price > 0 ? `${(item.price/10000)}만원` : '무료';
+        html += `<div class="action-option" onclick="${full?'':`buyItem('${item.id}')`}" style="${full?'background:#1e110a;border-color:#3a2018;opacity:0.55;cursor:default':''}">
+          ${_itemIconHtml(item)}
+          <div style="flex:1"><div class="name">${item.name} ${full?'(보유중)':owned>0?`(${owned}/${item.max})`:''}</div>
+          <div class="effects">${item.desc}</div></div>
+          <div class="cost">${priceStr}</div></div>`;
+      });
+    }
   }
+  html += '</div></div>'; // 스크롤 영역 + 고정 컨테이너 닫기
   document.getElementById('storage-list').innerHTML = html;
 }
 
@@ -17805,6 +18162,16 @@ function buyItem(itemId) {
   const owned = getItemCount(itemId);
   if (owned >= item.max) { showToast('이미 최대 보유량입니다.'); return; }
   if (G.funds < item.price) { showToast('자금이 부족합니다.'); return; }
+  // 펫: 이름 입력 후 구매
+  if (item.isPet) {
+    const defaultName = itemId === 'dog' ? '바둑이' : '나비';
+    textPrompt(`${item.name}의 이름을 정해주세요.`, defaultName, (name) => {
+      const trimmed = (name || '').trim();
+      if (!trimmed) return; // 취소·빈 이름 → 구매 중단
+      _completePetPurchase(item, trimmed);
+    }, 12);
+    return;
+  }
   G.funds -= item.price;
   G.inventory[itemId] = (G.inventory[itemId]||0) + 1;
   // 즉시 효과 (책, 컴퓨터 - 옷/가방은 착용 시 적용)
@@ -17833,6 +18200,23 @@ function buyItem(itemId) {
   } else {
     showToast(`${item.name} 구매 완료!`);
   }
+  updateUI(); openShopping();
+}
+
+function _completePetPurchase(item, name) {
+  G.funds -= item.price;
+  G.inventory[item.id] = (G.inventory[item.id]||0) + 1;
+  if (!Array.isArray(G.pets)) G.pets = [];
+  G.pets.push({
+    species: item.id,
+    name: name,
+    acquiredYear: G.year,
+    acquiredMonth: G.month,
+  });
+  G.fixedExpense = calcFixedExpense();
+  updateRoomPets();
+  showToast(`${item.name} '${name}' 입양 완료!`);
+  addDiary('🐾', `${item.name} ${name} 입양 🐾 새 가족이 늘었다 #반려동물`, 1);
   updateUI(); openShopping();
 }
 
@@ -18675,7 +19059,7 @@ function openStaffPanel() {
 let _staffTab = 'assoc';
 
 function renderStaffList() {
-  let html = '<div style="height:440px;overflow-y:auto">';
+  let html = '<div style="height:480px;overflow-y:auto">';
   // 처음 열 때 인원 많은 쪽으로 자동 선택 (한쪽만 있을 때)
   if (G.hiredAssocs.length === 0 && G.hiredStaff.length > 0) _staffTab = 'staff';
   else if (G.hiredStaff.length === 0 && G.hiredAssocs.length > 0) _staffTab = 'assoc';
@@ -18806,70 +19190,62 @@ function _housingIconHtml(type) {
   const data = HOUSING_DATA[type];
   return `<img src="${data.icon}" style="width:32px;height:32px;margin-right:8px;object-fit:contain;flex-shrink:0" alt="">`;
 }
+let _homeTab = 'housing';
 function openHousing() {
   document.getElementById('storage-modal').style.display = 'flex';
   document.getElementById('storage-title').textContent = '집';
-  const sectionHeader = (label) => `<div style="font-size:0.7rem;color:#a09060;letter-spacing:2px;font-weight:700;padding:6px 0 4px;margin-top:4px;border-bottom:1px solid #5a3528">${label}</div>`;
+  renderHomeMenu();
+}
+function renderHomeMenu() {
+  const tabs = [
+    {key:'housing', label:'주거'},
+    {key:'car',     label:'차량'},
+    {key:'pet',     label:'반려동물'},
+  ];
+  let html = '<div style="height:480px;display:flex;flex-direction:column">';
+  html += '<div style="display:flex;gap:5px;margin-bottom:12px;justify-content:center;flex-shrink:0">';
+  tabs.forEach(t => {
+    const isActive = _homeTab === t.key;
+    const style = `width:96px;padding:6px 0;font-size:0.82rem;cursor:pointer;border:1px solid ${isActive?'#c9a84c':'#5a3528'};background:${isActive?'rgba(201,168,76,0.18)':'#1e110a'};color:${isActive?'#f0c850':'#a09080'};font-weight:${isActive?'700':'500'};border-radius:4px;font-family:'Noto Sans KR',sans-serif;letter-spacing:0.5px;text-align:center`;
+    html += `<button style="${style}" onclick="_homeTab='${t.key}';renderHomeMenu()">${t.label}</button>`;
+  });
+  html += '</div>';
+  html += '<div style="flex:1;overflow-y:auto;min-height:0">';
 
-  // 현재 주거
+  if (_homeTab === 'housing') {
+    html += _renderHousingTab();
+  } else if (_homeTab === 'car') {
+    html += _renderCarTab();
+  } else if (_homeTab === 'pet') {
+    html += _renderPetTab();
+  }
+
+  html += '</div></div>';
+  document.getElementById('storage-list').innerHTML = html;
+}
+
+function _renderHousingTab() {
   const curData = HOUSING_DATA[G.housing];
-  let html = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px">
+  let html = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px">
     ${_housingIconHtml(G.housing)}
     <div style="font-size:0.85rem;color:#a09080">현재 주거: <span style="color:#c9a84c;font-weight:700">${curData.name}</span></div>
   </div>`;
-
-  // 보유 차량 섹션
-  html += sectionHeader('내 차량');
-  const ownedCars = getOwnedCarIds();
-  const activeCarId = getActiveCarId();
-  if (ownedCars.length === 0) {
-    html += `<div style="text-align:center;color:#8a7060;padding:14px 0;font-size:0.85rem">차량 없음 (쇼핑에서 구입 가능)</div>`;
-  } else {
-    // 비싼 순으로 정렬
-    const sortedCars = ownedCars.slice().sort((a,b)=>{
-      const pa = SHOP_ITEMS.find(i=>i.id===a)?.price || 0;
-      const pb = SHOP_ITEMS.find(i=>i.id===b)?.price || 0;
-      return pb - pa;
-    });
-    sortedCars.forEach(id => {
-      const car = SHOP_ITEMS.find(i=>i.id===id); if (!car) return;
-      const isActive = id === activeCarId;
-      const tag = isActive ? `<span style="color:#c9a84c;font-weight:700;font-size:0.78rem">[적용중]</span>` : `<span style="color:#8a7060;font-size:0.75rem">[보관]</span>`;
-      html += `<div class="action-option" style="cursor:default;background:#1e110a;border-color:${isActive?'#5a3528':'#3a2018'};${isActive?'':'opacity:0.7;'}">
-        ${_itemIconHtml(car)}
-        <div style="flex:1"><div class="name">${car.name} ${tag}</div>
-        <div class="effects">${car.desc}</div>
-        ${isActive?`<div class="effects" style="color:#66cc88">영업 보너스 +${car.carBonus}</div>`:''}</div></div>`;
-    });
-    if (ownedCars.length > 1) {
-      html += `<div style="text-align:center;font-size:0.72rem;color:#8a7060;padding:4px 0">가장 비싼 차량의 보너스만 적용됩니다.</div>`;
-    }
-  }
-
-  // 이사 섹션
-  html += sectionHeader('이사');
   ['oneroom','apartment','luxury'].forEach(type => {
     const data = HOUSING_DATA[type];
     const isCurrent = type === G.housing;
     const price = HOUSING_PRICE[type];
     const refund = Math.floor(HOUSING_PRICE[G.housing] * 0.75);
-    const netCost = price - refund; // 실제 필요 자금 (음수면 잔돈 받음)
+    const netCost = price - refund;
     let cost = '', enabled = false, costColor = '#cc6666';
     if (isCurrent) {
-      cost = '거주 중';
-      costColor = '#c9a84c';
+      cost = '거주 중'; costColor = '#c9a84c';
     } else if (price === 0) {
-      cost = '무료';
-      enabled = true;
-      costColor = '#a09060';
+      cost = '무료'; enabled = true; costColor = '#a09060';
     } else {
-      cost = formatMoney(price);
-      enabled = G.funds >= netCost; // 환급 차감 후 실제 들 자금
+      cost = formatMoney(price); enabled = G.funds >= netCost;
     }
     const buffStr = HOUSING_BUFF[type] ? Object.entries(HOUSING_BUFF[type]).map(([k,v])=>`${STAT_NAMES[k]||k}+${v}`).join(', ') : '없음';
-    const effects = isCurrent
-      ? `현재 적용: ${buffStr}`
-      : `거주 효과: ${buffStr}`;
+    const effects = isCurrent ? `현재 적용: ${buffStr}` : `거주 효과: ${buffStr}`;
     const opacity = isCurrent ? 'opacity:0.55;' : (enabled ? '' : 'opacity:0.45;');
     const click = (isCurrent || !enabled) ? '' : `onclick="changeHousing('${type}')"`;
     html += `<div class="action-option" ${click} style="${opacity}${(isCurrent||!enabled)?'cursor:default;':''}">
@@ -18878,8 +19254,108 @@ function openHousing() {
       <div class="effects">${effects}</div></div>
       <div class="cost" style="color:${costColor}">${cost}</div></div>`;
   });
+  return html;
+}
 
-  document.getElementById('storage-list').innerHTML = html;
+function _renderCarTab() {
+  const ownedCars = getOwnedCarIds();
+  const activeCarId = getActiveCarId();
+  if (ownedCars.length === 0) {
+    return `<div style="text-align:center;color:#8a7060;padding:30px 16px;font-size:0.85rem">차량 없음<br><span style="font-size:0.75rem">쇼핑에서 구입 가능</span></div>`;
+  }
+  let html = '';
+  const sortedCars = ownedCars.slice().sort((a,b)=>{
+    const pa = SHOP_ITEMS.find(i=>i.id===a)?.price || 0;
+    const pb = SHOP_ITEMS.find(i=>i.id===b)?.price || 0;
+    return pb - pa;
+  });
+  sortedCars.forEach(id => {
+    const car = SHOP_ITEMS.find(i=>i.id===id); if (!car) return;
+    const isActive = id === activeCarId;
+    const tag = isActive ? `<span style="color:#c9a84c;font-weight:700;font-size:0.78rem">[적용중]</span>` : `<span style="color:#8a7060;font-size:0.75rem">[보관]</span>`;
+    html += `<div class="action-option" style="cursor:default;background:#1e110a;border-color:${isActive?'#5a3528':'#3a2018'};${isActive?'':'opacity:0.7;'}">
+      ${_itemIconHtml(car)}
+      <div style="flex:1"><div class="name">${car.name} ${tag}</div>
+      <div class="effects">${car.desc}</div>
+      ${isActive?`<div class="effects" style="color:#66cc88">영업 보너스 +${car.carBonus}</div>`:''}</div></div>`;
+  });
+  if (ownedCars.length > 1) {
+    html += `<div style="text-align:center;font-size:0.72rem;color:#8a7060;padding:6px 0">가장 비싼 차량의 보너스만 적용됩니다.</div>`;
+  }
+  return html;
+}
+
+function _petAgeText(pet) {
+  if (!pet) return '';
+  const months = (G.year - (pet.acquiredYear||1)) * 12 + (G.month - (pet.acquiredMonth||1));
+  if (months <= 0) return '갓 입양';
+  const yr = Math.floor(months / 12);
+  const mo = months % 12;
+  if (yr === 0) return `${mo}개월`;
+  if (mo === 0) return `${yr}살`;
+  return `${yr}살 ${mo}개월`;
+}
+
+function _renderPetTab() {
+  const pets = Array.isArray(G.pets) ? G.pets : [];
+  if (pets.length === 0) {
+    return `<div style="text-align:center;color:#8a7060;padding:30px 16px;font-size:0.85rem">키우는 반려동물이 없습니다.<br><span style="font-size:0.75rem">쇼핑 → 기타 탭에서 입양 가능</span></div>`;
+  }
+  let html = '';
+  pets.forEach((pet, idx) => {
+    const item = SHOP_ITEMS.find(i => i.id === pet.species);
+    const speciesName = item ? item.name : pet.species;
+    const img = item && item.iconImg ? item.iconImg : '';
+    html += `<div class="action-option" onclick="showPetDetail(${idx})" style="background:#1e110a;border-color:#5a3528;align-items:flex-start;padding:10px 12px">
+      ${img ? `<img src="${img}" style="width:64px;height:64px;margin-right:12px;object-fit:contain;flex-shrink:0">` : ''}
+      <div style="flex:1">
+        <div class="name" style="font-size:1rem;color:#f0d68a">${pet.name}</div>
+        <div class="effects" style="margin-top:4px">종: <span style="color:#c9a84c">${speciesName}</span></div>
+        <div class="effects">나이: <span style="color:#c9a84c">${_petAgeText(pet)}</span></div>
+        <div class="effects" style="margin-top:4px;color:#8aaa70">매월 관리비 20만원 · 스트레스 -5~10 회복</div>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+// 펫 클릭 시 상호작용 화면 (펫이 울고 → 주인공이 이름 부름)
+function showPetDetail(idx) {
+  const pets = Array.isArray(G.pets) ? G.pets : [];
+  const pet = pets[idx];
+  if (!pet) return;
+  document.getElementById('storage-modal').style.display = 'none';
+  const modal = document.getElementById('status-event-modal');
+  modal.style.display = 'flex';
+  resetModalStyle(true);
+  document.getElementById('se-bg').style.backgroundImage = `url('${G.gender==='male'?'배경/방.webp':'배경/방2.webp'}')`;
+  const item = SHOP_ITEMS.find(i => i.id === pet.species);
+  const petImg = item && item.iconImg ? item.iconImg : '';
+  if (petImg) {
+    document.getElementById('se-face').style.display = 'block';
+    document.getElementById('se-face-img').src = petImg;
+    document.getElementById('se-dialog').classList.remove('no-face');
+  }
+  const sound = pet.species === 'cat' ? '냐옹~' : '멍멍!';
+  document.getElementById('se-speaker').textContent = pet.name;
+  document.getElementById('se-text').textContent = sound;
+  window._petDetailPet = pet;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="_petDetailStep2()">...</button>`;
+}
+function _petDetailStep2() {
+  const pet = window._petDetailPet;
+  if (!pet) { _petDetailClose(); return; }
+  document.getElementById('se-face-img').src = getPlayerFace();
+  document.getElementById('se-speaker').textContent = G.name;
+  document.getElementById('se-text').textContent = `우리 귀여운 ${pet.name}, 뭐하니?`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="_petDetailClose()">(쓰다듬어준다)</button>`;
+}
+function _petDetailClose() {
+  document.getElementById('status-event-modal').style.display = 'none';
+  window._petDetailPet = null;
+  // 집 메뉴 펫 탭으로 복귀
+  _homeTab = 'pet';
+  openHousing();
 }
 
 function changeHousing(type) {
@@ -18909,6 +19385,7 @@ function changeHousing(type) {
 
   G.housing = type;
   document.querySelector('.room-bg').style.backgroundImage = `url('${getRoomBg()}')`;
+  updateRoomPets();
   if (isUpgrade) {
     addDiary('🏠', pickDiaryText([
       `${label}(으)로 이사 🏠 새 공간에 짐 푸는데 설렘 #이사 #새집`,
@@ -19243,7 +19720,7 @@ function showBulkTossResult(results) {
 // ==================== SAVE / LOAD ====================
 const SAVE_KEY_PREFIX = 'lawyerSave_';
 const SAVE_SLOT_COUNT = 10;
-const GAME_VERSION = 15;
+const GAME_VERSION = 16;
 
 // 저장 파일 버전별 마이그레이션 함수.
 // key = 목적 버전 (from < v ≤ GAME_VERSION 범위의 함수가 순차 호출됨)
@@ -19382,7 +19859,21 @@ const MIGRATIONS = {
     }
     return state;
   },
-  // 향후 업데이트: v16, v17 ... 형태로 추가
+  // v15 → v16 : 펫 메타데이터(이름·입양연월) 추적용 G.pets 배열
+  // 기존 인벤토리에 dog/cat이 있는데 G.pets가 비어있으면 기본 이름으로 채워넣음
+  16: function(state) {
+    if (!Array.isArray(state.pets)) state.pets = [];
+    const hasDog = state.pets.some(p => p && p.species === 'dog');
+    const hasCat = state.pets.some(p => p && p.species === 'cat');
+    if (state.inventory && state.inventory.dog > 0 && !hasDog) {
+      state.pets.push({species:'dog', name:'바둑이', acquiredYear: state.year||1, acquiredMonth: state.month||1});
+    }
+    if (state.inventory && state.inventory.cat > 0 && !hasCat) {
+      state.pets.push({species:'cat', name:'나비', acquiredYear: state.year||1, acquiredMonth: state.month||1});
+    }
+    return state;
+  },
+  // 향후 업데이트: v17, v18 ... 형태로 추가
 };
 
 // ===== 저장 데이터 기본값 보충 (크래시 예방 안전망) =====
@@ -19398,7 +19889,7 @@ function ensureDefaults(state) {
     'hiredAssocs', 'hiredStaff', 'specialLawyer',
     'children', 'schedulePresets', 'diary',
     'monthlyNews', 'nextMonthInvestBias',
-    'rivals',
+    'rivals', 'pets',
   ];
   for (const k of arrs) if (!Array.isArray(state[k])) state[k] = [];
 
@@ -19667,6 +20158,7 @@ function loadGame(slot) {
   // 배경 복원
   const bgMap = {oneroom:'원룸.webp', apartment:'아파트.webp', luxury:'최고급아파트.webp'};
   document.querySelector('.room-bg').style.backgroundImage = `url('${bgMap[G.housing]||'원룸.webp'}')`;
+  updateRoomPets();
   updateUI();
   if (G.bgmOn) { playBGM('normal'); } else { if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; } }
   _sessionStart = Date.now();
