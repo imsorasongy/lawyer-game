@@ -3617,8 +3617,7 @@ const SUB_TRIAL_1 = [
 ];
 
 function startSubCase1Intro() {
-  playBGM('trial');
-  // 서브스토리 사건1 배정
+  // 서브스토리 사건1 배정 (대표변호사 수임 씬 — BGM은 일반 유지)
   G.subCase1 = {
     active: true, trialPhase: 0, wrongCount: 0,
     cleared: false, failed: false,
@@ -3653,7 +3652,7 @@ function subCase1Intro3() {
 function subCase1Intro4() {
   document.getElementById('se-face-img').src = getBossFace();
   document.getElementById('se-speaker').textContent = '대표변호사';
-  document.getElementById('se-text').textContent = '그래, 다음 재판은 3월이니 그 때까지 기록을 숙지하고 가야돼. 재판장이 이것저것 질문을 할텐데, 재판정에서는 기록을 찾아보며 대답할 수 없으니 말이야.';
+  document.getElementById('se-text').textContent = '그래, 다음 재판은 3월이니 그 때까지 기록을 숙지하고 가야돼. 재판장이 이것저것 질문을 할텐데, 재판정에서 기록을 보며 대답하다보면 실수할 수 있으니 말이야.';
   document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="subCase1Intro5()">▼ 계속</button>`;
 }
 
@@ -3668,7 +3667,7 @@ function subCase1IntroEnd() {
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-speaker').textContent = G.name;
   document.getElementById('se-text').textContent = '(증거 서류함에서 증거를 미리 읽어보고, 재판에 대비하자.)';
-  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="playBGM('normal');document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건1이 시작되었습니다. 증거함에서 증거를 확인하세요.')">확인</button>`;
+  document.getElementById('se-choices').innerHTML = `<button class="event-choice" onclick="document.getElementById('status-event-modal').style.display='none';showToast('서브스토리 사건1이 시작되었습니다. 증거함에서 증거를 확인하세요.')">확인</button>`;
 }
 
 function showSubCase2Intro() {
@@ -10846,7 +10845,9 @@ function getRomanceTargets() {
       dialoguesFirst:[
         {speaker:'박연아', text:'...안녕하세요.'},
         {speaker:'{name}', text:'안녕하세요, 저는 {name}이라고 합니다.'},
-        {speaker:'박연아', text:'아, 네. 반가워요.'},
+        {speaker:'박연아', text:'아, 네 반가워요. 운동 좋아하시나봐요?'},
+        {speaker:'{name}', text:'네, 운동도 좋아하고 미술도 좋아합니다.'},
+        {speaker:'박연아', text:'그렇군요. 저랑 비슷한 취향이시네요. 나중에 또 봐요. 그럼 이만.'},
       ],
       dialogues:[
         {speaker:'박연아', text:'{name} 씨, 또 만났네요.'},
@@ -14268,9 +14269,9 @@ function showRomanceDialogue(isFirst) {
     if (!G.romance.affection[target.id]) G.romance.affection[target.id] = 0;
     G.romance.affection[target.id] = Math.min(100, G.romance.affection[target.id] + gain);
 
-    // 호감도 이벤트 체크 (0~80, 30% 확률, 연인 아닌 상태)
+    // 호감도 이벤트 체크 (0~80, 30% 확률, 연인 아닌 상태) — 첫 만남에는 발동 X (소개만)
     const aff = G.romance.affection[target.id] || 0;
-    if (aff <= 80 && !G.romance.dating && FRIEND_EVENTS[target.id] && Math.random() < 0.30) {
+    if (!isFirst && aff <= 80 && !G.romance.dating && FRIEND_EVENTS[target.id] && Math.random() < 0.30) {
       const evts = FRIEND_EVENTS[target.id];
       const picked = evts[Math.floor(Math.random() * evts.length)];
       showFriendEvent(target, picked);
