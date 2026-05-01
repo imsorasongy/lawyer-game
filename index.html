@@ -4807,7 +4807,7 @@ const SUB_TRIAL_5 = [
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'피고인측, 피고인이 수금책으로 일을 하고 있을 당시, 범죄를 인식하지 못했다고 볼만한 서류증거가 있습니까?'},
       {face:'player', speaker:'{name}', text:'당연히 있습니다.'},
     ],
-    evidenceSteps:[{prompt:'(피고인이 범죄를 인식하지 못했다는 증거를 제출하자.)', correct:['sc5_manual','sc5_chat'], count:2}],
+    evidenceSteps:[{prompt:'(피고인이 수금책으로 일할 당시 범죄인지 인식하지 못했다는 증거를 제시하자.)', correct:['sc5_manual','sc5_chat'], count:2}],
     successDialogues:[
       {face:'player', speaker:'{name}', text:'여기 업무매뉴얼과 카카오톡 대화내용을 봐주시기 바랍니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'재판장', text:'이게 뭔가요?'},
@@ -6060,7 +6060,7 @@ const RIVAL_BOND_DATA = {
         {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
         {speaker:'{name}', text:'무슨 일인데?'},
         {speaker:'이기승', text:'마침 잘 만났어. 형사사건 하나 받았는데, 좀 막막해서.'},
-        {speaker:'이기승', text:'직접증거가 거의 없는 무죄 다툼이야. 너 형사 감각 좋잖아. 한 번 봐줄 수 있어?'},
+        {speaker:'이기승', text:'무죄를 주장하는 사건인데 결정적 증거가 부족해. 너 형사 감각 좋잖아. 한 번 봐줄 수 있어?'},
       ],
       choices: [
         {text:'기꺼이. 자료 보내줘', pass:true,  reply:{speaker:'이기승', text:'고맙다. 너 아니면 누구한테 부탁하겠어. 한 잔 사야겠다.'}, effects:{sociability:3, mental:2, _rivalry:-10}},
@@ -6115,13 +6115,13 @@ const RIVAL_BOND_DATA = {
       dialogues: [
         {speaker:'이기승', text:'{name} 변호사, 잠깐 시간 좀 돼? 할 얘기가 있어.'},
         {speaker:'{name}', text:'무슨 일인데?'},
-        {speaker:'이기승', text:'1심 사형선고 받은 사람이 있어. 진범 따로 있다는 정황이 잡혔는데, 혼자 무리야.'},
-        {speaker:'이기승', text:'너랑 같이 변호인단으로 들어가자. 동지로서. 사람을 살리는 일이야.'},
+        {speaker:'이기승', text:'1심 사형선고 받은 사람이 있어. 진범 따로 있다는 정황이 잡혔는데, 나 혼자서는 버거워.'},
+        {speaker:'이기승', text:'너랑 같이 변호하고 싶어. 동지로서. 사람을 살리는 일이야.'},
       ],
       choices: [
-        {text:'같이 들어간다. 끝까지 함께', pass:true, reply:{speaker:'이기승', text:'살았어! 무죄 판결이다. 너랑 나, 진짜 동지야. 내 인생에서 잊지 않을 거야.'}, effects:{reputation:10, mental:3, sociability:2, funds:3000000}},
-        {text:'보수가 적은데 안 한다', pass:false, reply:{speaker:'이기승', text:'...너 변했네. 알겠다, 혼자 해볼게.'}, effects:{_rivalry:10}},
-        {text:'공동 수임은 부담스러워. 자료만 봐줄게', pass:false, reply:{speaker:'이기승', text:'...그것만으로는 부족해. 동지가 그런 거 아니지.'}, effects:{mental:5, _rivalry:-3}},
+        {text:'그래, 너와는 함께할 수 있지. 같이 하자!', pass:true, reply:{speaker:'이기승', text:'고마워, 너만 있다면 든든해. 너랑 나는 이제 진짜 동지다.'}, effects:{reputation:10, mental:3, sociability:2, funds:3000000}},
+        {text:'보수가 얼만데?', pass:false, reply:{speaker:'이기승', text:'...너 변했네. 알겠다, 혼자 해볼게.'}, effects:{_rivalry:10}},
+        {text:'공동 수임은 부담스러워. 자료만 봐줄게', pass:false, reply:{speaker:'이기승', text:'...미안, 내가 괜한 부탁을 했다.'}, effects:{mental:5, _rivalry:-3}},
       ],
     },
     stage3_rival: {
@@ -9466,8 +9466,8 @@ function renderSchedule(daysInMonth, firstDayOfWeek) {
       let cc = `<div class="day-num" style="${dayColor}">${dayNum}일${ds.holidayName?` <span style="font-size:0.55rem">${ds.holidayName}</span>`:''}</div>`;
       const hasTrial = ds.slots.some(s=>s.action==='trial');
       ds.slots.forEach((slot, si) => {
-        const tl = slot.time==='day'?'낮 ':(slot.time==='evening'?'저녁 ':'');
-        const emptyLabel = slot.time==='day' ? '낮 일정선택' : (slot.time==='evening' ? '저녁 일정선택' : '일정선택');
+        const tl = '';
+        const emptyLabel = '일정선택';
         if (!slot.locked && !slot.action) {
           cc += `<div class="slot slot-empty" onclick="event.stopPropagation();openActionModalSlot(${dayNum-1},${si})">${emptyLabel}</div>`;
         } else if (!slot.locked && slot.action) {
@@ -16435,7 +16435,7 @@ function showEventResult(evtDef, choice, changeList) {
   document.getElementById('se-speaker').textContent = speakerName;
   let changesHtml = '';
   if (changeList.length > 0) {
-    changesHtml = '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center">' +
+    changesHtml = '<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center">' +
       changeList.map(c => {
         const color = c.positive ? '#88cc88' : '#cc8888';
         return `<span style="color:${color};font-size:0.85rem;font-weight:700">${c.name} ${c.value}</span>`;
