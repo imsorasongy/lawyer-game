@@ -6616,11 +6616,11 @@ function playSubRivalReaction(subNum, outcome, onDone) {
 
 // 메인4 조력자 대사 (친한 라이벌)
 function getRivalMain4HelpLine(r, pn) {
-  if (r.id === 'rival_iguseung')  return `${pn}, 내가 알아본 바에 따르면 상대측 증거에 허점이 있어. 이 부분을 집요하게 파고들어봐. 자료는 메일로 보내둘게.`;
-  if (r.id === 'rival_ganghaju')  return `${J(pn, '아/야')} 혼자 감당할 일이 아니야. 내가 도울게. 필요한 자료는 다 모아놨어. 너무 무리하지 마.`;
-  if (r.id === 'rival_anjindam')  return `${pn} 변호사. 이번 사건, 당신 쪽에 섭니다. 제 명성을 걸고라도 이 정도 일은 두고 볼 수 없으니까요.`;
-  if (r.id === 'rival_seongrina') return `${pn} 변호사. 이건 개인 차원을 넘어선 문제예요. 내가 도울게요. 대신 이 신세, 기억해두시길.`;
-  return `${pn} 변호사, 이번 사건 내가 도울게.`;
+  if (r.id === 'rival_iguseung')  return `${pn}, 이야기는 들었어. 나도 좀 도와주고 싶어서 알아봤어. 일단 자료 몇 개 정리해서 보냈으니까 봐. 혹시 더 필요한 거 있으면 이야기해 줘!`;
+  if (r.id === 'rival_ganghaju')  return `${J(pn, '아/야')}, 이야기는 들었어. 나도 좀 도와주고 싶어서 알아봤어. 우선 모은 자료 보낼테니까 너무 무리하지 말고. 더 필요한 거 있으면 얘기해 줘.`;
+  if (r.id === 'rival_anjindam')  return `${pn} 변호사, 이야기는 들었습니다. 저도 좀 도와주고 싶어서 알아봤어요. 일단 정리한 자료를 보내드릴테니, 혹시 더 필요한 게 있으면 말씀해 주세요.`;
+  if (r.id === 'rival_seongrina') return `${pn} 변호사, 이야기는 들었어요. 나도 좀 도와주고 싶어서 알아봤어. 우선 자료부터 보낼게. 혹시 더 필요한 거 있으면 이야기해 줘.`;
+  return `${pn} 변호사, 이야기는 들었어. 나도 좀 도와주고 싶어서 알아봤어. 혹시 필요한 것 있으면 더 이야기를 해 줘!`;
 }
 
 // 변형 중 랜덤 선택 (일기 문체 다양성)
@@ -10953,7 +10953,7 @@ function getRomanceTargets() {
         {action:'consult', prob:0.05, condition:()=>G.officeType==='building'},
       ],
       dialoguesFirst:[
-        {speaker:'성요셉', text:'오늘도 출근하시나?'},
+        {speaker:'성요셉', text:'첨 보는 것 같은데, 여기 건물주 아들 성요셉이오. 관리를 맡고 있고. 오늘도 출근하시나?'},
         {speaker:'{name}', text:'아, 넵. 뭐 출근해야죠.'},
         {speaker:'성요셉', text:'그렇게 깨작깨작 일해서 돈 벌면 재밌어요?'},
         {speaker:'{name}', text:'의미없이 사는 것보다는 훨씬 재밌죠..?'},
@@ -20511,6 +20511,10 @@ function acceptMainStory(caseNum) {
     if (helper && helper.rivalry < 0 && G.mainCase4) {
       G.mainCase4.rivalHelper = helper.id;
       applyStat('mental', 10);  // 친한 사람 지원으로 멘탈 보너스
+      // 조력자가 phase1 증거 중 랜덤 3개를 미리 모아준 상태로 시작
+      const phase1Ids = (MAIN_STORY_EVIDENCE.case4.phase1 || []).map(e => e.id);
+      const shuffled = phase1Ids.slice().sort(() => Math.random() - 0.5);
+      G.mainCase4.foundEvidence = shuffled.slice(0, 3);
       const helpLine = getRivalMain4HelpLine(helper, G.name);
       const scene = [
         {bg:'배경/서면.webp', face: helper.face, speaker: helper.name, text: helpLine},
@@ -20520,7 +20524,7 @@ function acceptMainStory(caseNum) {
       showMainTrialDialogueSequence(scene, 0, () => {
         document.getElementById('status-event-modal').style.display = 'none';
         playBGM('normal');
-        showToast(`${helper.name} 변호사가 이번 사건을 함께합니다. 멘탈 +10`);
+        showToast(`${helper.name} 변호사가 이 사건 관련 증거를 일부 찾아주었습니다. 멘탈 +10`);
         checkJanuaryEvents();
       });
     } else {
@@ -21261,7 +21265,7 @@ const MAIN_TRIAL_3 = [
       {face:'player', speaker:'{name}', text:'먼저 이 개발사업 참여 회사 명단을 봐 주십시오.\n도라군 개발사업에 참여하고 있는 회사들의 목록입니다.\n여기... \'주식회사 전우\'가 포함되어 있습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'방금 말한 그 회사군요. 그런데 주식회사 전우랑 장현우 군수가 무슨 상관입니까?'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'...'},
-      {face:'player', speaker:'{name}', text:'이걸 봐 주십시오, 재판장님.'},
+      {face:'player', speaker:'{name}', text:'이걸 봐 주십시오, 재판장님. 주식회사 전우의 대표는 장현우 군수와 매우 가까운 사람입니다. (주식회사 전우의 대표가 장현우 군수와 가까운 사람이라는 증거를 제시하자.)'},
     ],
     evidenceSteps2: [{prompt:'주식회사 전우와 장현우의 관계를 증명할 증거 2개를 제시하세요.', correct:['inv3_corp_reg','inv3_interview'], count:2}],
     successDialogues2: [
