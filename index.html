@@ -8685,7 +8685,7 @@ const RIVAL_NEWS_TEMPLATES = [
     body:  (r) => `수많은 승소와 공로로 ${PRO_NAMES[r.specialty]||'법조'} 분야의 대표 주자로 자리매김했다.`,
     fullBody: (r) => [
       `{date}. ${r.name} 변호사가 법조인들이 뽑은 ${PRO_NAMES[r.specialty]||'법조'} 분야 최고변호사에 선정됐다.`,
-      `${r.personality} 성격으로 알려진 ${r.name} 변호사는 여러 굵직한 사건을 연이어 승소하며 전문성을 갖춘 이 시대 최고의 변호사 중 한 명이라는 평을 받고 있다.`,
+      `${r.personality === '지적' ? '지적인' : r.personality + '한'} 성격으로 알려진 ${r.name} 변호사는 여러 굵직한 사건을 연이어 승소하며 전문성을 갖춘 이 시대 최고의 변호사 중 한 명이라는 평을 받고 있다.`,
       `법조계 안팎에서는 "${PRO_NAMES[r.specialty]||'법조'} 분야 사건은 ${r.name} 변호사에게 가라는 이야기가 이미 파다하다."며 "그의 시대가 시작됐다"는 평가가 나온다.`,
     ],
     fameGain: 10,
