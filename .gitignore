@@ -13,6 +13,7 @@ package-lock.json
 !UI/쇼핑/**/*.png
 !ui/아이콘/**/*.png
 !UI/아이콘/**/*.png
+!엔딩배경/**/*.png
 
 # Tauri 빌드 산출물
 /dist/
