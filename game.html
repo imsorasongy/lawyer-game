@@ -6387,7 +6387,7 @@ const RIVAL_BOND_DATA = {
         {speaker:'성리나', text:'이 사건이 우리 둘 중 누가 진짜인지 정해줄 거야.'},
       ],
       choices: [
-        {text:'정면 대결한다', pass:true, reply:{speaker:'성리나', text:'...완벽한 패배야. 너를 인정해. 하지만 끝이 아니야.'}, effects:{reputation:20, fame:5, funds:5000000, mental:5, _rivalFame:-15}},
+        {text:'정면 대결한다', pass:true, reply:{speaker:'성리나', text:'그래, 제대로 붙어봐야지. 그렇게 나와야 {name}이지.'}, effects:{reputation:20, fame:5, mental:5}},
         {text:'합의 제안할게', pass:false, reply:{speaker:'성리나', text:'합의? ...너답지 않네. 됐어, 내가 가져갈게.'}, effects:{reputation:-50, mental:-30}},
         {text:'양보할게', pass:false, reply:{speaker:'성리나', text:'...너무 약해졌네. 다음을 기다릴게.'}, effects:{reputation:-30}},
       ],
@@ -8692,8 +8692,8 @@ const RIVAL_NEWS_TEMPLATES = [
     fameGain: 10,
     popup: true,
     popupLine: (r, plRep) => (plRep > r.fame)
-      ? `${r.name} 변호사도 드디어 여기까지 왔구나. 수고했네.`
-      : `${r.name} 변호사가 법조계 정상에 섰구나. 대단하다. 나도 이대로 있을 수는 없지.`,
+      ? `${r.name} 변호사가 뉴스에 나왔군. 드디어 여기까지 왔구나. 수고했네.`
+      : `${r.name} 변호사가 뉴스에 나왔군. 법조계 정상에 섰구나. 대단하다. 나도 이대로 있을 수는 없지.`,
   },
   {
     key: 'fame800',
@@ -8708,8 +8708,8 @@ const RIVAL_NEWS_TEMPLATES = [
     fameGain: 20,
     popup: true,
     popupLine: (r, plRep) => (plRep > r.fame)
-      ? `${r.name} 변호사도 열심히 하고 있군.`
-      : `${r.name} 변호사, 벌써 대형펌 파트너라고? 빠르네. 나도 뒤쳐지면 안 될텐데..`,
+      ? `${r.name} 변호사가 뉴스에 나왔군. 열심히 하고 있어.`
+      : `${r.name} 변호사가 뉴스에 나왔군. 벌써 대형펌 파트너라고? 빠르네. 나도 뒤쳐지면 안 될텐데..`,
   },
   {
     key: 'fame500',
@@ -8724,8 +8724,8 @@ const RIVAL_NEWS_TEMPLATES = [
     fameGain: 30,
     popup: true,
     popupLine: (r, plRep) => (plRep > r.fame)
-      ? `${r.name} 변호사도 열심히 하고 있군. 나도 화이팅하자.`
-      : `${r.name} 변호사가 또 승소했구나. 기세가 좋네. 나도 뒤쳐지면 안 되는데...`,
+      ? `${r.name} 변호사가 뉴스에 나왔군. 열심히 하고 있어. 나도 화이팅하자.`
+      : `${r.name} 변호사가 뉴스에 나왔군. 또 승소했구나. 기세가 좋네. 나도 뒤쳐지면 안 되는데...`,
   },
   {
     key: 'fame300',
@@ -9601,7 +9601,7 @@ function openActionModal(dayIdx) {
       if(item.id==='drive' && !G.currentCar) return;
       // 아르바이트: 일과시간에는 숨김 (저녁/주말만)
       if(item.id==='partTimeJob' && isDaytime && !isSuspended) return;
-      const cost = item.cost>0?`${(item.cost/10000)}만원`:'무료';
+      const cost = item.cost>0?`${(item.cost/10000)}만원`:(item.id==='partTimeJob'?'+10만원':'무료');
       const effs = [];
       for(const k in item.effects) if(STAT_NAMES[k]) effs.push(`${STAT_NAMES[k]} ${item.effects[k]>0?'+':''}${item.effects[k]}`);
       html += `<div class="action-option" onclick="selectAction('${item.id}')">
@@ -12199,6 +12199,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const unownedItems = SHOP_ITEMS.filter(i => {
       if (i.gender && i.gender !== G.gender) return false;
       if (i.category === 'car') return false; // 차량은 선물 제외
+      if (i.isPet) return false; // 반려동물은 선물 제외
       if (getItemCount(i.id) >= (i.max||1)) return false;
       return true;
     });
@@ -20607,7 +20608,6 @@ function runMainTrialPhase(caseNum, phase, step, callback) {
                     if (evIdx3 >= trialData.evidenceSteps3.length) {
                       mc.trialPhase++;
                       mc.preparation = 0;
-                      if (mc.trialPhase >= 4) showStampEffect('win'); // verdict 대사 시점에 도장
                       showMainTrialDialogueSequence(trialData.successDialogues3 || [], 0, () => {
                         trialData._phase2Done = false; trialData._phase3Done = false;
                         callback();
@@ -20624,7 +20624,6 @@ function runMainTrialPhase(caseNum, phase, step, callback) {
                 // 2차 성공 대사 → 완료
                 mc.trialPhase++;
                 mc.preparation = 0;
-                if (mc.trialPhase >= 4) showStampEffect('win');
                 showMainTrialDialogueSequence(trialData.successDialogues2 || [], 0, () => {
                   trialData._phase2Done = false;
                   callback();
@@ -20643,7 +20642,6 @@ function runMainTrialPhase(caseNum, phase, step, callback) {
         // 2차 없음 → 바로 완료
         mc.trialPhase++;
         mc.preparation = 0;
-        if (mc.trialPhase >= 4) showStampEffect('win');
         if (trialData.successDialogues) {
           showMainTrialDialogueSequence(trialData.successDialogues, 0, callback);
         } else {
@@ -20677,6 +20675,8 @@ function showMainTrialDialogue(d, callback) {
 
 function showMainTrialDialogueSequence(arr, idx, callback) {
   if (idx >= arr.length) { callback(); return; }
+  // stampWin 마커가 있는 verdict 대사에 도달하면 도장 띄움
+  if (arr[idx] && arr[idx].stampWin) showStampEffect('win');
   showMainTrialDialogue(arr[idx], () => showMainTrialDialogueSequence(arr, idx+1, callback));
 }
 
@@ -20977,7 +20977,7 @@ const MAIN_TRIAL_1 = [
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'글쎄요.. 변호인측 최후진술 하세요.'},
       {face:'player', speaker:'{name}', text:'아까 말씀드린대로입니다. 이 사건의 진실은 명백합니다. 오히려 이런 명백한 사건의 진실이 수사기관에서 드러나지 않았다는 점이 더 의문입니다. 피고인에게 무죄를 선고해주십시오.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'네, 잘 들었습니다.'},
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그럼 선고하겠습니다. 피고인 한정민은 무죄.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'그럼 선고하겠습니다. 피고인 한정민은 무죄.', stampWin:true},
       {face:'캐릭터얼굴/피해자(한정민).webp', speaker:'한정민', text:'변호사님! 감사합니다... 정말 감사합니다!'},
       {face:'player', speaker:'{name}', text:'한정민 씨의 용기가 없었다면 불가능했을 겁니다.'},
       {face:'캐릭터얼굴/군수.webp', speaker:'???', text:'아주 인상적이었네. {name} 변호사.'},
@@ -21161,7 +21161,7 @@ const MAIN_TRIAL_2 = [
       {face:'캐릭터얼굴/여검사.webp', speaker:'강선 검사', text:'저희..'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'아니, 이 증거에 대해 부동의하신다고 하더라도 본 재판부는 이미 결론을 내렸습니다.'},
       {face:'player', speaker:'{name}', text:'!!'},
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'선고하겠습니다. 피고인 박정호는 무죄.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'선고하겠습니다. 피고인 박정호는 무죄.', stampWin:true},
       {face:'캐릭터얼굴/피고인부인.webp', speaker:'김미영', text:'여보... 드디어... 당신이 아니라는 걸 다들 알게 됐어...'},
       {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 감사합니다. 정말... 감사합니다.'},
       {face:'player', speaker:'{name}', text:'박정호 씨, 이제 집으로 돌아가세요.'},
@@ -21269,9 +21269,9 @@ const MAIN_TRIAL_3 = [
       {face:'player', speaker:'{name}', text:'먼저 이 개발사업 참여 회사 명단을 봐 주십시오.\n도라군 개발사업에 참여하고 있는 회사들의 목록입니다.\n여기... \'주식회사 전우\'가 포함되어 있습니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'방금 말한 그 회사군요. 그런데 주식회사 전우랑 장현우 군수가 무슨 상관입니까?'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'...'},
-      {face:'player', speaker:'{name}', text:'이걸 봐 주십시오, 재판장님. 주식회사 전우의 대표는 장현우 군수와 매우 가까운 사람입니다. (주식회사 전우의 대표가 장현우 군수와 가까운 사람이라는 증거를 제시하자.)'},
+      {face:'player', speaker:'{name}', text:'이걸 봐 주십시오, 재판장님. 주식회사 전우의 대표는 장현우 군수와 매우 가까운 사람입니다.'},
     ],
-    evidenceSteps2: [{prompt:'주식회사 전우와 장현우의 관계를 증명할 증거 2개를 제시하세요.', correct:['inv3_corp_reg','inv3_interview'], count:2}],
+    evidenceSteps2: [{prompt:'주식회사 전우의 대표가 장현우 군수와 가까운 사람이라는 증거를 제시하자.', correct:['inv3_corp_reg','inv3_interview'], count:2}],
     successDialogues2: [
       {face:'player', speaker:'{name}', text:'첫 번째는 \'주식회사 전우\'의 법인등기사항전부증명서입니다.\n이 증명서에 따르면 주식회사 전우의 대표이사는... \'임순애\'입니다.'},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'임순애... 그래서요?'},
@@ -21338,7 +21338,7 @@ const MAIN_TRIAL_3 = [
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'............'},
       {face:'player', speaker:'{name}', text:'장현우 군수는 위법한 개발사업으로 사적 이익을 취했을 뿐만 아니라...\n그 비밀을 지키기 위해 살인까지 저질렀습니다.\n이러한 개발사업시행승인처분이 유효할 수 있겠습니까?'},
       {face:'캐릭터얼굴/군수.webp', speaker:'장현우', text:'............'},
-      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'본 재판부는 충분히 심리하였으므로 결심하겠습니다.\n선고합니다.\n도라군의 개발사업시행승인처분을 취소합니다.'},
+      {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'본 재판부는 충분히 심리하였으므로 결심하겠습니다.\n선고합니다.\n도라군의 개발사업시행승인처분을 취소합니다.', stampWin:true},
       {face:'캐릭터얼굴/판사.webp', speaker:'판사', text:'환경영향평가의 절차적·실질적 하자가 인정되고, 그 외 중대한 위법사유가 확인되었습니다.\n아울러 오늘 법정에서 제기된 살인 관련 의혹에 대해서는 검찰에 수사를 촉구하겠습니다.'},
       {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'변호사님... 해냈습니다... 정말로 해냈습니다...'},
       {face:'캐릭터얼굴/피고인.webp', speaker:'박정호', text:'이태준이... 이태준이 목숨 걸고 지키려 한 이 땅을... 드디어 지켜냈습니다.'},
@@ -21612,7 +21612,7 @@ const MAIN_TRIAL_4 = [
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'처음 성진그룹 사건 재판때 널 봤을때 조치를 취했어야 하는데, 너 때문에 모든 걸 망쳤어.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'성진그룹의 막대한 비자금을 도라군 개발사업으로 세탁하고, 그걸로 장현우와 나도 한몫챙길 생각이었어서 이만석의 멍청한 부탁을 들어줬었는데.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/법조수괴.webp', speaker:'박진서', text:'하하.. 네 놈 때문에 이렇게 될 줄이야.'},
-      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 장현우 살해 혐의로 긴급체포합니다.'},
+      {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'박진서 씨, 장현우 살해 혐의로 긴급체포합니다.', stampWin:true},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'당신은 진술하지 아니할 권리가 있고, 변호인은 이미 선임하셨네요?'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/수사관.webp', speaker:'수사관', text:'{name} 변호사님.. 수고하셨습니다.'},
       {bg:'배경/경찰서.webp', face:'캐릭터얼굴/피해자.webp', speaker:'장선우', text:'변호사님... 형의 억울함을 풀어주셔서... 감사합니다.'},
@@ -21852,6 +21852,22 @@ function checkYoutubeMilestones() {
       G.youtubeMilestones[m.threshold] = true;
       G.stats.reputation = Math.min(999, G.stats.reputation + m.rep);
       showToast(`유튜브 구독자 ${m.label} 돌파! 명성 +${m.rep}`);
+      // 30만 이상은 마일스톤 팝업도 표시
+      if (m.threshold >= 300000) {
+        showMilestonePopup({
+          title: `유튜브 구독자 ${m.label} 돌파!`,
+          desc: `명성 +${m.rep}`,
+          bg: '배경/방.webp',
+          face: getPlayerFace(),
+          speaker: G.name,
+          text: m.threshold === 1000000
+            ? `구독자 100만이라니... 정말 꿈만 같다. 댓글 수만 통이야.`
+            : (m.threshold === 500000
+              ? `구독자 ${m.label}을 넘었다. 이제 어디 가도 알아보는 사람이 생겼네.`
+              : `구독자가 ${m.label}이나 됐다니. 영상 만드는 보람이 있어.`),
+          btnLabel: '축하합니다!'
+        });
+      }
       if (m.threshold === 1000000) {
         triggerPlayerNews('youtubeMillion',
           `유튜브 스타 ${G.name} 변호사, "세상은 법정에만 있는 게 아니니까요"`,
@@ -23119,6 +23135,7 @@ function showBirthdayEvent(cb) {
   const unownedItems = SHOP_ITEMS.filter(i => {
     if (i.gender && i.gender !== G.gender) return false;
     if (i.category === 'car') return false; // 차량은 선물 제외
+    if (i.isPet) return false; // 반려동물은 선물 제외
     if (getItemCount(i.id) >= (i.max||1)) return false;
     return true;
   });
