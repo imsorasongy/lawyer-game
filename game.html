@@ -15665,9 +15665,13 @@ function applyStat(k,v){
 }
 
 // 사건 클리어 보상: 일반 능력치 일괄 +N (스트레스·피로·업보·전문능력치 제외)
+// 평탄 적용 — 체감수익(diminishingMult)·번아웃 패널티 우회. 999 상한만 적용.
 const CASE_REWARD_STATS = ['lawKnowledge','debate','sales','charm','observation','stamina','mental','morality','sociability','reputation'];
 function awardCaseClearReward(amount) {
-  for (const k of CASE_REWARD_STATS) applyStat(k, amount);
+  for (const k of CASE_REWARD_STATS) {
+    G.stats[k] = Math.max(0, Math.min(999, (G.stats[k]||0) + amount));
+    if (typeof statChanges !== 'undefined' && statChanges[k] !== undefined) statChanges[k] += amount;
+  }
 }
 
 // ==================== VN SCENE DISPLAY ====================
