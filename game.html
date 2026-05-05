@@ -11066,6 +11066,29 @@ function getRomanceTargets() {
   return targets;
 }
 
+// 데이트 배경 매핑 (연애/배우자 ID → 데이트배경 이미지)
+function getDateBg(datingId) {
+  const map = {
+    // 남주 with...
+    minyoung: '데이트배경/남주여주.webp',
+    eunkyung: '데이트배경/남주이은경.webp',
+    sarang:   '데이트배경/남주추사랑.webp',
+    yeona:    '데이트배경/남주박연아.webp',
+    seungha:  '데이트배경/남주최승하.webp',
+    heesun:   '데이트배경/남주이희선.webp',
+    hyemin:   '데이트배경/남주김혜민.webp',
+    // 여주 with...
+    wonhyung:  '데이트배경/남주여주.webp',
+    minwoo:    '데이트배경/여주강민우.webp',
+    changwook: '데이트배경/여주김창욱.webp',
+    jaseong:   '데이트배경/여주안자성.webp',
+    mingyu:    '데이트배경/여주상민규.webp',
+    yosep:     '데이트배경/여주성요셉.webp',
+    hyuk:      '데이트배경/여주강혁.webp',
+  };
+  return map[datingId] || '배경/식당.webp';
+}
+
 // 배경 매핑 (액션 → 배경이미지)
 function getActionBg(actionId) {
   const bgMap = {
@@ -11990,7 +12013,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     G.anniversaryDone = true;
     const td = getDateTone('anniversary', datingId);
     return {
-      id:'anniversary', bg:'배경/식당.webp', face:datingFace,
+      id:'anniversary', bg:getDateBg(datingId), face:datingFace,
       dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
         {speaker:G.name, text:'우리 결혼한지 벌써 오래됐네.'},
         {speaker:datingName, text:'그러게. 시간이 정말 빠르다.'},
@@ -12010,7 +12033,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const td = getDateTone('dateJealousy', datingId);
     if (td) {
       return {
-        id:'dateJealousy', bg:'배경/식당.webp', face:datingFace,
+        id:'dateJealousy', bg:getDateBg(datingId), face:datingFace,
         dialogues: td.dialogues.map(fn=>fn(d, otherCrush.name)),
         prompt:'어떡하지?',
         choices:[
@@ -12021,7 +12044,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
       };
     }
     return {
-      id:'dateJealousy', bg:'배경/식당.webp', face:datingFace,
+      id:'dateJealousy', bg:getDateBg(datingId), face:datingFace,
       dialogues:[
         {speaker:datingName, text:`${G.name}, 요즘 ${J(otherCrush.name, '와/과')} 친하게 지내는 것 같던데 무슨 사이야?`},
         {speaker:G.name, text:'무슨 사이는, 아무 사이도 아니지.'},
@@ -12046,7 +12069,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const td = getDateTone('dateCall', datingId);
     if (td) {
       return {
-        id:'dateCall', bg:'배경/식당.webp', face:datingFace,
+        id:'dateCall', bg:getDateBg(datingId), face:datingFace,
         dialogues: td.dialogues.map(fn=>fn(d)),
         prompt:'어떡하지?',
         choices:[
@@ -12057,7 +12080,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
       };
     }
     return {
-      id:'dateCall', bg:'배경/식당.webp', face:datingFace,
+      id:'dateCall', bg:getDateBg(datingId), face:datingFace,
       dialogues:[
         {speaker:datingName, text:`${G.name}, 전화오는데?`},
         {speaker:G.name, text:'아. 의뢰인이다.'},
@@ -12085,7 +12108,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const td = getDateTone('dateWine', datingId);
     if (td) {
       return {
-        id:'dateWine', bg:'배경/식당.webp', face:datingFace,
+        id:'dateWine', bg:getDateBg(datingId), face:datingFace,
         dialogues: td.dialogues.map(fn=>fn(d)),
         prompt:'어떤 와인을 고를까?',
         choices:[
@@ -12096,7 +12119,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
       };
     }
     return {
-      id:'dateWine', bg:'배경/식당.webp', face:datingFace,
+      id:'dateWine', bg:getDateBg(datingId), face:datingFace,
       dialogues:[
         {speaker:datingName, text:'오늘은 맛있는 와인을 한 잔 하고 싶은 기분인데?'},
         {speaker:G.name, text:'그래? 어떤 거 마시고 싶어?'},
@@ -12121,7 +12144,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const td = getDateTone('dateReview', datingId);
     const dlg = td ? td(d) : {speaker:datingName, text:`오늘도 즐거운 데이트였다. ${J(G.name,'은/는')} 어땠어?`};
     return {
-      id:'dateReview', bg:'배경/식당.webp', face:datingFace,
+      id:'dateReview', bg:getDateBg(datingId), face:datingFace,
       dialogues:[dlg],
       prompt:'어떡하지?',
       choices:[
@@ -12137,7 +12160,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const td = getDateTone('dateNotice', datingId);
     if (td) {
       return {
-        id:'dateNotice', bg:'배경/식당.webp', face:datingFace,
+        id:'dateNotice', bg:getDateBg(datingId), face:datingFace,
         dialogues: td.dialogues.map(fn=>fn(d)),
         autoResolve: true,
         noticed: noticed,
@@ -12153,7 +12176,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
       };
     }
     return {
-      id:'dateNotice', bg:'배경/식당.webp', face:datingFace,
+      id:'dateNotice', bg:getDateBg(datingId), face:datingFace,
       dialogues:[
         {speaker:G.name, text:'아. 왔어? 딱 맞춰서 왔네'},
         {speaker:datingName, text:'길이 막혀서 늦을 뻔 했어. 일찍 왔네.'},
@@ -12177,7 +12200,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     const td = getDateTone('dateLate', datingId);
     if (td) {
       return {
-        id:'dateLate', bg:'배경/식당.webp', face:datingFace,
+        id:'dateLate', bg:getDateBg(datingId), face:datingFace,
         dialogues: td.dialogues.map(fn=>fn(d)),
         prompt:'',
         choices:[
@@ -12188,7 +12211,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
       };
     }
     return {
-      id:'dateLate', bg:'배경/식당.webp', face:datingFace,
+      id:'dateLate', bg:getDateBg(datingId), face:datingFace,
       dialogues:[
         {speaker:G.name, text:'아, 미안, 좀 늦었지?'},
         {speaker:datingName, text:'왜 이렇게 늦었어?'}
@@ -12223,7 +12246,7 @@ function checkDateEvent(datingId, datingName, datingFace) {
     if (giftItem) {
       const td = getDateTone('surpriseGift', datingId);
       return {
-        id:'surpriseGift', bg:'배경/식당.webp', face:datingFace,
+        id:'surpriseGift', bg:getDateBg(datingId), face:datingFace,
         dialogues: td ? [td.d1(d), td.d2(d), td.d3(d), td.d4(d)] : [
           {speaker:datingName, text:G.name+', 오늘 깜짝 선물이 있어!'},
           {speaker:G.name, text:'뭔데?'},
@@ -12405,7 +12428,7 @@ function showMarriageEvent(callback) {
 
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
-  document.getElementById('se-bg').style.backgroundImage = "url('배경/식당.webp')";
+  document.getElementById('se-bg').style.backgroundImage = `url('${getDateBg(did)}')`;
   document.getElementById('se-face').style.display = 'block';
   document.getElementById('se-face-img').src = getPlayerFace();
   document.getElementById('se-dialog').classList.remove('no-face');
@@ -15462,7 +15485,7 @@ function buildScene(slot) {
       // 데이트 이벤트 체크
       const dateEvt = checkDateEvent(datingId, datingName, datingFace);
       if (dateEvt) {
-        return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
+        return {bg:getDateBg(datingId), face:datingFace, speaker:datingName, date:dateStr,
           result:'success', resultLabel:'데이트',
           skipText: true,
           changes:['자금 -20만원', `${datingName} 호감도 +5`],
@@ -15470,7 +15493,7 @@ function buildScene(slot) {
       }
       const defaultTd = getDateTone('defaultDate', datingId);
       const defaultText = defaultTd ? defaultTd({name:datingName, pName:G.name}) : '오늘 데이트도 즐거웠어!';
-      return {bg:'배경/식당.webp', face:datingFace, speaker:datingName, date:dateStr,
+      return {bg:getDateBg(datingId), face:datingFace, speaker:datingName, date:dateStr,
         result:'success', resultLabel:'데이트',
         text:defaultText,
         changes:['자금 -20만원', `${datingName} 호감도 +5`]};
@@ -17617,7 +17640,7 @@ function confirmBreakup() {
   const modal = document.getElementById('status-event-modal');
   modal.style.display = 'flex';
   resetModalStyle(true);
-  document.getElementById('se-bg').style.backgroundImage = "url('배경/식당.webp')";
+  document.getElementById('se-bg').style.backgroundImage = `url('${getDateBg(datingId)}')`;
   document.getElementById('se-face').style.display = 'block';
   document.getElementById('se-face-img').src = datingFace;
   document.getElementById('se-dialog').classList.remove('no-face');
