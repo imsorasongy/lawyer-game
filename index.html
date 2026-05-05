@@ -17265,11 +17265,11 @@ function _closeSummaryBody(){
     showSubCase2Intro(); return;
   }
   if (!G.mainStoryOffered.case1 && !G.mainCase1 && G.month === 1 &&
-      (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 700 && G.stats.reputation > 550) {
+      (ay === 2035 || ay === 2036) && G.stats.lawKnowledge > 600 && G.stats.reputation > 500) {
     showMainStoryOffer(1); return;
   }
   if (G.mainStoryFlag.case1_cleared && !G.mainStoryOffered.case2 && !G.mainCase2 && G.month === 1 &&
-      (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 800 && G.stats.reputation > 550) {
+      (ay === 2036 || ay === 2037) && G.stats.lawKnowledge > 650 && G.stats.reputation > 550) {
     showMainStoryOffer(2); return;
   }
   // 사건3: 사건2 클리어 후 다음 해 1월
