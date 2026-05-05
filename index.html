@@ -8746,7 +8746,7 @@ const RIVAL_NEWS_TEMPLATES = [
     title: (r) => `${r.name} 변호사, 주목받는 신예`,
     body:  (r) => `${PRO_NAMES[r.specialty]||'법조'} 분야에서 눈에 띄는 신진 변호사로 거론된다.`,
     fullBody: (r) => [
-      `{date}. ${r.name} 변호사(${PRO_NAMES[r.specialty]||'법조'})가 업계의 주목을 받고 있다.`,
+      `{date}. ${r.name} 변호사(${PRO_NAMES[r.specialty]||'법조'}전문)가 업계의 주목을 받고 있다.`,
       `${r.name} 변호사는 최근 중요 사건에서 날카로운 변론으로 승소 판결을 이끌어내 주목을 받았으며, 재판뿐 아니라 다양한 방면에서 활동하며 두각을 드러내고 있다.`,
       `동료 변호사는 "2년 차 변호사가 이 정도 성과를 낸다는 것은 놀라운 일"이라면서, "${r.name} 변호사는 ${r.personality === '지적' ? '지적인' : r.personality + '한'} 성격으로, 변호사 업무에 맞는 스타일"이라고 평했다.`,
     ],
