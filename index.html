@@ -17193,7 +17193,18 @@ function _drainRivalNewsPopups(onDone) {
   const q = G._rivalNewsPopupQueue;
   if (!q || q.length === 0) { onDone(); return; }
   const { line } = q.shift();
-  gameConfirm(line, () => _drainRivalNewsPopups(onDone), () => _drainRivalNewsPopups(onDone));
+  const existing = document.getElementById('sys-popup');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'sys-popup';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:700;display:flex;align-items:center;justify-content:center';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#331e16;border:2px solid #5a3528;border-radius:10px;padding:24px 32px;max-width:400px;width:85%;text-align:center;color:#e8d5b5;font-size:0.95rem;line-height:1.7';
+  box.innerHTML = `<div style="margin-bottom:16px;white-space:pre-line">${line}</div>
+    <button class="event-choice" style="min-width:120px" onclick="document.getElementById('sys-popup').remove();if(window._rivalNewsNext)window._rivalNewsNext()">확인</button>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  window._rivalNewsNext = () => _drainRivalNewsPopups(onDone);
 }
 
 function closeSummary(){
